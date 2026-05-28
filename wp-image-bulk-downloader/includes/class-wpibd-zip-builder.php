@@ -28,11 +28,9 @@ class WPIBD_Zip_Builder {
 		}
 		$zip_path = trailingslashit( $dir ) . 'images-' . $job_id . '.zip';
 
-		$zip = new ZipArchive();
-		if ( true !== $zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
-			return new WP_Error( 'wpibd_zip_create', __( 'Could not create ZIP archive.', 'wp-image-bulk-downloader' ) );
+		if ( ! is_writable( $dir ) ) {
+			return new WP_Error( 'wpibd_dir_not_writable', __( 'Export directory is not writable.', 'wp-image-bulk-downloader' ) );
 		}
-		$zip->close();
 
 		$job = array(
 			'job_id'         => $job_id,
@@ -59,13 +57,17 @@ class WPIBD_Zip_Builder {
 			return new WP_Error( 'wpibd_job_missing', __( 'Export job not found or expired.', 'wp-image-bulk-downloader' ) );
 		}
 
-		if ( ! file_exists( $job['zip_path'] ) ) {
-			return new WP_Error( 'wpibd_zip_missing', __( 'Export archive is missing. Please restart.', 'wp-image-bulk-downloader' ) );
-		}
-
 		$zip = new ZipArchive();
-		if ( true !== $zip->open( $job['zip_path'] ) ) {
-			return new WP_Error( 'wpibd_zip_open', __( 'Could not open ZIP archive.', 'wp-image-bulk-downloader' ) );
+		$open_result = $zip->open( $job['zip_path'], ZipArchive::CREATE );
+		if ( true !== $open_result ) {
+			return new WP_Error(
+				'wpibd_zip_open',
+				sprintf(
+					/* translators: %s: ZipArchive error code. */
+					__( 'Could not open ZIP archive (code %s).', 'wp-image-bulk-downloader' ),
+					$open_result
+				)
+			);
 		}
 
 		$collector = new WPIBD_Image_Collector();
