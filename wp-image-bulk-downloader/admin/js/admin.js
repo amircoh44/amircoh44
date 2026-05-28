@@ -134,6 +134,8 @@
 		var text = wpibdConfig.i18n.error + ' ' + (message || '');
 		setNotice(text, 'error');
 		setStatus('');
+		setProgress(0, 1);
+		$progress.prop('hidden', true);
 		currentJobId = null;
 		exitRunningState();
 	}

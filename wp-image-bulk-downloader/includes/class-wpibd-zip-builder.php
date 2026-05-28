@@ -21,7 +21,11 @@ class WPIBD_Zip_Builder {
 			return $dir;
 		}
 
-		$job_id   = wp_generate_password( 16, false, false );
+		try {
+			$job_id = bin2hex( random_bytes( 8 ) );
+		} catch ( Exception $e ) {
+			$job_id = strtolower( wp_generate_password( 16, false, false ) );
+		}
 		$zip_path = trailingslashit( $dir ) . 'images-' . $job_id . '.zip';
 
 		$zip = new ZipArchive();
