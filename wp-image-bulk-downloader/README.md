@@ -2,6 +2,9 @@
 
 A WordPress plugin that lets users download every image in the media library as a single ZIP file with one click.
 
+**Author:** [Amir Cohen](https://www.adamchimneysweep.com/)
+**License:** GPL-2.0-or-later
+
 ## Export modes
 
 | Mode | What's in the ZIP |

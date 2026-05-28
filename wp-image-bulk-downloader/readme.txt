@@ -1,5 +1,7 @@
 === Image Bulk Downloader ===
-Contributors: yourname
+Contributors: amircoh44
+Author: Amir Cohen
+Author URI: https://www.adamchimneysweep.com/
 Tags: media, images, export, download, zip, backup
 Requires at least: 5.6
 Tested up to: 6.5

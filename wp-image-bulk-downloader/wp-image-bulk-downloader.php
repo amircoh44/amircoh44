@@ -1,12 +1,13 @@
 <?php
 /**
  * Plugin Name:       Image Bulk Downloader
- * Plugin URI:        https://example.com/wp-image-bulk-downloader
+ * Plugin URI:        https://github.com/amircoh44/wp-image-bulk-downloader
  * Description:       One-click download of all WordPress media library images as a ZIP file. Choose to export images only, preserve upload folder paths, or include image metadata (alt text, caption, description, title).
  * Version:           1.0.0
  * Requires at least: 5.6
  * Requires PHP:      7.2
- * Author:            Image Bulk Downloader
+ * Author:            Amir Cohen
+ * Author URI:        https://www.adamchimneysweep.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       wp-image-bulk-downloader
