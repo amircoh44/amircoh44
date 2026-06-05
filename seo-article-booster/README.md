@@ -1,6 +1,8 @@
 # SEO Article Booster
 
-A WordPress plugin that boosts on-page SEO for your articles in three ways:
+[![Smoke test](https://github.com/amircoh44/amircoh44/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/amircoh44/amircoh44/actions/workflows/smoke-test.yml)
+
+A WordPress plugin that boosts on-page SEO for your articles in several ways:
 
 1. **Image minimum** — counts images inside each article and flags posts below a configurable minimum.
 2. **Schema check** — audits articles for Schema.org structured data (JSON-LD / microdata).
@@ -139,6 +141,35 @@ Injected links carry the CSS class `sab-internal-link` (and `data-sab-target="<p
 | Max older posts to edit per new post | `5` | Cap for the above. |
 
 ---
+
+## Development & testing
+
+The plugin ships with a self-contained smoke test that stands up a throwaway
+WordPress on **SQLite** (no MySQL, no wordpress.org — core and the SQLite
+drop-in are pulled from GitHub) and exercises the engines, the `the_content`
+filters, auto-clean-on-save, and every admin screen.
+
+Run it locally:
+
+```bash
+# 1. Bootstrap a throwaway WP install (clones core + SQLite drop-in)
+WP_CORE=/tmp/wp bash seo-article-booster/tests/bootstrap-wp.sh
+
+# 2. Run the suites (each exits non-zero on failure)
+WP_CORE=/tmp/wp php seo-article-booster/tests/test-engines.php
+WP_CORE=/tmp/wp php seo-article-booster/tests/test-frontend.php
+WP_CORE=/tmp/wp php seo-article-booster/tests/test-admin.php
+```
+
+The same suites run automatically in **GitHub Actions** on every push that
+touches the plugin, across PHP 7.4 / 8.0 / 8.2 / 8.3
+(`.github/workflows/smoke-test.yml`).
+
+| Suite | Covers |
+| --- | --- |
+| `test-engines.php` | image/H1 counters, link enumerate/classify/inline-edit, every cleaner cleanup, backup→log→revert, link replacer, settings defaults |
+| `test-frontend.php` | internal-link injection + content distribution on a real singular loop, auto-clean-on-save |
+| `test-admin.php` | every admin screen renders with no fatals |
 
 ## License
 
