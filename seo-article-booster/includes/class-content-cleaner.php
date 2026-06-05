@@ -255,8 +255,9 @@ class SAB_Content_Cleaner {
 		$tags  = 'strong|em|b|i|span|u|small|mark|sub|sup';
 		$total = 0;
 		do {
+			// Delimiter is ~ (not #) because the pattern contains "&#160;".
 			$html = preg_replace(
-				'#<(' . $tags . ')\b[^>]*>(?:\s|&nbsp;|&#160;|\x{00A0})*</\1>#iu',
+				'~<(' . $tags . ')\b[^>]*>(?:\s|&nbsp;|&#160;|\x{00A0})*</\1>~iu',
 				'',
 				$html,
 				-1,
@@ -277,8 +278,9 @@ class SAB_Content_Cleaner {
 	 */
 	protected function strip_empty_paragraphs( $html, &$stats ) {
 		// Empty Gutenberg paragraph block (comment wrapper + empty <p>).
+		// Delimiter is ~ (not #) because the pattern contains "&#160;".
 		$html = preg_replace(
-			'#<!--\s*wp:paragraph\s*-->\s*<p[^>]*>(?:\s|&nbsp;|&#160;|\x{00A0})*</p>\s*<!--\s*/wp:paragraph\s*-->#iu',
+			'~<!--\s*wp:paragraph\s*-->\s*<p[^>]*>(?:\s|&nbsp;|&#160;|\x{00A0})*</p>\s*<!--\s*/wp:paragraph\s*-->~iu',
 			'',
 			$html,
 			-1,
@@ -286,7 +288,7 @@ class SAB_Content_Cleaner {
 		);
 		// Plain empty paragraph.
 		$html = preg_replace(
-			'#<p[^>]*>(?:\s|&nbsp;|&#160;|\x{00A0})*</p>#iu',
+			'~<p[^>]*>(?:\s|&nbsp;|&#160;|\x{00A0})*</p>~iu',
 			'',
 			$html,
 			-1,
