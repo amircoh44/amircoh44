@@ -1,0 +1,143 @@
+/**
+ * Admin styles for SEO Article Booster.
+ */
+
+.sab-wrap .sab-intro {
+	max-width: 760px;
+	font-size: 14px;
+	color: #50575e;
+}
+
+/* Dashboard stat cards */
+.sab-cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin: 20px 0;
+}
+
+.sab-card {
+	flex: 1 1 180px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	padding: 18px 20px;
+	text-align: center;
+	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.04 );
+}
+
+.sab-card .dashicons {
+	font-size: 28px;
+	width: 28px;
+	height: 28px;
+	color: #2271b1;
+}
+
+.sab-card h2 {
+	font-size: 30px;
+	margin: 8px 0 4px;
+	line-height: 1.1;
+}
+
+.sab-card p {
+	margin: 0;
+	color: #646970;
+}
+
+/* Panels */
+.sab-panel {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	padding: 16px 20px;
+	margin: 20px 0;
+	max-width: 900px;
+}
+
+.sab-panel h2 {
+	margin-top: 0;
+}
+
+.sab-actions .button {
+	margin-right: 6px;
+}
+
+/* Status badges (also used in post list columns) */
+.sab-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.sab-badge .dashicons {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+}
+
+.sab-badge--ok {
+	background: #edfaef;
+	color: #007017;
+}
+
+.sab-badge--warn {
+	background: #fcf0f1;
+	color: #b32d2e;
+}
+
+.sab-badge--neutral {
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+/* Progress bar */
+.sab-progress {
+	max-width: 600px;
+	margin: 16px 0;
+}
+
+.sab-progress__bar {
+	background: #f0f0f1;
+	border-radius: 6px;
+	height: 16px;
+	overflow: hidden;
+}
+
+.sab-progress__bar > span {
+	display: block;
+	height: 100%;
+	width: 0;
+	background: #2271b1;
+	transition: width 0.25s ease;
+}
+
+.sab-progress__label {
+	margin: 6px 0 0;
+	color: #50575e;
+	font-size: 13px;
+}
+
+.sab-inline-status {
+	margin-left: 8px;
+	color: #50575e;
+	font-style: italic;
+}
+
+.sab-empty {
+	padding: 12px 16px;
+	background: #f6f7f7;
+	border-left: 4px solid #72aee6;
+	color: #50575e;
+}
+
+/* Publish meta box lines */
+.sab-pub-images .dashicons,
+.sab-pub-schema .dashicons {
+	color: #2271b1;
+	vertical-align: text-bottom;
+}

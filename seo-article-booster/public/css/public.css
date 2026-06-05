@@ -1,0 +1,12 @@
+/**
+ * Optional front-end styling for automatically inserted internal links.
+ *
+ * Loaded only when "style internal links" support is desired. By default it is
+ * intentionally subtle so injected links look native to the theme.
+ */
+
+a.sab-internal-link {
+	/* Inherit the theme's link colour by default. Uncomment to customise: */
+	/* text-decoration: underline; */
+	/* text-decoration-style: dotted; */
+}
