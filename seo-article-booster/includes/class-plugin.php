@@ -69,9 +69,10 @@ final class SAB_Plugin {
 		$new_post = new SAB_New_Post_Linker( $index, $applier );
 		$rules    = new SAB_Injection_Rules();
 		$distrib  = new SAB_Content_Distributor( $rules );
+		$link_scan = new SAB_Link_Scanner();
 		$ajax     = new SAB_Ajax( $scanner, $schema, $index, $applier, $sitemap );
 
-		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'ajax' );
+		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'ajax' );
 
 		// --- Register settings + i18n. ------------------------------------.
 		add_action( 'admin_init', array( 'SAB_Settings', 'register' ) );
@@ -83,6 +84,7 @@ final class SAB_Plugin {
 		$injector->init();
 		$new_post->init();
 		$distrib->init();
+		$link_scan->init();
 
 		// --- Scheduled maintenance (see activation hook). -----------------.
 		add_action( 'sab_rebuild_index_event', array( $index, 'rebuild' ) );
@@ -102,6 +104,12 @@ final class SAB_Plugin {
 				$dist_admin = new SAB_Distribution_Admin( $rules );
 				$dist_admin->init();
 				$this->services['dist_admin'] = $dist_admin;
+			}
+
+			if ( class_exists( 'SAB_Link_Audit_Admin' ) ) {
+				$link_admin = new SAB_Link_Audit_Admin( $link_scan );
+				$link_admin->init();
+				$this->services['link_admin'] = $link_admin;
 			}
 
 			// Convenience "Settings" link on the Plugins screen.

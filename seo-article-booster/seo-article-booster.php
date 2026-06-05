@@ -62,6 +62,7 @@ require_once SAB_PLUGIN_DIR . 'includes/class-link-index.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-link-injector.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-link-applier.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-new-post-linker.php';
+require_once SAB_PLUGIN_DIR . 'includes/class-link-scanner.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-injection-rules.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-content-distributor.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-ajax.php';
@@ -70,6 +71,7 @@ require_once SAB_PLUGIN_DIR . 'includes/class-plugin.php';
 if ( is_admin() ) {
 	require_once SAB_PLUGIN_DIR . 'admin/class-admin.php';
 	require_once SAB_PLUGIN_DIR . 'admin/class-distribution-admin.php';
+	require_once SAB_PLUGIN_DIR . 'admin/class-link-audit-admin.php';
 }
 
 /**

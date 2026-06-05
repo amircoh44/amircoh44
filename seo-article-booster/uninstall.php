@@ -32,6 +32,8 @@ $meta_keys = array(
 	'_sab_inbound_sources',
 	'_sab_schema_types',
 	'_sab_schema_checked',
+	'_sab_links_internal',
+	'_sab_links_external',
 );
 foreach ( $meta_keys as $meta_key ) {
 	delete_post_meta_by_key( $meta_key );
