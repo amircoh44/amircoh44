@@ -17,9 +17,10 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-// 1. Settings + distribution rules.
+// 1. Settings + distribution rules + cleaner log.
 delete_option( 'sab_settings' );
 delete_option( 'sab_injection_rules' );
+delete_option( 'sab_cleaner_log' );
 
 // 2. Cached transients.
 delete_transient( 'sab_link_index' );
@@ -34,6 +35,9 @@ $meta_keys = array(
 	'_sab_schema_checked',
 	'_sab_links_internal',
 	'_sab_links_external',
+	'_sab_cleaner_backup',
+	'_sab_cleaner_backup_time',
+	'_sab_ignore_h1',
 );
 foreach ( $meta_keys as $meta_key ) {
 	delete_post_meta_by_key( $meta_key );

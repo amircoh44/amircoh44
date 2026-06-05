@@ -49,6 +49,19 @@ class SAB_Settings {
 			// --- Content distribution (Sprinkler) ----------------------.
 			'enable_distribution'    => 1,      // Master switch for rule-based content injection.
 
+			// --- Content cleaner (generative junk) ---------------------.
+			'clean_code_fences'      => 1,      // Strip markdown ``` fences.
+			'clean_zero_width'       => 1,      // Strip zero-width/invisible chars.
+			'clean_empty_paragraphs' => 1,      // Remove empty <p>.
+			'clean_word_cruft'       => 1,      // Remove <o:p>, <font>, conditional comments.
+			'clean_script_style'     => 1,      // Remove stray <script>/<style>.
+			'clean_multiple_br'      => 1,      // Collapse runs of <br>.
+			'clean_empty_tags'       => 1,      // Remove empty inline tags.
+			'clean_html_comments'    => 0,      // Remove HTML comments (keep wp: blocks).
+			'clean_inline_styles'    => 1,      // Strip inline style="" (no CSS).
+			'clean_classes'          => 0,      // Strip class="" (aggressive; off by default).
+			'cleaner_autosave'       => 0,      // Auto-clean content on save.
+
 			// --- Internal linking --------------------------------------.
 			'enable_auto_linking'    => 1,      // Master switch for display-time linking.
 			'link_post_types'        => array( 'post', 'page' ), // Where links may be injected.
@@ -82,6 +95,17 @@ class SAB_Settings {
 		'count_featured_image',
 		'enable_schema_check',
 		'enable_distribution',
+		'clean_code_fences',
+		'clean_zero_width',
+		'clean_empty_paragraphs',
+		'clean_word_cruft',
+		'clean_script_style',
+		'clean_multiple_br',
+		'clean_empty_tags',
+		'clean_html_comments',
+		'clean_inline_styles',
+		'clean_classes',
+		'cleaner_autosave',
 		'enable_auto_linking',
 		'case_sensitive',
 		'open_new_tab',

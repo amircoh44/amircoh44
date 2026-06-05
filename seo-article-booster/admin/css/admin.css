@@ -146,8 +146,22 @@
 
 /* Publish meta box lines */
 .sab-pub-images .dashicons,
-.sab-pub-schema .dashicons {
+.sab-pub-schema .dashicons,
+.sab-pub-h1 .dashicons {
 	color: #2271b1;
+	vertical-align: text-bottom;
+}
+
+.sab-checklist {
+	margin: 0;
+}
+
+.sab-checklist li {
+	margin: 2px 0;
+}
+
+.sab-checklist .dashicons {
+	color: #007017;
 	vertical-align: text-bottom;
 }
 

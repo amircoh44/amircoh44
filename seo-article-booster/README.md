@@ -6,6 +6,9 @@ A WordPress plugin that boosts on-page SEO for your articles in three ways:
 2. **Schema check** — audits articles for Schema.org structured data (JSON-LD / microdata).
 3. **Internal linking** — builds a linking index from your **Yoast SEO sitemap** and automatically links related content; new posts are picked up automatically.
 4. **Content distribution ("Sprinkler")** — injects a shortcode (e.g. an Elementor template), an image, or HTML into articles matched by tag/category/keyword, placed precisely around your headings and paragraphs.
+5. **Link audit** — internal vs external link counts per post + a full link list with an inline mini‑WYSIWYG editor to change a link's text/URL and save it.
+6. **Content cleaner** — strips "generative" HTML junk to clean markup (no CSS/inline styles, nothing added to links); every change is logged with a per‑post backup and one‑click revert.
+7. **Duplicate‑H1 warning** — flags a content `<h1>` in the editor; dismissible per post.
 
 > Requires PHP 7.2+ and WordPress 5.6+. Works best alongside [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/).
 
@@ -74,10 +77,15 @@ includes/
   class-new-post-linker.php Reacts to publish transitions
   class-injection-rules.php Distribution rule storage, sanitisation + targeting
   class-content-distributor.php  DOM engine that sprinkles payloads into content
+  class-link-scanner.php    Per-post internal/external link analysis + inline edit
+  class-content-cleaner.php Generative-junk cleanup + log + per-post backup/revert
+  class-heading-checker.php Duplicate-H1 warning (dismissible per post)
   class-ajax.php            Nonce/capability-guarded batched AJAX endpoints
   class-plugin.php          Service container + hook wiring
 admin/                      Menu pages, settings fields, views, CSS/JS
   class-distribution-admin.php   Rules list/editor + CRUD handlers
+  class-link-audit-admin.php     Link counts/list + inline link editor
+  class-cleaner-admin.php        Scan/clean + reversible change log
 public/css/                 Optional styling for injected links
 ```
 

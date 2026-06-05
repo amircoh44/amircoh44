@@ -118,6 +118,7 @@ $rule_count  = class_exists( 'SAB_Injection_Rules' ) ? count( ( new SAB_Injectio
 			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-links' ) ); ?>"><?php esc_html_e( 'Manage internal links', 'seo-article-booster' ); ?></a>
 			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-link-audit' ) ); ?>"><?php esc_html_e( 'Link audit', 'seo-article-booster' ); ?></a>
 			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-distribution' ) ); ?>"><?php esc_html_e( 'Content distribution', 'seo-article-booster' ); ?></a>
+			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-cleaner' ) ); ?>"><?php esc_html_e( 'Content cleaner', 'seo-article-booster' ); ?></a>
 			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'seo-article-booster' ); ?></a>
 		</p>
 	</div>

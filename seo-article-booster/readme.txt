@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,12 @@ Enforce a minimum number of images per article, audit articles for Schema.org st
 3. **Internal linking from the Yoast sitemap** – Builds an index of linkable phrases from your published, sitemap-listed posts and pages (using each post's title and/or its Yoast focus keyword) and automatically links those phrases where they appear in other content. Linking is **non-destructive by default** (added on the fly when a page is viewed). You can optionally **bake the links permanently** into your content, and **revert** them again at any time.
 
 4. **Content distribution ("Sprinkler")** – Create rules that inject a shortcode (such as an Elementor template), an image, or custom HTML into the articles you choose — matched by tag, category or keyword — placed exactly where you want: around sub-headings, around paragraphs, in the empty gap between paragraphs, after every N paragraphs, and more. Includes device targeting, scheduling, de-duplication and per-rule limits. Your stored content is never modified.
+
+5. **Link audit** – See how many internal vs external links each post has (admin column + a dedicated screen), browse the full list of links inside any article, and edit a link's text and URL inline with a small WYSIWYG editor that saves straight to the post.
+
+6. **Content cleaner** – Remove "generative content trash" from your HTML — markdown code fences, zero-width characters, empty paragraphs, Word/Office cruft, stray script/style, runs of <br>, empty inline tags, and (optionally) inline styles, class attributes and HTML comments. The result is clean markup with no CSS and nothing added to your links. Every change is logged with a per-post backup and a one-click Revert; optional auto-clean on save.
+
+7. **Duplicate-H1 warning** – Warns you in the editor when the content contains an <h1> (which usually duplicates the theme's title H1). Dismissible per post for layouts that hide the theme H1 on purpose.
 
 = New post awareness =
 
@@ -56,6 +62,11 @@ Because SEO plugins output JSON-LD in the page head at render time, the plugin r
 No. The linker never links inside existing links, code, scripts or (optionally) headings, matches whole words only, and caps links per phrase and per article. Re-applying links first strips any it previously added, so it is safe to run repeatedly.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: Link Audit — per-post internal/external link counts (admin column + screen) and a full link list with an inline mini-WYSIWYG editor to change a link's text/URL and save it from the back end.
+* New: Content Cleaner — remove "generative content trash" (markdown code fences, zero-width characters, empty paragraphs, Word/Office cruft, stray script/style, runs of <br>, empty inline tags, optional HTML comments / inline styles / class attributes). Leaves clean markup, adds nothing to links, and every change is logged with a per-post backup and one-click Revert. Optional auto-clean on save.
+* New: Duplicate-H1 warning in the editor when content contains an <h1>, dismissible per post.
 
 = 1.1.0 =
 * New: Content Distribution ("Sprinkler") — rule-based injection of shortcodes, images or HTML into targeted articles (by tag/category/keyword) at precise positions around headings and paragraphs, with device targeting, scheduling, de-duplication and limits.

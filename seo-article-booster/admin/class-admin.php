@@ -221,6 +221,7 @@ class SAB_Admin {
 		add_settings_section( 'sab_images', __( 'Image minimum', 'seo-article-booster' ), array( $this, 'section_images' ), 'sab-settings' );
 		add_settings_section( 'sab_schema', __( 'Schema (structured data)', 'seo-article-booster' ), array( $this, 'section_schema' ), 'sab-settings' );
 		add_settings_section( 'sab_distribution', __( 'Content distribution (Sprinkler)', 'seo-article-booster' ), array( $this, 'section_distribution' ), 'sab-settings' );
+		add_settings_section( 'sab_cleaner', __( 'Content cleaner (generative junk)', 'seo-article-booster' ), array( $this, 'section_cleaner' ), 'sab-settings' );
 		add_settings_section( 'sab_linking', __( 'Internal linking', 'seo-article-booster' ), array( $this, 'section_linking' ), 'sab-settings' );
 		add_settings_section( 'sab_sitemap', __( 'Yoast sitemap', 'seo-article-booster' ), array( $this, 'section_sitemap' ), 'sab-settings' );
 		add_settings_section( 'sab_newposts', __( 'New post awareness', 'seo-article-booster' ), array( $this, 'section_newposts' ), 'sab-settings' );
@@ -236,6 +237,14 @@ class SAB_Admin {
 
 		// Content distribution fields.
 		$this->add_checkbox_field( 'enable_distribution', __( 'Enable rule-based content distribution', 'seo-article-booster' ), 'sab_distribution' );
+
+		// Content cleaner fields (one checkbox per cleanup, plus auto-clean).
+		if ( class_exists( 'SAB_Content_Cleaner' ) ) {
+			foreach ( SAB_Content_Cleaner::cleanups() as $key => $label ) {
+				$this->add_checkbox_field( $key, $label, 'sab_cleaner' );
+			}
+		}
+		$this->add_checkbox_field( 'cleaner_autosave', __( 'Auto-clean content every time a post is saved', 'seo-article-booster' ), 'sab_cleaner' );
 
 		// Linking fields.
 		$this->add_checkbox_field( 'enable_auto_linking', __( 'Enable automatic internal linking (display-time)', 'seo-article-booster' ), 'sab_linking' );
@@ -273,6 +282,14 @@ class SAB_Admin {
 			esc_html__( 'Distribute shortcodes, images or HTML into articles by tag, category or keyword, placed around your headings and paragraphs. Manage the rules on the dedicated screen:', 'seo-article-booster' ),
 			esc_url( admin_url( 'admin.php?page=' . SAB_Distribution_Admin::PAGE ) ),
 			esc_html__( 'Content Distribution →', 'seo-article-booster' )
+		);
+	}
+	public function section_cleaner() {
+		printf(
+			'<p>%s <a href="%s">%s</a></p>',
+			esc_html__( 'Choose which kinds of "generative trash" to remove from your HTML. Cleaning leaves plain markup — no CSS, no inline styles — and never adds anything to your links. Run a scan or clean from:', 'seo-article-booster' ),
+			esc_url( admin_url( 'admin.php?page=' . ( class_exists( 'SAB_Cleaner_Admin' ) ? SAB_Cleaner_Admin::PAGE : 'sab-cleaner' ) ) ),
+			esc_html__( 'Content Cleaner →', 'seo-article-booster' )
 		);
 	}
 	public function section_linking() {
