@@ -201,6 +201,8 @@ class SAB_Admin {
 					'statusNone'     => __( 'No structured data', 'seo-article-booster' ),
 					'statusInsufficient' => __( 'Missing required type', 'seo-article-booster' ),
 					'statusError'    => __( 'Could not fetch', 'seo-article-booster' ),
+					'schemaOk'       => __( 'OK', 'seo-article-booster' ),
+					'noSitemapUrls'  => __( 'No URLs were found in the sitemap(s).', 'seo-article-booster' ),
 					'edit'           => __( 'Edit', 'seo-article-booster' ),
 					'view'           => __( 'View', 'seo-article-booster' ),
 				),
@@ -234,6 +236,8 @@ class SAB_Admin {
 		// Schema fields.
 		$this->add_checkbox_field( 'enable_schema_check', __( 'Audit articles for structured data', 'seo-article-booster' ), 'sab_schema' );
 		$this->add_text_field( 'schema_required_types', __( 'Required schema types', 'seo-article-booster' ), 'sab_schema', __( 'Optional comma-separated list, e.g. Article, BlogPosting. Leave blank to accept any structured data.', 'seo-article-booster' ) );
+		$this->add_checkbox_field( 'enable_schema_output', __( 'Output this plugin’s JSON-LD schema in <head>', 'seo-article-booster' ), 'sab_schema' );
+		$this->add_text_field( 'service_post_type', __( 'Service post type', 'seo-article-booster' ), 'sab_schema', __( 'Post type mapped to Service schema (default: service).', 'seo-article-booster' ), 'text', 'service' );
 
 		// Content distribution fields.
 		$this->add_checkbox_field( 'enable_distribution', __( 'Enable rule-based content distribution', 'seo-article-booster' ), 'sab_distribution' );
@@ -260,8 +264,9 @@ class SAB_Admin {
 		$this->add_checkbox_field( 'nofollow', __( 'Add rel="nofollow" to internal links', 'seo-article-booster' ), 'sab_linking' );
 
 		// Sitemap fields.
-		$this->add_text_field( 'sitemap_url', __( 'Sitemap index URL', 'seo-article-booster' ), 'sab_sitemap', sprintf( /* translators: %s: default sitemap URL. */ __( 'Leave blank to auto-detect %s', 'seo-article-booster' ), '<code>' . esc_html( home_url( '/sitemap_index.xml' ) ) . '</code>' ), 'url', home_url( '/sitemap_index.xml' ) );
-		$this->add_checkbox_field( 'restrict_to_sitemap', __( 'Only link to URLs present in the sitemap', 'seo-article-booster' ), 'sab_sitemap' );
+		$this->add_text_field( 'sitemap_url', __( 'Primary sitemap URL', 'seo-article-booster' ), 'sab_sitemap', sprintf( /* translators: %s: default sitemap URL. */ __( 'Leave blank to auto-detect %s', 'seo-article-booster' ), '<code>' . esc_html( home_url( '/sitemap_index.xml' ) ) . '</code>' ), 'url', home_url( '/sitemap_index.xml' ) );
+		$this->add_textarea_field( 'sitemap_urls', __( 'Additional sitemaps', 'seo-article-booster' ), 'sab_sitemap', __( 'One sitemap URL per line. Each may be a sitemap index or a flat urlset. All are merged and de-duplicated.', 'seo-article-booster' ) );
+		$this->add_checkbox_field( 'restrict_to_sitemap', __( 'Only link to URLs present in the sitemap(s)', 'seo-article-booster' ), 'sab_sitemap' );
 
 		// New-post fields.
 		$this->add_checkbox_field( 'auto_link_new_posts', __( 'React when new content is published', 'seo-article-booster' ), 'sab_newposts' );
@@ -367,6 +372,37 @@ class SAB_Admin {
 	 * @param string $help        Optional help (may contain safe <code> HTML).
 	 * @param string $type        Input type ('text' or 'url').
 	 * @param string $placeholder Optional placeholder text.
+	 */
+	protected function add_textarea_field( $key, $label, $section, $help = '' ) {
+		add_settings_field(
+			$key,
+			$label,
+			function () use ( $key, $help ) {
+				printf(
+					'<textarea name="%1$s[%2$s]" id="%2$s" rows="4" class="large-text code">%3$s</textarea>',
+					esc_attr( SAB_OPTION_KEY ),
+					esc_attr( $key ),
+					esc_textarea( SAB_Settings::get( $key ) )
+				);
+				if ( $help ) {
+					echo '<p class="description">' . esc_html( $help ) . '</p>';
+				}
+			},
+			'sab-settings',
+			$section,
+			array( 'label_for' => $key )
+		);
+	}
+
+	/**
+	 * Render a text/url input field.
+	 *
+	 * @param string $key         Setting key.
+	 * @param string $label       Field label.
+	 * @param string $section     Section id.
+	 * @param string $help        Optional help (may contain safe <code> HTML).
+	 * @param string $type        Input type ('text' or 'url').
+	 * @param string $placeholder Optional placeholder.
 	 */
 	protected function add_text_field( $key, $label, $section, $help = '', $type = 'text', $placeholder = '' ) {
 		add_settings_field(

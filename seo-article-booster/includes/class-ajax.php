@@ -82,6 +82,7 @@ class SAB_Ajax {
 	public function init() {
 		add_action( 'wp_ajax_sab_scan_images', array( $this, 'scan_images' ) );
 		add_action( 'wp_ajax_sab_scan_schema', array( $this, 'scan_schema' ) );
+		add_action( 'wp_ajax_sab_scan_sitemap_schema', array( $this, 'scan_sitemap_schema' ) );
 		add_action( 'wp_ajax_sab_rebuild_index', array( $this, 'rebuild_index' ) );
 		add_action( 'wp_ajax_sab_refresh_sitemap', array( $this, 'refresh_sitemap' ) );
 		add_action( 'wp_ajax_sab_apply_links', array( $this, 'apply_links' ) );
@@ -129,6 +130,14 @@ class SAB_Ajax {
 	public function scan_schema() {
 		$this->guard();
 		wp_send_json_success( $this->schema->scan_batch( $this->paged(), 10 ) );
+	}
+
+	/**
+	 * Scan a batch of sitemap URLs for structured data (sitemap-synced audit).
+	 */
+	public function scan_sitemap_schema() {
+		$this->guard();
+		wp_send_json_success( $this->schema->scan_sitemap_batch( $this->paged(), 10 ) );
 	}
 
 	/**

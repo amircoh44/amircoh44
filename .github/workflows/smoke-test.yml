@@ -50,6 +50,9 @@ jobs:
       - name: Front-end filter tests
         run: php seo-article-booster/tests/test-frontend.php
 
+      - name: Schema generator tests
+        run: php seo-article-booster/tests/test-schema.php
+
       - name: Admin render tests
         run: php seo-article-booster/tests/test-admin.php
 

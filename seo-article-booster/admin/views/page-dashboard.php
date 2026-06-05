@@ -113,7 +113,8 @@ $rule_count  = class_exists( 'SAB_Injection_Rules' ) ? count( ( new SAB_Injectio
 		</table>
 
 		<p class="sab-actions">
-			<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-images' ) ); ?>"><?php esc_html_e( 'Run image audit', 'seo-article-booster' ); ?></a>
+			<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-business' ) ); ?>"><?php esc_html_e( 'Business profile', 'seo-article-booster' ); ?></a>
+			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-images' ) ); ?>"><?php esc_html_e( 'Run image audit', 'seo-article-booster' ); ?></a>
 			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-schema' ) ); ?>"><?php esc_html_e( 'Run schema audit', 'seo-article-booster' ); ?></a>
 			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-links' ) ); ?>"><?php esc_html_e( 'Manage internal links', 'seo-article-booster' ); ?></a>
 			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-link-audit' ) ); ?>"><?php esc_html_e( 'Link audit', 'seo-article-booster' ); ?></a>

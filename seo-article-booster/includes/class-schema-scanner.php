@@ -32,6 +32,22 @@ class SAB_Schema_Scanner {
 	const META_CHECKED = '_sab_schema_checked';
 
 	/**
+	 * Optional sitemap parser (for the sitemap-coverage audit).
+	 *
+	 * @var SAB_Sitemap_Parser|null
+	 */
+	protected $sitemap = null;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param SAB_Sitemap_Parser|null $sitemap Sitemap parser.
+	 */
+	public function __construct( $sitemap = null ) {
+		$this->sitemap = $sitemap;
+	}
+
+	/**
 	 * Wire up editor hooks.
 	 */
 	public function init() {
@@ -58,8 +74,16 @@ class SAB_Schema_Scanner {
 				'error'   => __( 'Post not found.', 'seo-article-booster' ),
 			);
 		}
+		return $this->detect_for_url( get_permalink( $post ) );
+	}
 
-		$url      = get_permalink( $post );
+	/**
+	 * Fetch any URL's rendered HTML and extract its structured-data @type list.
+	 *
+	 * @param string $url URL.
+	 * @return array{checked:bool,types:string[],error:string}
+	 */
+	public function detect_for_url( $url ) {
 		$response = wp_remote_get(
 			$url,
 			array(
@@ -88,12 +112,9 @@ class SAB_Schema_Scanner {
 			);
 		}
 
-		$html  = (string) wp_remote_retrieve_body( $response );
-		$types = $this->extract_types( $html );
-
 		return array(
 			'checked' => true,
-			'types'   => $types,
+			'types'   => $this->extract_types( (string) wp_remote_retrieve_body( $response ) ),
 			'error'   => '',
 		);
 	}
@@ -233,6 +254,49 @@ class SAB_Schema_Scanner {
 	/* ---------------------------------------------------------------------
 	 * Bulk scanning (AJAX)
 	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Scan a batch of URLs taken from the configured sitemap(s).
+	 *
+	 * This "syncs" the schema audit with the sitemaps: every public URL the
+	 * sitemaps advertise is fetched and checked for structured data.
+	 *
+	 * @param int $paged    Batch page.
+	 * @param int $per_page URLs per batch.
+	 * @return array Progress payload incl. `rows`.
+	 */
+	public function scan_sitemap_batch( $paged = 1, $per_page = 10 ) {
+		$all = $this->sitemap ? $this->sitemap->get_all_urls() : array();
+		$all = array_values( $all );
+
+		$total  = count( $all );
+		$offset = ( $paged - 1 ) * $per_page;
+		$slice  = array_slice( $all, $offset, $per_page );
+		$rows   = array();
+
+		foreach ( $slice as $url ) {
+			$result = $this->detect_for_url( $url );
+			$passes = $result['checked'] && $this->passes( $result['types'] );
+
+			$rows[] = array(
+				'url'    => $url,
+				'types'  => $result['types'],
+				'status' => ! $result['checked'] ? 'error' : ( $passes ? 'ok' : ( empty( $result['types'] ) ? 'none' : 'insufficient' ) ),
+				'note'   => $result['error'],
+			);
+		}
+
+		$scanned = min( $offset + $per_page, $total );
+
+		return array(
+			'rows'      => $rows,
+			'total'     => $total,
+			'scanned'   => $scanned,
+			'done'      => $scanned >= $total,
+			'next_page' => $paged + 1,
+			'required'  => $this->required_types(),
+		);
+	}
 
 	/**
 	 * Scan a batch of posts for missing/insufficient schema.

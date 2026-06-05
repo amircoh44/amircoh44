@@ -4,15 +4,15 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Enforce a minimum number of images per article, audit articles for Schema.org structured data, and auto-interlink content from your Yoast sitemap.
+Generate full JSON-LD schema from a business questionnaire, audit every sitemap URL, enforce image minimums, audit/clean content, and auto-interlink.
 
 == Description ==
 
-**SEO Article Booster** helps you ship better-optimised articles by combining three on-page SEO checks and tools in one place:
+**SEO Article Booster** helps you ship better-optimised articles by combining several on-page SEO tools in one place:
 
 1. **Image minimum** – Counts the images inside each article (inline images, gallery blocks/shortcodes and, optionally, the featured image) and flags any article that falls below a minimum you choose. The count appears in the post list and in the editor's Publish box.
 
@@ -27,6 +27,10 @@ Enforce a minimum number of images per article, audit articles for Schema.org st
 6. **Content cleaner** – Remove "generative content trash" from your HTML — markdown code fences, zero-width characters, empty paragraphs, Word/Office cruft, stray script/style, runs of <br>, empty inline tags, and (optionally) inline styles, class attributes and HTML comments. The result is clean markup with no CSS and nothing added to your links. Every change is logged with a per-post backup and a one-click Revert; optional auto-clean on save.
 
 7. **Duplicate-H1 warning** – Warns you in the editor when the content contains an <h1> (which usually duplicates the theme's title H1). Dismissible per post for layouts that hide the theme H1 on purpose.
+
+8. **Business profile → full schema** – A "tell us about your business" questionnaire (name, type/LocalBusiness subtype, logo, address, geo, hours, price range, social profiles, founder, areas served…) that powers a complete JSON-LD `@graph` output in `<head>`: Organization/LocalBusiness, WebSite (with search action), WebPage, Article, **Service** (mapped to your service post type), CollectionPage and BreadcrumbList — so your home page, pages, services, posts and tag/category archives all get accurate structured data. (Disable Yoast's schema to avoid duplication.)
+
+9. **Multiple sitemaps + sitemap-synced audit** – Add as many sitemaps as you like (each an index or a flat urlset); they're merged and de-duplicated. The Schema Audit can then scan **every URL in your sitemaps** for structured data, keeping your schema coverage in sync with what you actually publish.
 
 = New post awareness =
 
@@ -62,6 +66,12 @@ Because SEO plugins output JSON-LD in the page head at render time, the plugin r
 No. The linker never links inside existing links, code, scripts or (optionally) headings, matches whole words only, and caps links per phrase and per article. Re-applying links first strips any it previously added, so it is safe to run repeatedly.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: Business Profile questionnaire that generates a full JSON-LD schema graph (Organization/LocalBusiness, WebSite, WebPage, Article, Service, CollectionPage, BreadcrumbList) output in <head> for every page, service, post and archive.
+* New: Multiple sitemaps — add any number of sitemap URLs (index or urlset), merged and de-duplicated.
+* New: Sitemap-synced schema audit — scan every URL in your sitemap(s) for structured data.
+* Settings: schema-output toggle and configurable Service post type.
 
 = 1.2.0 =
 * New: Link Audit — per-post internal/external link counts (admin column + screen) and a full link list with an inline mini-WYSIWYG editor to change a link's text/URL and save it from the back end.

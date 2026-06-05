@@ -63,7 +63,8 @@ final class SAB_Plugin {
 		$replacer = new SAB_Link_Replacer();
 		$index    = new SAB_Link_Index( $sitemap );
 		$scanner  = new SAB_Image_Scanner();
-		$schema   = new SAB_Schema_Scanner();
+		$schema   = new SAB_Schema_Scanner( $sitemap );
+		$schema_gen = new SAB_Schema_Generator();
 		$injector = new SAB_Link_Injector( $index, $replacer );
 		$applier  = new SAB_Link_Applier( $index, $replacer );
 		$new_post = new SAB_New_Post_Linker( $index, $applier );
@@ -74,7 +75,7 @@ final class SAB_Plugin {
 		$heading  = new SAB_Heading_Checker();
 		$ajax     = new SAB_Ajax( $scanner, $schema, $index, $applier, $sitemap );
 
-		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'ajax' );
+		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'ajax' );
 
 		// --- Register settings + i18n. ------------------------------------.
 		add_action( 'admin_init', array( 'SAB_Settings', 'register' ) );
@@ -83,6 +84,7 @@ final class SAB_Plugin {
 		// --- Front-end + content services. --------------------------------.
 		$scanner->init();
 		$schema->init();
+		$schema_gen->init();
 		$injector->init();
 		$new_post->init();
 		$distrib->init();
@@ -120,6 +122,12 @@ final class SAB_Plugin {
 				$cleaner_admin = new SAB_Cleaner_Admin( $cleaner );
 				$cleaner_admin->init();
 				$this->services['cleaner_admin'] = $cleaner_admin;
+			}
+
+			if ( class_exists( 'SAB_Business_Admin' ) ) {
+				$business_admin = new SAB_Business_Admin();
+				$business_admin->init();
+				$this->services['business_admin'] = $business_admin;
 			}
 
 			// Convenience "Settings" link on the Plugins screen.

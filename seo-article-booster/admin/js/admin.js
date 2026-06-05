@@ -238,6 +238,83 @@
 	}
 
 	/* -----------------------------------------------------------------
+	 * Sitemap coverage: schema scan across all sitemap URLs (batched)
+	 * --------------------------------------------------------------- */
+	function runSitemapSchemaScan() {
+		var $btn      = $( '#sab-sitemap-schema-start' ),
+			$progress = $( '#sab-sitemap-schema-progress' ),
+			$table    = $( '#sab-sitemap-schema-table' ),
+			$tbody    = $table.find( 'tbody' ),
+			$empty    = $( '#sab-sitemap-schema-empty' ),
+			missing   = 0;
+
+		$btn.prop( 'disabled', true );
+		$tbody.empty();
+		$table.hide();
+		$empty.hide();
+		setProgress( $progress, 2, i18n.schemaScanning || 'Checking schema…' );
+
+		function nextPage( paged ) {
+			request( 'sab_scan_sitemap_schema', { paged: paged } )
+				.done( function ( res ) {
+					if ( ! res || ! res.success ) {
+						setProgress( $progress, 100, i18n.error || 'Error' );
+						$btn.prop( 'disabled', false );
+						return;
+					}
+					var d = res.data;
+					$.each( d.rows || [], function ( _, row ) {
+						if ( 'ok' !== row.status ) { missing++; }
+						$tbody.append( renderSitemapSchemaRow( row ) );
+					} );
+					if ( d.rows && d.rows.length ) { $table.show(); }
+
+					var percent = d.total ? Math.round( ( d.scanned / d.total ) * 100 ) : 100;
+					setProgress( $progress, percent, ( i18n.schemaScanning || 'Checking…' ) + ' ' + d.scanned + ' / ' + d.total );
+
+					if ( d.done ) {
+						setProgress( $progress, 100, ( i18n.done || 'Done.' ) + ' ' + missing + ' ' + ( i18n.flagged || 'flagged' ) + '.' );
+						$btn.prop( 'disabled', false );
+						if ( d.total === 0 ) {
+							$empty.text( i18n.noSitemapUrls || 'No URLs were found in the sitemap(s).' ).show();
+						}
+						return;
+					}
+					nextPage( d.next_page );
+				} )
+				.fail( function () {
+					setProgress( $progress, 100, i18n.error || 'Error' );
+					$btn.prop( 'disabled', false );
+				} );
+		}
+		nextPage( 1 );
+	}
+
+	function renderSitemapSchemaRow( row ) {
+		var $tr = $( '<tr/>' );
+		$( '<td/>' ).html(
+			$( '<a/>' ).attr( { href: row.url, target: '_blank', rel: 'noopener' } ).text( row.url )
+		).appendTo( $tr );
+
+		var label, cls;
+		if ( 'ok' === row.status ) {
+			label = ( row.types && row.types.length ) ? row.types.join( ', ' ) : ( i18n.schemaOk || 'OK' );
+			cls   = 'sab-badge--ok';
+		} else if ( 'error' === row.status ) {
+			label = ( i18n.statusError || 'Could not fetch' ) + ( row.note ? ' (' + row.note + ')' : '' );
+			cls   = 'sab-badge--neutral';
+		} else if ( 'insufficient' === row.status ) {
+			label = ( i18n.statusInsufficient || 'Missing required type' ) + ( row.types && row.types.length ? ': ' + row.types.join( ', ' ) : '' );
+			cls   = 'sab-badge--warn';
+		} else {
+			label = i18n.statusNone || 'No structured data';
+			cls   = 'sab-badge--warn';
+		}
+		$( '<td/>' ).html( '<span class="sab-badge ' + cls + '"></span>' ).find( 'span' ).text( label ).end().appendTo( $tr );
+		return $tr;
+	}
+
+	/* -----------------------------------------------------------------
 	 * Rebuild index / refresh sitemap (one-shot)
 	 * --------------------------------------------------------------- */
 	function oneShot( action, $btn, busyText ) {
@@ -324,6 +401,7 @@
 	$( function () {
 		$( '#sab-scan-start' ).on( 'click', runScan );
 		$( '#sab-schema-start' ).on( 'click', runSchemaScan );
+		$( '#sab-sitemap-schema-start' ).on( 'click', runSitemapSchemaScan );
 
 		$( '#sab-rebuild-index' ).on( 'click', function () {
 			oneShot( 'sab_rebuild_index', $( this ), i18n.working );

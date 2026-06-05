@@ -71,5 +71,9 @@ $ca = $plugin->service( 'cleaner_admin' );
 $_GET = array();
 render( 'content cleaner', function () use ( $ca ) { $ca->render(); }, 'Change log' );
 
+$ba = $plugin->service( 'business_admin' );
+$ba->register_setting();
+render( 'business profile', function () use ( $ba ) { $ba->render(); }, 'Business Profile' );
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

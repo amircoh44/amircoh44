@@ -45,6 +45,8 @@ class SAB_Settings {
 			// --- Schema (structured data) ------------------------------.
 			'enable_schema_check'    => 1,      // Audit articles for JSON-LD/microdata.
 			'schema_required_types'  => '',     // Comma list, e.g. "Article,BlogPosting" (blank = any).
+			'enable_schema_output'   => 1,      // Output our own JSON-LD schema graph in <head>.
+			'service_post_type'      => 'service', // Post type mapped to Service schema.
 
 			// --- Content distribution (Sprinkler) ----------------------.
 			'enable_distribution'    => 1,      // Master switch for rule-based content injection.
@@ -75,9 +77,10 @@ class SAB_Settings {
 			'use_yoast_focus_kw'     => 1,      // Use Yoast focus keyword(s) as phrases.
 			'skip_headings'          => 1,      // Never inject links inside <h1>-<h6>.
 
-			// --- Yoast sitemap -----------------------------------------.
-			'sitemap_url'            => '',     // Blank = auto-detect /sitemap_index.xml.
-			'restrict_to_sitemap'    => 1,      // Only link to URLs present in the sitemap.
+			// --- Sitemaps ----------------------------------------------.
+			'sitemap_url'            => '',     // Legacy single sitemap (kept for back-compat).
+			'sitemap_urls'           => '',     // One sitemap URL per line (index or urlset). Blank = auto-detect.
+			'restrict_to_sitemap'    => 1,      // Only link to URLs present in the sitemap(s).
 
 			// --- New post awareness ------------------------------------.
 			'auto_link_new_posts'    => 1,             // React to newly published content.
@@ -94,6 +97,7 @@ class SAB_Settings {
 	protected static $booleans = array(
 		'count_featured_image',
 		'enable_schema_check',
+		'enable_schema_output',
 		'enable_distribution',
 		'clean_code_fences',
 		'clean_zero_width',
@@ -235,10 +239,30 @@ class SAB_Settings {
 				continue;
 			}
 
-			// Sitemap URL.
+			// Sitemap URL (legacy single).
 			if ( 'sitemap_url' === $key ) {
 				$raw           = isset( $input[ $key ] ) ? trim( (string) $input[ $key ] ) : '';
 				$clean[ $key ] = ( '' === $raw ) ? '' : esc_url_raw( $raw );
+				continue;
+			}
+
+			// Multiple sitemap URLs (one per line).
+			if ( 'sitemap_urls' === $key ) {
+				$lines = isset( $input[ $key ] ) ? preg_split( '/\r\n|\r|\n/', (string) $input[ $key ] ) : array();
+				$urls  = array();
+				foreach ( (array) $lines as $line ) {
+					$line = trim( $line );
+					if ( '' !== $line ) {
+						$urls[] = esc_url_raw( $line );
+					}
+				}
+				$clean[ $key ] = implode( "\n", array_values( array_unique( array_filter( $urls ) ) ) );
+				continue;
+			}
+
+			// Service post type.
+			if ( 'service_post_type' === $key ) {
+				$clean[ $key ] = isset( $input[ $key ] ) ? sanitize_key( $input[ $key ] ) : $default_value;
 				continue;
 			}
 
@@ -262,10 +286,48 @@ class SAB_Settings {
 	 * @return string
 	 */
 	public static function get_sitemap_url() {
-		$override = trim( (string) self::get( 'sitemap_url', '' ) );
-		if ( '' !== $override ) {
-			return $override;
+		$all = self::get_sitemap_urls();
+		return $all[0];
+	}
+
+	/**
+	 * Resolve all configured sitemap URLs.
+	 *
+	 * Combines the multi-line "sitemap_urls" field with the legacy single
+	 * "sitemap_url", de-duplicates, and falls back to Yoast's default index
+	 * when nothing is configured.
+	 *
+	 * @return string[] Always at least one URL.
+	 */
+	public static function get_sitemap_urls() {
+		$urls = array();
+
+		$multi = trim( (string) self::get( 'sitemap_urls', '' ) );
+		if ( '' !== $multi ) {
+			foreach ( preg_split( '/\r\n|\r|\n/', $multi ) as $line ) {
+				$line = trim( $line );
+				if ( '' !== $line ) {
+					$urls[] = $line;
+				}
+			}
 		}
-		return home_url( '/sitemap_index.xml' );
+
+		$legacy = trim( (string) self::get( 'sitemap_url', '' ) );
+		if ( '' !== $legacy ) {
+			$urls[] = $legacy;
+		}
+
+		$urls = array_values( array_unique( array_filter( $urls ) ) );
+
+		if ( empty( $urls ) ) {
+			$urls[] = home_url( '/sitemap_index.xml' );
+		}
+
+		/**
+		 * Filter the list of sitemap URLs the plugin will read.
+		 *
+		 * @param string[] $urls Sitemap URLs.
+		 */
+		return apply_filters( 'sab_sitemap_urls', $urls );
 	}
 }

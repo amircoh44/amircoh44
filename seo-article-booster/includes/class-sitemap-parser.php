@@ -61,16 +61,32 @@ class SAB_Sitemap_Parser {
 	 */
 	public function fetch_all_urls() {
 		$this->last_error = '';
-		$index_url        = SAB_Settings::get_sitemap_url();
+		$urls             = array();
 
-		$index_xml = $this->fetch( $index_url );
-		if ( false === $index_xml ) {
+		// Read every configured sitemap (each may be an index or a flat urlset).
+		foreach ( SAB_Settings::get_sitemap_urls() as $sitemap_url ) {
+			$urls = array_merge( $urls, $this->fetch_one( $sitemap_url ) );
+		}
+
+		// De-duplicate while preserving order.
+		return array_values( array_unique( $urls ) );
+	}
+
+	/**
+	 * Fetch + parse a single sitemap URL (index or urlset) into a list of URLs.
+	 *
+	 * @param string $url Sitemap URL.
+	 * @return string[]
+	 */
+	protected function fetch_one( $url ) {
+		$xml = $this->fetch( $url );
+		if ( false === $xml ) {
 			return array();
 		}
 
-		$root = $this->load_xml( $index_xml );
+		$root = $this->load_xml( $xml );
 		if ( ! $root ) {
-			$this->last_error = __( 'The sitemap could not be parsed as valid XML.', 'seo-article-booster' );
+			$this->last_error = __( 'A sitemap could not be parsed as valid XML.', 'seo-article-booster' );
 			return array();
 		}
 
@@ -99,8 +115,7 @@ class SAB_Sitemap_Parser {
 			$this->last_error = __( 'Unrecognised sitemap format (expected sitemapindex or urlset).', 'seo-article-booster' );
 		}
 
-		// De-duplicate while preserving order.
-		return array_values( array_unique( $urls ) );
+		return $urls;
 	}
 
 	/**

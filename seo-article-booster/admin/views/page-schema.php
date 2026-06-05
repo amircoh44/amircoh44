@@ -77,4 +77,32 @@ $types    = (array) SAB_Settings::get( 'audit_post_types', array( 'post' ) );
 	</table>
 
 	<p id="sab-schema-empty" class="sab-empty" style="display:none"></p>
+
+	<hr style="margin:28px 0">
+
+	<h2><?php esc_html_e( 'Sitemap coverage', 'seo-article-booster' ); ?></h2>
+	<p class="description"><?php esc_html_e( 'Check every URL in your configured sitemap(s) — pages, services, home, tags, everything — for structured data. This keeps your schema in sync with what you actually publish.', 'seo-article-booster' ); ?></p>
+	<p>
+		<button type="button" class="button button-primary" id="sab-sitemap-schema-start">
+			<span class="dashicons dashicons-networking" style="margin-top:4px"></span>
+			<?php esc_html_e( 'Scan all sitemap URLs', 'seo-article-booster' ); ?>
+		</button>
+		<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sab-settings' ) ); ?>#sab_sitemap"><?php esc_html_e( 'Sitemap settings', 'seo-article-booster' ); ?></a>
+	</p>
+
+	<div id="sab-sitemap-schema-progress" class="sab-progress" style="display:none">
+		<div class="sab-progress__bar"><span></span></div>
+		<p class="sab-progress__label"></p>
+	</div>
+
+	<table class="widefat striped" id="sab-sitemap-schema-table" style="display:none">
+		<thead>
+			<tr>
+				<th><?php esc_html_e( 'URL', 'seo-article-booster' ); ?></th>
+				<th style="width:240px"><?php esc_html_e( 'Schema found', 'seo-article-booster' ); ?></th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+	<p id="sab-sitemap-schema-empty" class="sab-empty" style="display:none"></p>
 </div>

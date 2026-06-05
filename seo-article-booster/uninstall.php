@@ -21,6 +21,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 delete_option( 'sab_settings' );
 delete_option( 'sab_injection_rules' );
 delete_option( 'sab_cleaner_log' );
+delete_option( 'sab_business_profile' );
 
 // 2. Cached transients.
 delete_transient( 'sab_link_index' );
