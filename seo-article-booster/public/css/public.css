@@ -1,12 +1,66 @@
 /**
- * Optional front-end styling for automatically inserted internal links.
+ * Front-end styling for SEO Article Booster.
  *
- * Loaded only when "style internal links" support is desired. By default it is
- * intentionally subtle so injected links look native to the theme.
+ * Covers automatically inserted internal links and the Content Distribution
+ * ("Sprinkler") blocks (spacing, alignment and device visibility).
  */
 
 a.sab-internal-link {
 	/* Inherit the theme's link colour by default. Uncomment to customise: */
 	/* text-decoration: underline; */
 	/* text-decoration-style: dotted; */
+}
+
+/* ---------------------------------------------------------------------------
+ * Distributed ("sprinkled") blocks
+ * ------------------------------------------------------------------------- */
+
+.sab-injection {
+	margin: 1.5em 0;
+	clear: both;
+}
+
+.sab-injection > figure {
+	margin: 0;
+}
+
+.sab-injection figure.alignleft {
+	float: left;
+	margin: 0 1.25em 1em 0;
+	max-width: 50%;
+}
+
+.sab-injection figure.alignright {
+	float: right;
+	margin: 0 0 1em 1.25em;
+	max-width: 50%;
+}
+
+.sab-injection figure.aligncenter {
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.sab-injection figure.alignnone {
+	display: block;
+}
+
+.sab-injection img.sab-injection-img {
+	max-width: 100%;
+	height: auto;
+}
+
+/* Device visibility. The wrapper carries one of these classes when a rule is
+ * limited to desktop or mobile. The 782px breakpoint matches WordPress core. */
+@media ( max-width: 782px ) {
+	.sab-injection--desktop-only {
+		display: none !important;
+	}
+}
+
+@media ( min-width: 783px ) {
+	.sab-injection--mobile-only {
+		display: none !important;
+	}
 }

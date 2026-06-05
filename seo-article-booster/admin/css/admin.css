@@ -135,6 +135,15 @@
 	color: #50575e;
 }
 
+.sab-muted {
+	color: #787c82;
+	font-size: 12px;
+}
+
+.sab-rule-form .form-table th {
+	width: 220px;
+}
+
 /* Publish meta box lines */
 .sab-pub-images .dashicons,
 .sab-pub-schema .dashicons {

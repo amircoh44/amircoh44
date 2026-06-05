@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       SEO Article Booster
  * Plugin URI:        https://github.com/amircoh44/amircoh44
- * Description:        Boost your SEO: enforce a minimum number of images per article, audit articles for Schema.org structured data, and build an internal-linking index from the Yoast SEO sitemap to link related content automatically. New posts/pages automatically receive inbound internal links from older related articles.
- * Version:           1.0.0
+ * Description:        Boost your SEO: enforce a minimum number of images per article, audit articles for Schema.org structured data, build an internal-linking index from the Yoast SEO sitemap to link related content automatically, and distribute shortcodes/images/HTML into targeted articles by tag, category or keyword. New posts/pages automatically receive inbound internal links from older related articles.
+ * Version:           1.1.0
  * Requires at least: 5.6
  * Requires PHP:      7.2
  * Author:            amircoh44
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * We centralise version, paths and the option/menu identifiers here so they
  * can be reused safely across every class without magic strings.
  */
-define( 'SAB_VERSION', '1.0.0' );
+define( 'SAB_VERSION', '1.1.0' );
 define( 'SAB_PLUGIN_FILE', __FILE__ );
 define( 'SAB_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );   // .../seo-article-booster/
 define( 'SAB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );    // https://.../seo-article-booster/
@@ -62,11 +62,14 @@ require_once SAB_PLUGIN_DIR . 'includes/class-link-index.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-link-injector.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-link-applier.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-new-post-linker.php';
+require_once SAB_PLUGIN_DIR . 'includes/class-injection-rules.php';
+require_once SAB_PLUGIN_DIR . 'includes/class-content-distributor.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-ajax.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-plugin.php';
 
 if ( is_admin() ) {
 	require_once SAB_PLUGIN_DIR . 'admin/class-admin.php';
+	require_once SAB_PLUGIN_DIR . 'admin/class-distribution-admin.php';
 }
 
 /**

@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,6 +19,8 @@ Enforce a minimum number of images per article, audit articles for Schema.org st
 2. **Schema (structured data) check** – Fetches each article's rendered output and detects the Schema.org JSON-LD (and microdata) types present — for example `Article` or `BlogPosting`. Flags any article that has no structured data, or that is missing a required type you specify.
 
 3. **Internal linking from the Yoast sitemap** – Builds an index of linkable phrases from your published, sitemap-listed posts and pages (using each post's title and/or its Yoast focus keyword) and automatically links those phrases where they appear in other content. Linking is **non-destructive by default** (added on the fly when a page is viewed). You can optionally **bake the links permanently** into your content, and **revert** them again at any time.
+
+4. **Content distribution ("Sprinkler")** – Create rules that inject a shortcode (such as an Elementor template), an image, or custom HTML into the articles you choose — matched by tag, category or keyword — placed exactly where you want: around sub-headings, around paragraphs, in the empty gap between paragraphs, after every N paragraphs, and more. Includes device targeting, scheduling, de-duplication and per-rule limits. Your stored content is never modified.
 
 = New post awareness =
 
@@ -54,6 +56,9 @@ Because SEO plugins output JSON-LD in the page head at render time, the plugin r
 No. The linker never links inside existing links, code, scripts or (optionally) headings, matches whole words only, and caps links per phrase and per article. Re-applying links first strips any it previously added, so it is safe to run repeatedly.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Content Distribution ("Sprinkler") — rule-based injection of shortcodes, images or HTML into targeted articles (by tag/category/keyword) at precise positions around headings and paragraphs, with device targeting, scheduling, de-duplication and limits.
 
 = 1.0.0 =
 * Initial release: image-minimum auditing, Schema.org structured-data auditing, Yoast-sitemap-driven internal linking (display-time + permanent apply/revert), and new-post inbound-link awareness.

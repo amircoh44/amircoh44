@@ -17,8 +17,9 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-// 1. Settings.
+// 1. Settings + distribution rules.
 delete_option( 'sab_settings' );
+delete_option( 'sab_injection_rules' );
 
 // 2. Cached transients.
 delete_transient( 'sab_link_index' );

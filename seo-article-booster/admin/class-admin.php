@@ -220,6 +220,7 @@ class SAB_Admin {
 		// Sections.
 		add_settings_section( 'sab_images', __( 'Image minimum', 'seo-article-booster' ), array( $this, 'section_images' ), 'sab-settings' );
 		add_settings_section( 'sab_schema', __( 'Schema (structured data)', 'seo-article-booster' ), array( $this, 'section_schema' ), 'sab-settings' );
+		add_settings_section( 'sab_distribution', __( 'Content distribution (Sprinkler)', 'seo-article-booster' ), array( $this, 'section_distribution' ), 'sab-settings' );
 		add_settings_section( 'sab_linking', __( 'Internal linking', 'seo-article-booster' ), array( $this, 'section_linking' ), 'sab-settings' );
 		add_settings_section( 'sab_sitemap', __( 'Yoast sitemap', 'seo-article-booster' ), array( $this, 'section_sitemap' ), 'sab-settings' );
 		add_settings_section( 'sab_newposts', __( 'New post awareness', 'seo-article-booster' ), array( $this, 'section_newposts' ), 'sab-settings' );
@@ -232,6 +233,9 @@ class SAB_Admin {
 		// Schema fields.
 		$this->add_checkbox_field( 'enable_schema_check', __( 'Audit articles for structured data', 'seo-article-booster' ), 'sab_schema' );
 		$this->add_text_field( 'schema_required_types', __( 'Required schema types', 'seo-article-booster' ), 'sab_schema', __( 'Optional comma-separated list, e.g. Article, BlogPosting. Leave blank to accept any structured data.', 'seo-article-booster' ) );
+
+		// Content distribution fields.
+		$this->add_checkbox_field( 'enable_distribution', __( 'Enable rule-based content distribution', 'seo-article-booster' ), 'sab_distribution' );
 
 		// Linking fields.
 		$this->add_checkbox_field( 'enable_auto_linking', __( 'Enable automatic internal linking (display-time)', 'seo-article-booster' ), 'sab_linking' );
@@ -262,6 +266,14 @@ class SAB_Admin {
 	}
 	public function section_schema() {
 		echo '<p>' . esc_html__( 'Verify that your articles output Schema.org structured data (JSON-LD or microdata). The audit fetches each article and reports the schema types found.', 'seo-article-booster' ) . '</p>';
+	}
+	public function section_distribution() {
+		printf(
+			'<p>%s <a href="%s">%s</a></p>',
+			esc_html__( 'Distribute shortcodes, images or HTML into articles by tag, category or keyword, placed around your headings and paragraphs. Manage the rules on the dedicated screen:', 'seo-article-booster' ),
+			esc_url( admin_url( 'admin.php?page=' . SAB_Distribution_Admin::PAGE ) ),
+			esc_html__( 'Content Distribution →', 'seo-article-booster' )
+		);
 	}
 	public function section_linking() {
 		echo '<p>' . esc_html__( 'Control how related articles are linked. Matching uses each post’s title and/or Yoast focus keyword as the anchor phrase.', 'seo-article-booster' ) . '</p>';

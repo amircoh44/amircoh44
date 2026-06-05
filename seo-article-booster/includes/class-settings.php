@@ -46,6 +46,9 @@ class SAB_Settings {
 			'enable_schema_check'    => 1,      // Audit articles for JSON-LD/microdata.
 			'schema_required_types'  => '',     // Comma list, e.g. "Article,BlogPosting" (blank = any).
 
+			// --- Content distribution (Sprinkler) ----------------------.
+			'enable_distribution'    => 1,      // Master switch for rule-based content injection.
+
 			// --- Internal linking --------------------------------------.
 			'enable_auto_linking'    => 1,      // Master switch for display-time linking.
 			'link_post_types'        => array( 'post', 'page' ), // Where links may be injected.
@@ -78,6 +81,7 @@ class SAB_Settings {
 	protected static $booleans = array(
 		'count_featured_image',
 		'enable_schema_check',
+		'enable_distribution',
 		'enable_auto_linking',
 		'case_sensitive',
 		'open_new_tab',
