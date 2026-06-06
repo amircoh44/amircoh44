@@ -13,6 +13,7 @@ A WordPress plugin that boosts on-page SEO for your articles in several ways:
 7. **Duplicate‑H1 warning** — flags a content `<h1>` in the editor; dismissible per post.
 8. **Business profile → full schema** — a questionnaire that generates a complete JSON‑LD `@graph` (Organization/LocalBusiness, WebSite, WebPage, Article, **Service**, CollectionPage, BreadcrumbList) in `<head>` for every page, service, post and archive. (Disable Yoast's schema to avoid duplication.)
 9. **Multiple sitemaps + sitemap‑synced audit** — add any number of sitemaps (merged/de‑duplicated) and scan every sitemap URL for structured data.
+10. **SEO Booster meta box** — on every post/page/CPT editor: one‑click "fill with related (randomised) images" (middle/left/right, thumbnail→full, reversible) + a live SEO checklist (images, internal/external links, schema, H1).
 
 > Requires PHP 7.2+ and WordPress 5.6+. Works best alongside [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/).
 
@@ -86,6 +87,7 @@ includes/
   class-heading-checker.php Duplicate-H1 warning (dismissible per post)
   class-business-profile.php Business questionnaire storage + schema helpers
   class-schema-generator.php JSON-LD @graph output (org, website, page, article, service, breadcrumbs)
+  class-image-filler.php    "Fill with images" engine + SEO Booster meta box
   class-ajax.php            Nonce/capability-guarded batched AJAX endpoints
   class-plugin.php          Service container + hook wiring
 admin/                      Menu pages, settings fields, views, CSS/JS
@@ -174,6 +176,7 @@ touches the plugin, across PHP 7.4 / 8.0 / 8.2 / 8.3
 | `test-engines.php` | image/H1 counters, link enumerate/classify/inline-edit, every cleaner cleanup, backup→log→revert, link replacer, settings defaults |
 | `test-frontend.php` | internal-link injection + content distribution on a real singular loop, auto-clean-on-save |
 | `test-schema.php` | schema `@graph` for articles + services, business-profile helpers, multi-sitemap merge |
+| `test-filler.php` | image relevance/randomisation, block markup, distribution, fill + revert |
 | `test-admin.php` | every admin screen renders with no fatals |
 
 ## License

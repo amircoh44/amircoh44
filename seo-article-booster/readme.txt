@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,8 @@ Generate full JSON-LD schema from a business questionnaire, audit every sitemap 
 8. **Business profile → full schema** – A "tell us about your business" questionnaire (name, type/LocalBusiness subtype, logo, address, geo, hours, price range, social profiles, founder, areas served…) that powers a complete JSON-LD `@graph` output in `<head>`: Organization/LocalBusiness, WebSite (with search action), WebPage, Article, **Service** (mapped to your service post type), CollectionPage and BreadcrumbList — so your home page, pages, services, posts and tag/category archives all get accurate structured data. (Disable Yoast's schema to avoid duplication.)
 
 9. **Multiple sitemaps + sitemap-synced audit** – Add as many sitemaps as you like (each an index or a flat urlset); they're merged and de-duplicated. The Schema Audit can then scan **every URL in your sitemaps** for structured data, keeping your schema coverage in sync with what you actually publish.
+
+10. **SEO Booster meta box (fill with images)** – On every post, page and custom-post editor: a one-click button that fills the content with **related, randomised** images from your media library — choose alignment (middle/left/right) and size (thumbnail → full) — distributed through the article so it's full of visuals. The same box shows a live SEO checklist (images vs the minimum, internal/external link counts, schema status, H1). Every fill is backed up and can be undone.
 
 = New post awareness =
 
@@ -66,6 +68,9 @@ Because SEO plugins output JSON-LD in the page head at render time, the plugin r
 No. The linker never links inside existing links, code, scripts or (optionally) headings, matches whole words only, and caps links per phrase and per article. Re-applying links first strips any it previously added, so it is safe to run repeatedly.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: "SEO Booster" meta box on every post/page/custom-post editor — a one-click "fill with images" tool that inserts related, randomised library images (choose middle/left/right alignment and thumbnail→full size) distributed through the content, plus a live SEO checklist (images, internal/external links, schema, H1). Fills are backed up and reversible.
 
 = 1.3.0 =
 * New: Business Profile questionnaire that generates a full JSON-LD schema graph (Organization/LocalBusiness, WebSite, WebPage, Article, Service, CollectionPage, BreadcrumbList) output in <head> for every page, service, post and archive.

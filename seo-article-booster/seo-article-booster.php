@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       SEO Article Booster
  * Plugin URI:        https://github.com/amircoh44/amircoh44
- * Description:        Boost your SEO: a business-profile questionnaire that generates full JSON-LD schema (Organization/LocalBusiness, WebSite, WebPage, Article, Service, breadcrumbs) across all pages; multi-sitemap support with a sitemap-synced schema audit; internal linking from the sitemap; image-minimum and link audits with inline editing; rule-based content distribution; reversible "generative junk" cleanup; and a duplicate-H1 warning.
- * Version:           1.3.0
+ * Description:        Boost your SEO: a business-profile questionnaire that generates full JSON-LD schema (Organization/LocalBusiness, WebSite, WebPage, Article, Service, breadcrumbs) across all pages; multi-sitemap support with a sitemap-synced schema audit; internal linking from the sitemap; image-minimum and link audits with inline editing; an in-editor "fill with related images" booster; rule-based content distribution; reversible "generative junk" cleanup; and a duplicate-H1 warning.
+ * Version:           1.4.0
  * Requires at least: 5.6
  * Requires PHP:      7.2
  * Author:            amircoh44
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * We centralise version, paths and the option/menu identifiers here so they
  * can be reused safely across every class without magic strings.
  */
-define( 'SAB_VERSION', '1.3.0' );
+define( 'SAB_VERSION', '1.4.0' );
 define( 'SAB_PLUGIN_FILE', __FILE__ );
 define( 'SAB_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );   // .../seo-article-booster/
 define( 'SAB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );    // https://.../seo-article-booster/
@@ -69,6 +69,7 @@ require_once SAB_PLUGIN_DIR . 'includes/class-injection-rules.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-content-distributor.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-content-cleaner.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-heading-checker.php';
+require_once SAB_PLUGIN_DIR . 'includes/class-image-filler.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-ajax.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-plugin.php';
 

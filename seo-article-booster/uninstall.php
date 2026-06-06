@@ -39,6 +39,7 @@ $meta_keys = array(
 	'_sab_cleaner_backup',
 	'_sab_cleaner_backup_time',
 	'_sab_ignore_h1',
+	'_sab_imagefill_backup',
 );
 foreach ( $meta_keys as $meta_key ) {
 	delete_post_meta_by_key( $meta_key );

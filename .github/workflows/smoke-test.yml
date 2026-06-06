@@ -53,6 +53,9 @@ jobs:
       - name: Schema generator tests
         run: php seo-article-booster/tests/test-schema.php
 
+      - name: Image filler tests
+        run: php seo-article-booster/tests/test-filler.php
+
       - name: Admin render tests
         run: php seo-article-booster/tests/test-admin.php
 

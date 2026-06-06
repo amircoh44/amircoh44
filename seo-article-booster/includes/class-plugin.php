@@ -73,9 +73,10 @@ final class SAB_Plugin {
 		$link_scan = new SAB_Link_Scanner();
 		$cleaner  = new SAB_Content_Cleaner();
 		$heading  = new SAB_Heading_Checker();
+		$filler   = new SAB_Image_Filler( $scanner, $link_scan, $schema, $heading );
 		$ajax     = new SAB_Ajax( $scanner, $schema, $index, $applier, $sitemap );
 
-		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'ajax' );
+		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'ajax' );
 
 		// --- Register settings + i18n. ------------------------------------.
 		add_action( 'admin_init', array( 'SAB_Settings', 'register' ) );
@@ -99,6 +100,7 @@ final class SAB_Plugin {
 		// --- Admin-only services. -----------------------------------------.
 		if ( is_admin() ) {
 			$ajax->init();
+			$filler->init();
 
 			if ( class_exists( 'SAB_Admin' ) ) {
 				$admin = new SAB_Admin( $scanner, $schema, $index, $applier, $sitemap );
