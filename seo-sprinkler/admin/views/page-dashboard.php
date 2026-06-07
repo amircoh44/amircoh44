@@ -117,8 +117,18 @@ $rule_count  = class_exists( 'SPR_Injection_Rules' ) ? count( ( new SPR_Injectio
 		<div class="spr-card">
 			<span class="spr-chip spr-chip--amber"><span class="dashicons dashicons-images-alt2"></span></span>
 			<div>
-				<div class="spr-card__num"><?php echo esc_html( number_format_i18n( $min_images ) ); ?></div>
-				<div class="spr-card__lbl"><?php esc_html_e( 'Minimum images per article', 'seo-sprinkler' ); ?></div>
+				<div class="spr-card__num">
+					<span id="spr-min-display"><?php echo esc_html( number_format_i18n( $min_images ) ); ?></span>
+					<span id="spr-min-editor" style="display:none">
+						<input type="number" id="spr-min-input" min="0" max="100" value="<?php echo esc_attr( (int) $min_images ); ?>" class="small-text" />
+						<button type="button" class="button button-small button-primary" id="spr-min-save"><?php esc_html_e( 'Save', 'seo-sprinkler' ); ?></button>
+					</span>
+				</div>
+				<div class="spr-card__lbl">
+					<?php esc_html_e( 'Minimum images per article', 'seo-sprinkler' ); ?>
+					<a href="#" id="spr-min-edit" class="spr-mini-edit"><?php esc_html_e( 'edit', 'seo-sprinkler' ); ?></a>
+					<span id="spr-min-status" class="spr-mini-status"></span>
+				</div>
 			</div>
 		</div>
 		<div class="spr-card">
@@ -128,6 +138,27 @@ $rule_count  = class_exists( 'SPR_Injection_Rules' ) ? count( ( new SPR_Injectio
 				<div class="spr-card__lbl"><?php esc_html_e( 'Linkable anchor phrases', 'seo-sprinkler' ); ?></div>
 			</div>
 		</div>
+	</div>
+
+	<div class="spr-panel">
+		<h2 class="spr-panel__h"><span class="dashicons dashicons-search"></span> <?php esc_html_e( 'Site scan', 'seo-sprinkler' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Run every audit in one pass and see what needs attention — then jump straight to the fix.', 'seo-sprinkler' ); ?></p>
+		<p>
+			<button type="button" class="button button-primary" id="spr-scan-all">
+				<span class="dashicons dashicons-update" style="margin-top:4px"></span>
+				<?php esc_html_e( 'Run all scans', 'seo-sprinkler' ); ?>
+			</button>
+			<a class="button" href="<?php echo esc_url( 'https://search.google.com/test/rich-results?url=' . rawurlencode( home_url( '/' ) ) ); ?>" target="_blank" rel="noopener">
+				<span class="dashicons dashicons-media-code" style="margin-top:4px"></span>
+				<?php esc_html_e( 'Test schema on Google', 'seo-sprinkler' ); ?>
+			</a>
+			<label style="margin-left:10px"><input type="checkbox" id="spr-scan-all-schema" /> <?php esc_html_e( 'Also check schema (slower — fetches each page)', 'seo-sprinkler' ); ?></label>
+		</p>
+		<div id="spr-scan-all-progress" class="spr-progress" style="display:none">
+			<div class="spr-progress__bar"><span></span></div>
+			<p class="spr-progress__label"></p>
+		</div>
+		<div id="spr-scan-all-results" class="spr-scan-results" style="display:none"></div>
 	</div>
 
 	<div class="spr-panel">

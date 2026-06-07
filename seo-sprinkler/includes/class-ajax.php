@@ -87,6 +87,28 @@ class SPR_Ajax {
 		add_action( 'wp_ajax_spr_refresh_sitemap', array( $this, 'refresh_sitemap' ) );
 		add_action( 'wp_ajax_spr_apply_links', array( $this, 'apply_links' ) );
 		add_action( 'wp_ajax_spr_revert_links', array( $this, 'revert_links' ) );
+		add_action( 'wp_ajax_spr_set_min_images', array( $this, 'set_min_images' ) );
+	}
+
+	/**
+	 * AJAX: update the "minimum images per article" setting from the dashboard.
+	 */
+	public function set_min_images() {
+		$this->guard();
+		$min      = isset( $_POST['min'] ) ? max( 0, min( 100, absint( wp_unslash( $_POST['min'] ) ) ) ) : 0;
+		$settings = get_option( SPR_OPTION_KEY, array() );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+		$settings['min_images'] = $min;
+		update_option( SPR_OPTION_KEY, $settings );
+		if ( class_exists( 'SPR_Settings' ) ) {
+			SPR_Settings::flush_cache();
+		}
+		if ( class_exists( 'SPR_Activity' ) ) {
+			SPR_Activity::log( 'settings', sprintf( /* translators: %d: minimum images. */ __( 'Minimum images per article set to %d.', 'seo-sprinkler' ), $min ) );
+		}
+		wp_send_json_success( array( 'min' => $min ) );
 	}
 
 	/**

@@ -352,6 +352,50 @@
 	margin-right: 6px;
 }
 
+/* Inline "edit minimum images" affordance on the dashboard card. */
+.spr-mini-edit {
+	font-size: 11px;
+	font-weight: 500;
+	text-decoration: none;
+	margin-left: 4px;
+}
+
+.spr-mini-status {
+	font-size: 11px;
+	margin-left: 6px;
+}
+
+#spr-min-input {
+	width: 64px;
+	font-size: 15px;
+}
+
+/* "Run all scans" results summary. */
+.spr-scan-results {
+	margin-top: 14px;
+}
+
+.spr-scan-result {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--spr-line);
+}
+
+.spr-scan-result:last-child {
+	border-bottom: 0;
+}
+
+.spr-scan-result .dashicons {
+	color: #6d28d9;
+}
+
+.spr-scan-result__t {
+	flex: 1 1 auto;
+	color: var(--spr-ink);
+}
+
 /* Status badges (also used in post list columns) */
 .spr-badge {
 	display: inline-flex;

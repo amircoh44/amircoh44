@@ -409,9 +409,109 @@
 	}
 
 	/* -----------------------------------------------------------------
+	 * Dashboard: run every audit in one pass.
+	 * --------------------------------------------------------------- */
+	function summaryRow( icon, text, href ) {
+		return '<div class="spr-scan-result"><span class="dashicons ' + icon + '"></span> <span class="spr-scan-result__t">' + text + '</span> <a class="button button-small" href="' + href + '">' + ( i18n.view || 'View' ) + '</a></div>';
+	}
+
+	function runScanAll() {
+		var $btn   = $( '#spr-scan-all' ),
+			$prog  = $( '#spr-scan-all-progress' ),
+			$res   = $( '#spr-scan-all-results' ).hide().empty(),
+			withSchema = $( '#spr-scan-all-schema' ).is( ':checked' ),
+			cfg    = window.SPR || {},
+			sum    = { imgBelow: 0, linkNeed: 0, linkTotal: 0, schemaMissing: 0 };
+
+		var phases = [
+			{ key: 'images', label: ( i18n.scanning || 'Scanning images…' ), action: 'spr_scan_images', nonce: cfg.nonce },
+			{ key: 'links', label: ( i18n.scanningLinks || 'Scanning links…' ), action: 'spr_scan_links', nonce: cfg.linkNonce }
+		];
+		if ( withSchema ) {
+			phases.push( { key: 'schema', label: ( i18n.schemaScanning || 'Checking schema…' ), action: 'spr_scan_schema', nonce: cfg.nonce } );
+		}
+
+		$btn.prop( 'disabled', true );
+		setProgress( $prog, 2, phases[ 0 ].label );
+
+		var pi = 0;
+		function runPhase() {
+			if ( pi >= phases.length ) {
+				setProgress( $prog, 100, i18n.done || 'Done.' );
+				var rows = [
+					summaryRow( 'dashicons-format-image', sum.imgBelow + ' ' + ( i18n.belowMin || 'articles below the image minimum' ), 'admin.php?page=spr-image-distribution' ),
+					summaryRow( 'dashicons-admin-links', sum.linkNeed + ' / ' + sum.linkTotal + ' ' + ( i18n.needLinks || 'articles with no internal links' ), 'admin.php?page=spr-link-audit' )
+				];
+				if ( withSchema ) {
+					rows.push( summaryRow( 'dashicons-media-code', sum.schemaMissing + ' ' + ( i18n.schemaFlagged || 'pages missing structured data' ), 'admin.php?page=spr-schema' ) );
+				}
+				$res.html( rows.join( '' ) ).show();
+				$btn.prop( 'disabled', false );
+				return;
+			}
+			var ph = phases[ pi ];
+			function page( p ) {
+				$.post( cfg.ajaxUrl, { action: ph.action, nonce: ph.nonce, paged: p } )
+					.done( function ( r ) {
+						if ( r && r.success ) {
+							var d = r.data || {};
+							if ( 'images' === ph.key ) {
+								sum.imgBelow += ( d.deficient ? d.deficient.length : 0 );
+							} else if ( 'links' === ph.key ) {
+								$.each( d.rows || [], function ( _, row ) {
+									sum.linkTotal++;
+									if ( 0 === ( row.internal | 0 ) ) { sum.linkNeed++; }
+								} );
+							} else if ( 'schema' === ph.key ) {
+								sum.schemaMissing += ( d.missing | 0 );
+							}
+							var frac = d.total ? ( d.scanned / d.total ) : 1;
+							setProgress( $prog, Math.round( ( ( pi + frac ) / phases.length ) * 100 ), ph.label + ' ' + ( d.scanned || 0 ) + ' / ' + ( d.total || 0 ) );
+							if ( d.done ) { pi++; runPhase(); return; }
+							page( d.next_page );
+						} else {
+							pi++; runPhase(); // Skip a phase that errors (e.g. schema disabled).
+						}
+					} )
+					.fail( function () { pi++; runPhase(); } );
+			}
+			page( 1 );
+		}
+		runPhase();
+	}
+
+	/* Dashboard: edit "minimum images per article" inline. */
+	function bindMinEditor() {
+		$( '#spr-min-edit' ).on( 'click', function ( e ) {
+			e.preventDefault();
+			$( '#spr-min-display' ).hide();
+			$( '#spr-min-editor' ).show();
+			$( '#spr-min-input' ).trigger( 'focus' );
+		} );
+		$( '#spr-min-save' ).on( 'click', function () {
+			var $b = $( this ).prop( 'disabled', true );
+			request( 'spr_set_min_images', { min: $( '#spr-min-input' ).val() } )
+				.done( function ( r ) {
+					if ( r && r.success ) {
+						$( '#spr-min-display' ).text( r.data.min ).show();
+						$( '#spr-min-editor' ).hide();
+						$( '#spr-min-status' ).css( 'color', '#0a7c3f' ).text( i18n.minSaved || 'Saved' );
+						setTimeout( function () { $( '#spr-min-status' ).text( '' ); }, 2500 );
+					} else {
+						$( '#spr-min-status' ).css( 'color', '#b3261e' ).text( ( r && r.data && r.data.message ) || i18n.error || 'Error' );
+					}
+				} )
+				.fail( function () { $( '#spr-min-status' ).css( 'color', '#b3261e' ).text( i18n.error || 'Error' ); } )
+				.always( function () { $b.prop( 'disabled', false ); } );
+		} );
+	}
+
+	/* -----------------------------------------------------------------
 	 * Wire up event handlers.
 	 * --------------------------------------------------------------- */
 	$( function () {
+		$( '#spr-scan-all' ).on( 'click', runScanAll );
+		bindMinEditor();
 		$( '#spr-scan-start' ).on( 'click', runScan );
 		$( '#spr-schema-start' ).on( 'click', runSchemaScan );
 		$( '#spr-sitemap-schema-start' ).on( 'click', runSitemapSchemaScan );

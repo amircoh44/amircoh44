@@ -194,6 +194,7 @@ class SPR_Admin {
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( SPR_Ajax::NONCE ),
+				'linkNonce' => wp_create_nonce( 'spr_link_audit' ),
 				'i18n'    => array(
 					'scanning'       => __( 'Scanning…', 'seo-sprinkler' ),
 					'schemaScanning' => __( 'Checking schema…', 'seo-sprinkler' ),
@@ -216,6 +217,11 @@ class SPR_Admin {
 					'noSitemapUrls'  => __( 'No URLs were found in the sitemap(s).', 'seo-sprinkler' ),
 					'edit'           => __( 'Edit', 'seo-sprinkler' ),
 					'view'           => __( 'View', 'seo-sprinkler' ),
+					'scanningLinks'  => __( 'Scanning links…', 'seo-sprinkler' ),
+					'belowMin'       => __( 'articles below the image minimum', 'seo-sprinkler' ),
+					'needLinks'      => __( 'articles with no internal links', 'seo-sprinkler' ),
+					'schemaFlagged'  => __( 'pages missing structured data', 'seo-sprinkler' ),
+					'minSaved'       => __( 'Saved', 'seo-sprinkler' ),
 					'testGoogle'     => __( 'Test on Google', 'seo-sprinkler' ),
 				),
 			)

@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.13.0
+Stable tag: 1.14.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,11 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.14.0 =
+* New: "Run all scans" on the Dashboard — runs the image, internal-link (and optionally schema) audits in one pass and shows a summary with one-click links to fix each issue.
+* New: edit "Minimum images per article" right on the Dashboard.
+* New: "Test schema on Google" button on the Dashboard — opens Google's Rich Results Test for your site.
 
 = 1.13.0 =
 * New: Export / Migrate now produces a complete, portable mirror — it renders the *real* content of every page (including Elementor and other page builders, whose layout lives outside the post content), adds a clean semantic-HTML version (no scripts, styles, classes or builder/WordPress markup), and extracts each page's content images and internal/external link connections. Navigation menus are exported too.
