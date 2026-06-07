@@ -37,6 +37,9 @@ class SAB_Settings {
 	 */
 	public static function defaults() {
 		return array(
+			// --- License -----------------------------------------------.
+			'license_key'            => '',     // Validated on save into the edition.
+
 			// --- Image minimum auditing ---------------------------------.
 			'min_images'             => 3,      // Minimum images required per article.
 			'count_featured_image'   => 1,      // Count the featured image toward the total.
@@ -268,6 +271,11 @@ class SAB_Settings {
 
 			// Fallback: treat as plain text.
 			$clean[ $key ] = isset( $input[ $key ] ) ? sanitize_text_field( $input[ $key ] ) : $default_value;
+		}
+
+		// Resolve any entered license key into an edition.
+		if ( class_exists( 'SAB_Edition' ) ) {
+			SAB_Edition::activate_key( isset( $clean['license_key'] ) ? $clean['license_key'] : '' );
 		}
 
 		// Saving settings can change which posts are linkable; drop the caches.

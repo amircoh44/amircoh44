@@ -37,6 +37,9 @@ class SAB_Schema_Generator {
 		if ( ! SAB_Settings::get( 'enable_schema_output' ) ) {
 			return;
 		}
+		if ( ! SAB_Edition::can( 'schema_output' ) ) {
+			return; // Schema output is a Pro feature.
+		}
 		if ( is_admin() || is_feed() || is_embed() || is_404() ) {
 			return;
 		}

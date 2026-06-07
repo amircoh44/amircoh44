@@ -91,8 +91,8 @@ class SAB_New_Post_Linker {
 		// (1) Make the new URL linkable everywhere via the display filter.
 		$this->index->rebuild();
 
-		// (2) Optionally bake permanent inbound links into older related posts.
-		if ( SAB_Settings::get( 'auto_apply_inbound' ) ) {
+		// (2) Optionally bake permanent inbound links into older related posts (Pro).
+		if ( SAB_Settings::get( 'auto_apply_inbound' ) && SAB_Edition::can( 'auto_inbound' ) ) {
 			$limit = (int) SAB_Settings::get( 'inbound_apply_limit', 5 );
 
 			$this->is_processing = true; // Prevent recursion via wp_update_post.

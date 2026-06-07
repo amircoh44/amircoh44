@@ -3,7 +3,7 @@
  * Plugin Name:       SEO Article Booster
  * Plugin URI:        https://github.com/amircoh44/amircoh44
  * Description:        Boost your SEO: a business-profile questionnaire that generates full JSON-LD schema across all pages; multi-sitemap support with a sitemap-synced schema audit; internal linking from the sitemap; image-minimum and link audits with inline editing; an in-editor "fill with related images" booster; rule-based content distribution; reversible "generative junk" cleanup; a duplicate-H1 warning; and a full site export/migration tool (JSON + media ZIP) with SEO-plugin detection.
- * Version:           1.5.0
+ * Version:           1.6.0
  * Requires at least: 5.6
  * Requires PHP:      7.2
  * Author:            amircoh44
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * We centralise version, paths and the option/menu identifiers here so they
  * can be reused safely across every class without magic strings.
  */
-define( 'SAB_VERSION', '1.5.0' );
+define( 'SAB_VERSION', '1.6.0' );
 define( 'SAB_PLUGIN_FILE', __FILE__ );
 define( 'SAB_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );   // .../seo-article-booster/
 define( 'SAB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );    // https://.../seo-article-booster/
@@ -54,6 +54,7 @@ define( 'SAB_TRANSIENT_SITEMAP', 'sab_sitemap_urls' );
  * lives in its own file named class-{slug}.php. We require them once here.
  */
 require_once SAB_PLUGIN_DIR . 'includes/class-settings.php';
+require_once SAB_PLUGIN_DIR . 'includes/class-edition.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-business-profile.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-image-scanner.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-schema-scanner.php';

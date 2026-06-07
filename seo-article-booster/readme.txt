@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,7 +69,16 @@ Because SEO plugins output JSON-LD in the page head at render time, the plugin r
 
 No. The linker never links inside existing links, code, scripts or (optionally) headings, matches whole words only, and caps links per phrase and per article. Re-applying links first strips any it previously added, so it is safe to run repeatedly.
 
+== Free vs Pro vs Expert ==
+
+* **Free** – every audit and manual tool, with no page limit: image-minimum audit, schema audit (incl. sitemap coverage), link audit + inline link editor, content-cleaner scan + revert, duplicate-H1 warning, business profile, the "fill with images" booster, and all settings.
+* **Pro** – adds automation, bulk tools and schema output: automatic internal linking, permanent bulk apply/revert, content distribution (Sprinkler), bulk + auto content cleaning, new-post auto inbound links, and the JSON-LD schema output in <head>.
+* **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use.
+
 == Changelog ==
+
+= 1.6.0 =
+* New: Free / Pro / Expert editions with a feature-split licensing gate (no page cap). License-key field unlocks premium; integrate any provider (Freemius, Lemon Squeezy, …) via the `sab_validate_license` filter. Dashboard shows the current edition and an upgrade path.
 
 = 1.5.0 =
 * New: Export / Migrate — download the whole site as structured JSON (all post types/CPTs, taxonomies, full media library with alt/caption/description, settings, and SEO metadata from auto-detected SEO plugins) for import into Python or another platform; optional media-files ZIP. Personal data (logins/emails) requires explicit authorisation.

@@ -22,6 +22,7 @@ delete_option( 'sab_settings' );
 delete_option( 'sab_injection_rules' );
 delete_option( 'sab_cleaner_log' );
 delete_option( 'sab_business_profile' );
+delete_option( 'sab_edition' );
 
 // 2. Cached transients.
 delete_transient( 'sab_link_index' );

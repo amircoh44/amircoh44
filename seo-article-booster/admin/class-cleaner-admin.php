@@ -149,6 +149,19 @@ class SAB_Cleaner_Admin {
 	 */
 	public function ajax_clean() {
 		$this->guard();
+		if ( ! SAB_Edition::can( 'bulk_clean' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %s: edition label. */
+						__( 'Bulk cleaning is a %s feature. Scanning and reverting stay free.', 'seo-article-booster' ),
+						SAB_Edition::label( SAB_Edition::required_for( 'bulk_clean' ) )
+					),
+					'upgrade' => SAB_Edition::upgrade_url(),
+				),
+				402
+			);
+		}
 		wp_send_json_success( $this->cleaner->clean_batch( $this->paged(), 20 ) );
 	}
 

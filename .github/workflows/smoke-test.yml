@@ -47,6 +47,9 @@ jobs:
       - name: Engine tests
         run: php seo-article-booster/tests/test-engines.php
 
+      - name: Edition / licensing tests
+        run: php seo-article-booster/tests/test-edition.php
+
       - name: Front-end filter tests
         run: php seo-article-booster/tests/test-frontend.php
 

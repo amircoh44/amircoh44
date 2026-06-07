@@ -187,6 +187,7 @@ class SAB_Ajax {
 	 */
 	public function apply_links() {
 		$this->guard();
+		$this->require_edition( 'bulk_apply' );
 		wp_send_json_success( $this->applier->apply_batch( $this->paged(), 20 ) );
 	}
 
@@ -195,6 +196,28 @@ class SAB_Ajax {
 	 */
 	public function revert_links() {
 		$this->guard();
+		// Reverting is always allowed (safety), even on Free.
 		wp_send_json_success( $this->applier->revert_batch( $this->paged(), 20 ) );
+	}
+
+	/**
+	 * Send an upgrade error and stop if the current edition lacks a feature.
+	 *
+	 * @param string $feature Feature key.
+	 */
+	protected function require_edition( $feature ) {
+		if ( ! SAB_Edition::can( $feature ) ) {
+			wp_send_json_error(
+				array(
+					'message'  => sprintf(
+						/* translators: %s: required edition label. */
+						__( 'This is a %s feature. Please upgrade to use it.', 'seo-article-booster' ),
+						SAB_Edition::label( SAB_Edition::required_for( $feature ) )
+					),
+					'upgrade'  => SAB_Edition::upgrade_url(),
+				),
+				402
+			);
+		}
 	}
 }

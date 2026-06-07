@@ -13,6 +13,10 @@ $_SERVER['HTTP_HOST'] = 'localhost:8088';
 $_SERVER['REQUEST_URI'] = '/';
 require $core . '/wp-load.php';
 
+// Automatic linking, distribution and auto-clean are Pro/Expert features; run
+// these front-end checks as Expert so the gated behaviour is exercised.
+update_option( 'sab_edition', 'expert' );
+
 $pass = 0; $fail = 0;
 function check( $name, $cond ) {
 	global $pass, $fail;

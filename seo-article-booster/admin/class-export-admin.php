@@ -113,6 +113,7 @@ class SAB_Export_Admin {
 		}
 		$exporter  = $this->exporter;
 		$zip_ready = class_exists( 'ZipArchive' );
+		$locked    = ! SAB_Edition::can( 'export' ); // Export is an Expert feature.
 		require SAB_PLUGIN_DIR . 'admin/views/page-export.php';
 	}
 
@@ -178,6 +179,9 @@ class SAB_Export_Admin {
 		if ( ! current_user_can( self::CAP ) ) {
 			wp_die( esc_html__( 'You are not allowed to export this site.', 'seo-article-booster' ), 403 );
 		}
+		if ( ! SAB_Edition::can( 'export' ) ) {
+			wp_die( esc_html__( 'The Export / Migrate tool is an Expert feature. Please upgrade to use it.', 'seo-article-booster' ), 402 );
+		}
 		if ( empty( $src[ $nonce_field ] ) || ! wp_verify_nonce( $src[ $nonce_field ], $nonce_value ) ) {
 			wp_die( esc_html__( 'Security check failed. Please reload and try again.', 'seo-article-booster' ), 403 );
 		}
@@ -224,6 +228,9 @@ class SAB_Export_Admin {
 		}
 		if ( ! current_user_can( self::CAP ) ) {
 			wp_send_json_error( array( 'message' => __( 'Not allowed.', 'seo-article-booster' ) ), 403 );
+		}
+		if ( ! SAB_Edition::can( 'export' ) ) {
+			wp_send_json_error( array( 'message' => __( 'The Export / Migrate tool is an Expert feature.', 'seo-article-booster' ), 'upgrade' => SAB_Edition::upgrade_url() ), 402 );
 		}
 		if ( ! class_exists( 'ZipArchive' ) ) {
 			wp_send_json_error( array( 'message' => __( 'ZipArchive (PHP zip extension) is not available on this server.', 'seo-article-booster' ) ) );
@@ -320,7 +327,7 @@ class SAB_Export_Admin {
 	 * Stream the finished ZIP, then delete it.
 	 */
 	public function download_zip() {
-		if ( ! current_user_can( self::CAP ) ) {
+		if ( ! current_user_can( self::CAP ) || ! SAB_Edition::can( 'export' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'seo-article-booster' ), 403 );
 		}
 		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';

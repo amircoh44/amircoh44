@@ -29,6 +29,23 @@ $check = function ( $name, $label, $checked = true, $class = '' ) {
 ?>
 <div class="wrap sab-wrap">
 	<h1><?php esc_html_e( 'Export / Migrate', 'seo-article-booster' ); ?></h1>
+
+	<?php if ( ! empty( $locked ) ) : ?>
+		<div class="notice notice-info inline">
+			<p>
+				<span class="dashicons dashicons-star-filled"></span>
+				<?php
+				printf(
+					/* translators: %s: edition label. */
+					esc_html__( 'Export / Migrate is an %s feature. Below is a preview of what it does — upgrade to download.', 'seo-article-booster' ),
+					esc_html( SAB_Edition::label( SAB_Edition::required_for( 'export' ) ) )
+				);
+				?>
+				<a class="button button-primary" style="margin-left:8px" href="<?php echo esc_url( SAB_Edition::upgrade_url() ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade', 'seo-article-booster' ); ?></a>
+			</p>
+		</div>
+	<?php endif; ?>
+
 	<p class="sab-intro"><?php esc_html_e( 'Download your whole site as structured JSON — all post types and custom post types, taxonomies, the full media library with alt/caption/description, settings and SEO metadata — ready to import into Python or another platform. Optionally bundle the actual media files as a ZIP.', 'seo-article-booster' ); ?></p>
 
 	<?php if ( ! empty( $seo_plugins ) ) : ?>
@@ -92,9 +109,9 @@ $check = function ( $name, $label, $checked = true, $class = '' ) {
 			</div>
 
 			<p>
-				<button type="submit" class="button button-primary"><?php esc_html_e( 'Download JSON', 'seo-article-booster' ); ?></button>
+				<button type="submit" class="button button-primary" <?php disabled( ! empty( $locked ) ); ?>><?php esc_html_e( 'Download JSON', 'seo-article-booster' ); ?></button>
 				<?php if ( $zip_ready ) : ?>
-					<button type="button" class="button" id="sab-export-zip"><?php esc_html_e( 'Build &amp; download media ZIP', 'seo-article-booster' ); ?></button>
+					<button type="button" class="button" id="sab-export-zip" <?php disabled( ! empty( $locked ) ); ?>><?php esc_html_e( 'Build &amp; download media ZIP', 'seo-article-booster' ); ?></button>
 				<?php else : ?>
 					<span class="description"><?php esc_html_e( 'Media ZIP unavailable — the server is missing the PHP zip extension. Use JSON; media URLs are included so a script can fetch the files.', 'seo-article-booster' ); ?></span>
 				<?php endif; ?>

@@ -87,6 +87,9 @@ class SAB_Link_Injector {
 		if ( ! SAB_Settings::get( 'enable_auto_linking' ) ) {
 			return false;
 		}
+		if ( ! SAB_Edition::can( 'auto_linking' ) ) {
+			return false; // Automatic internal linking is a Pro feature.
+		}
 		// Never touch admin screens, feeds or REST output.
 		if ( is_admin() || is_feed() ) {
 			return false;

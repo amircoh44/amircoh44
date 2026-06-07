@@ -220,6 +220,9 @@ class SAB_Admin {
 	 */
 	public function register_settings_fields() {
 		// Sections.
+		add_settings_section( 'sab_license', __( 'License &amp; edition', 'seo-article-booster' ), array( $this, 'section_license' ), 'sab-settings' );
+		$this->add_text_field( 'license_key', __( 'License key', 'seo-article-booster' ), 'sab_license', __( 'Paste your Pro/Expert license key to unlock premium features.', 'seo-article-booster' ) );
+
 		add_settings_section( 'sab_images', __( 'Image minimum', 'seo-article-booster' ), array( $this, 'section_images' ), 'sab-settings' );
 		add_settings_section( 'sab_schema', __( 'Schema (structured data)', 'seo-article-booster' ), array( $this, 'section_schema' ), 'sab-settings' );
 		add_settings_section( 'sab_distribution', __( 'Content distribution (Sprinkler)', 'seo-article-booster' ), array( $this, 'section_distribution' ), 'sab-settings' );
@@ -275,6 +278,15 @@ class SAB_Admin {
 	}
 
 	/** Section intros. */
+	public function section_license() {
+		printf(
+			'<p>%s <strong>%s</strong>. <a href="%s" target="_blank" rel="noopener">%s</a></p>',
+			esc_html__( 'Current edition:', 'seo-article-booster' ),
+			esc_html( SAB_Edition::label() ),
+			esc_url( SAB_Edition::upgrade_url() ),
+			esc_html__( 'Compare Free / Pro / Expert →', 'seo-article-booster' )
+		);
+	}
 	public function section_images() {
 		echo '<p>' . esc_html__( 'Define how many images an article should contain. The plugin counts inline images, gallery blocks/shortcodes and (optionally) the featured image.', 'seo-article-booster' ) . '</p>';
 	}

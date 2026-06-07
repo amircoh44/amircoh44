@@ -600,6 +600,9 @@ class SAB_Content_Cleaner {
 		if ( ! SAB_Settings::get( 'cleaner_autosave' ) ) {
 			return $data;
 		}
+		if ( ! SAB_Edition::can( 'autosave_clean' ) ) {
+			return $data; // Auto-clean-on-save is a Pro feature.
+		}
 		if ( in_array( $data['post_status'], array( 'inherit', 'auto-draft', 'trash' ), true ) ) {
 			return $data;
 		}

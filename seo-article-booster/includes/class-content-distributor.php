@@ -128,6 +128,9 @@ class SAB_Content_Distributor {
 		if ( ! SAB_Settings::get( 'enable_distribution', 1 ) ) {
 			return false;
 		}
+		if ( ! SAB_Edition::can( 'distribution' ) ) {
+			return false; // Content distribution is a Pro feature.
+		}
 		if ( is_admin() || is_feed() ) {
 			return false;
 		}
