@@ -72,8 +72,29 @@
 		} );
 	}
 
+	function aiGenerate() {
+		var $btn = $( this ),
+			$res = $( '#sab-ai-result' );
+		$( '.sab-ai-go' ).prop( 'disabled', true );
+		$res.val( i18n.working || 'Working…' );
+
+		$.post( cfg.ajaxUrl, {
+			action: 'sab_ai_generate',
+			nonce: cfg.nonce,
+			post_id: $btn.data( 'post' ),
+			kind: $btn.data( 'kind' )
+		} ).done( function ( res ) {
+			$res.val( ( res && res.success ) ? res.data.text : ( ( res && res.data && res.data.message ) || i18n.error || 'Error' ) );
+		} ).fail( function () {
+			$res.val( i18n.error || 'Error' );
+		} ).always( function () {
+			$( '.sab-ai-go' ).prop( 'disabled', false );
+		} );
+	}
+
 	$( function () {
 		$( document ).on( 'click', '#sab-fill-go', fill );
 		$( document ).on( 'click', '#sab-fill-remove', undo );
+		$( document ).on( 'click', '.sab-ai-go', aiGenerate );
 	} );
 } )( jQuery );

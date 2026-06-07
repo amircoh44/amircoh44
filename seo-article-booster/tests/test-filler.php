@@ -79,5 +79,20 @@ $filler->revert_post( $post );
 check( 'revert restores original content', get_post( $post )->post_content === $before );
 check( 'backup removed after revert', ! metadata_exists( 'post', $post, '_sab_imagefill_backup' ) );
 
+// SEO score + AI configuration.
+$score = $filler->seo_score( $post );
+check( 'seo_score in 0-100', is_array( $score ) && $score['score'] >= 0 && $score['score'] <= 100 );
+check( 'seo_score has breakdown', isset( $score['parts']['images'], $score['parts']['schema'] ) );
+$s = (array) get_option( 'sab_settings' );
+$s['ai_key'] = '';
+update_option( 'sab_settings', $s );
+SAB_Settings::flush_cache();
+check( 'AI not configured without a key', ! SAB_AI::is_configured() );
+$s['ai_endpoint'] = 'https://example.test/v1/chat/completions';
+$s['ai_key']      = 'sk-test';
+update_option( 'sab_settings', $s );
+SAB_Settings::flush_cache();
+check( 'AI configured after endpoint+key set', SAB_AI::is_configured() );
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

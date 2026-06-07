@@ -165,6 +165,46 @@
 	vertical-align: text-bottom;
 }
 
+/* Per-post SEO score header */
+.sab-score {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	margin: 0 0 10px;
+	font-weight: 600;
+}
+
+.sab-score__num {
+	font-size: 28px;
+	line-height: 1;
+}
+
+.sab-score__max {
+	color: #646970;
+}
+
+.sab-score__label {
+	margin-left: auto;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #50575e;
+}
+
+.sab-score--ok {
+	background: #edfaef;
+}
+
+.sab-score--neutral {
+	background: #fcf9e8;
+}
+
+.sab-score--warn {
+	background: #fcf0f1;
+}
+
 /* ---------------------------------------------------------------------------
  * Link Audit: edit modal + mini WYSIWYG
  * ------------------------------------------------------------------------- */

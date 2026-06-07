@@ -61,6 +61,46 @@ class SAB_Image_Filler {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'wp_ajax_sab_fill_images', array( $this, 'ajax_fill' ) );
 		add_action( 'wp_ajax_sab_remove_images', array( $this, 'ajax_remove' ) );
+		add_action( 'wp_ajax_sab_ai_generate', array( $this, 'ajax_ai' ) );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Per-post SEO score (free)
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Compute a 0-100 on-page SEO score from the plugin's own signals.
+	 *
+	 * @param int|WP_Post $post Post.
+	 * @return array{score:int,parts:array,words:int}
+	 */
+	public function seo_score( $post ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return array( 'score' => 0, 'parts' => array(), 'words' => 0 );
+		}
+
+		$min    = max( 1, $this->images->get_minimum() );
+		$imgs   = $this->images->count_for_post( $post );
+		$links  = $this->links->count_for_post( $post );
+		$schema = $this->schema->get_cached_types( $post->ID );
+		$h1     = $this->headings->count_h1( $post->post_content );
+		$words  = str_word_count( wp_strip_all_tags( $post->post_content ) );
+
+		$parts = array(
+			'images'   => (int) round( 25 * min( 1, $imgs / $min ) ),
+			'internal' => $links['internal'] > 0 ? 20 : 0,
+			'external' => $links['external'] > 0 ? 10 : 0,
+			'schema'   => ( null !== $schema && $this->schema->passes( (array) $schema ) ) ? 20 : 0,
+			'h1'       => $h1 < 1 ? 10 : 0,
+			'length'   => (int) round( 15 * min( 1, $words / 300 ) ),
+		);
+
+		return array(
+			'score' => min( 100, array_sum( $parts ) ),
+			'parts' => $parts,
+			'words' => $words,
+		);
 	}
 
 	/**
@@ -118,7 +158,15 @@ class SAB_Image_Filler {
 				wp_kses_post( $label )
 			);
 		};
+
+		$score    = $this->seo_score( $post );
+		$score_cls = $score['score'] >= 80 ? 'ok' : ( $score['score'] >= 50 ? 'neutral' : 'warn' );
 		?>
+		<div class="sab-score sab-score--<?php echo esc_attr( $score_cls ); ?>">
+			<span class="sab-score__num"><?php echo (int) $score['score']; ?></span><span class="sab-score__max">/100</span>
+			<span class="sab-score__label"><?php esc_html_e( 'SEO score', 'seo-article-booster' ); ?></span>
+		</div>
+
 		<ul class="sab-checklist sab-booster-list">
 			<?php
 			$row( $imgs >= $min, sprintf( /* translators: 1: count, 2: min */ esc_html__( 'Images: %1$d / %2$d', 'seo-article-booster' ), $imgs, $min ) );
@@ -166,8 +214,56 @@ class SAB_Image_Filler {
 			<button type="button" class="button" id="sab-fill-remove" data-post="<?php echo esc_attr( $post->ID ); ?>" <?php echo metadata_exists( 'post', $post->ID, self::META_BACKUP ) ? '' : 'style="display:none"'; ?>><?php esc_html_e( 'Undo last fill', 'seo-article-booster' ); ?></button>
 		</p>
 		<p id="sab-fill-status" class="description"></p>
+
+		<hr />
+		<p><strong><?php esc_html_e( 'AI assist', 'seo-article-booster' ); ?></strong></p>
+		<?php if ( ! SAB_Edition::can( 'ai' ) ) : ?>
+			<p class="description">
+				<?php esc_html_e( 'AI actions are a Pro feature.', 'seo-article-booster' ); ?>
+				<a href="<?php echo esc_url( SAB_Edition::upgrade_url() ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade', 'seo-article-booster' ); ?></a>
+			</p>
+		<?php elseif ( ! SAB_AI::is_configured() ) : ?>
+			<p class="description">
+				<?php
+				printf(
+					/* translators: %s: settings link. */
+					esc_html__( 'Add your AI endpoint and key in %s.', 'seo-article-booster' ),
+					'<a href="' . esc_url( admin_url( 'admin.php?page=sab-settings#sab_ai' ) ) . '">' . esc_html__( 'Settings → AI', 'seo-article-booster' ) . '</a>'
+				);
+				?>
+			</p>
+		<?php else : ?>
+			<p>
+				<button type="button" class="button sab-ai-go" data-post="<?php echo esc_attr( $post->ID ); ?>" data-kind="meta_description"><?php esc_html_e( 'Meta description', 'seo-article-booster' ); ?></button>
+				<button type="button" class="button sab-ai-go" data-post="<?php echo esc_attr( $post->ID ); ?>" data-kind="title"><?php esc_html_e( 'SEO title', 'seo-article-booster' ); ?></button>
+			</p>
+			<textarea id="sab-ai-result" rows="3" class="widefat" readonly placeholder="<?php esc_attr_e( 'AI output appears here — copy it into your SEO plugin.', 'seo-article-booster' ); ?>"></textarea>
+		<?php endif; ?>
 		<?php
 		wp_nonce_field( self::NONCE, 'sab_booster_nonce' );
+	}
+
+	/**
+	 * AJAX: generate text with the configured AI provider (Pro).
+	 */
+	public function ajax_ai() {
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
+		$this->guard( $post_id );
+
+		if ( ! SAB_Edition::can( 'ai' ) ) {
+			wp_send_json_error( array( 'message' => __( 'AI actions are a Pro feature.', 'seo-article-booster' ) ), 402 );
+		}
+		if ( ! SAB_AI::is_configured() ) {
+			wp_send_json_error( array( 'message' => __( 'Configure your AI endpoint and key in Settings → AI.', 'seo-article-booster' ) ) );
+		}
+
+		$kind   = isset( $_POST['kind'] ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : 'meta_description';
+		$result = ( 'title' === $kind ) ? SAB_AI::generate_title( $post_id ) : SAB_AI::generate_meta_description( $post_id );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+		wp_send_json_success( array( 'text' => $result ) );
 	}
 
 	/**
