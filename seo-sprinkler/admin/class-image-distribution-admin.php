@@ -119,6 +119,8 @@ class SPR_Image_Distribution_Admin {
 					'removed'   => __( 'removed', 'seo-sprinkler' ),
 					'removeNone' => __( 'no inserted images', 'seo-sprinkler' ),
 					'removeConfirm' => __( 'Remove the images SEO Sprinkler inserted from the selected articles? This rewrites the saved content (your other content is untouched).', 'seo-sprinkler' ),
+					'iconsConfirm' => __( 'Sprinkle small icon images (≤150px) into the selected articles? Icons are placed left-aligned at the start of a paragraph, with no caption.', 'seo-sprinkler' ),
+					'noIcons'   => __( 'no icon-sized images in the library', 'seo-sprinkler' ),
 					'reviewAllConfirm' => __( 'Build an editable preview of every proposed image for the selected articles?', 'seo-sprinkler' ),
 					'gathering' => __( 'Preparing images…', 'seo-sprinkler' ),
 					'insertingAll' => __( 'Inserting', 'seo-sprinkler' ),
@@ -220,6 +222,7 @@ class SPR_Image_Distribution_Admin {
 				'per_words' => isset( $_POST['per_words'] ) ? absint( wp_unslash( $_POST['per_words'] ) ) : 200,
 				'alt_mode'  => ( isset( $_POST['alt_mode'] ) && 'ai' === $_POST['alt_mode'] ) ? 'ai' : 'auto',
 				'exclude'   => $exclude,
+				'icons_only' => ! empty( $_POST['icons'] ),
 			)
 		);
 

@@ -491,6 +491,7 @@ class SPR_Image_Filler {
 				'every'     => 2,
 				'alt_mode'  => 'auto',
 				'exclude'   => array(),
+				'icons_only' => false,
 			)
 		);
 		$align = in_array( $args['align'], array( 'left', 'center', 'right' ), true ) ? $args['align'] : 'center';
@@ -514,7 +515,7 @@ class SPR_Image_Filler {
 			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'enough' );
 		}
 
-		$ids = $this->related_image_ids( $post_id, $need, (array) $args['exclude'] );
+		$ids = $this->related_image_ids( $post_id, $need, (array) $args['exclude'], ! empty( $args['icons_only'] ) );
 		if ( empty( $ids ) ) {
 			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'no_images' );
 		}
@@ -536,7 +537,8 @@ class SPR_Image_Filler {
 		}
 
 		update_post_meta( $post_id, self::META_BACKUP, $post->post_content );
-		$new = $this->insert_blocks( $post->post_content, $blocks, (int) $args['every'] );
+		// Scatter the images evenly across the article rather than clumping them.
+		$new = $this->distribute_evenly( $post->post_content, $blocks );
 		wp_update_post( array( 'ID' => $post_id, 'post_content' => $new ) );
 		update_post_meta( $post_id, SPR_META_IMAGE_COUNT, $this->images->count_for_post( get_post( $post_id ) ) );
 
@@ -796,12 +798,13 @@ class SPR_Image_Filler {
 	 * Passing $exclude (IDs used earlier in a bulk run) pushes those images to the
 	 * back, so a run spreads across the whole library before any image repeats.
 	 *
-	 * @param int   $post_id Post ID.
-	 * @param int   $count   How many IDs to return.
-	 * @param int[] $exclude Attachment IDs to de-prioritise (used earlier this run).
+	 * @param int   $post_id    Post ID.
+	 * @param int   $count      How many IDs to return.
+	 * @param int[] $exclude    Attachment IDs to de-prioritise (used earlier this run).
+	 * @param bool  $icons_only Restrict to icon-sized images (<= 150x150).
 	 * @return int[]
 	 */
-	public function related_image_ids( $post_id, $count, $exclude = array() ) {
+	public function related_image_ids( $post_id, $count, $exclude = array(), $icons_only = false ) {
 		$count = max( 0, (int) $count );
 		if ( 0 === $count ) {
 			return array();
@@ -822,6 +825,13 @@ class SPR_Image_Filler {
 		);
 		if ( empty( $pool ) ) {
 			return array();
+		}
+
+		if ( $icons_only ) {
+			$pool = array_values( array_filter( $pool, array( $this, 'is_icon' ) ) );
+			if ( empty( $pool ) ) {
+				return array();
+			}
 		}
 
 		$exclude = array_flip( array_map( 'intval', (array) $exclude ) );
@@ -897,6 +907,15 @@ class SPR_Image_Filler {
 	 * @return string
 	 */
 	public function build_image_block( $id, $align, $size, $alt = '', $caption = '' ) {
+		$icon = $this->is_icon( $id );
+		if ( $icon ) {
+			// Small images behave like icons: lead a paragraph, float left, no caption,
+			// shown at their natural size.
+			$align   = 'left';
+			$caption = '';
+			$size    = 'full';
+		}
+
 		$attr = array( 'class' => 'wp-image-' . (int) $id );
 		if ( '' !== $alt ) {
 			$attr['alt'] = $alt;
@@ -910,7 +929,7 @@ class SPR_Image_Filler {
 		if ( '' !== trim( (string) $caption ) ) {
 			$inner .= '<figcaption class="wp-element-caption">' . esc_html( $caption ) . '</figcaption>';
 		}
-		$figure_class = 'wp-block-image align' . $align . ' size-' . $size . ' ' . self::CSS_CLASS;
+		$figure_class = 'wp-block-image align' . $align . ' size-' . $size . ' ' . self::CSS_CLASS . ( $icon ? ' spr-auto-icon' : '' );
 		$figure       = '<figure class="' . esc_attr( $figure_class ) . '">' . $inner . '</figure>';
 
 		$attrs = wp_json_encode(
@@ -923,6 +942,74 @@ class SPR_Image_Filler {
 		);
 
 		return '<!-- wp:image ' . $attrs . " -->\n" . $figure . "\n<!-- /wp:image -->";
+	}
+
+	/**
+	 * Is an attachment icon-sized (<= 150x150)? Such images are placed inline at
+	 * the start of a paragraph, left-aligned, with no caption.
+	 *
+	 * @param int $id Attachment ID.
+	 * @return bool
+	 */
+	public function is_icon( $id ) {
+		$meta = wp_get_attachment_metadata( (int) $id );
+		$w    = isset( $meta['width'] ) ? (int) $meta['width'] : 0;
+		$h    = isset( $meta['height'] ) ? (int) $meta['height'] : 0;
+		if ( $w < 1 || $h < 1 ) {
+			return false;
+		}
+		return $w <= 150 && $h <= 150;
+	}
+
+	/**
+	 * Insert blocks spread *evenly* across the content's paragraph/heading
+	 * boundaries, so images are scattered rather than clumped.
+	 *
+	 * @param string   $content Content.
+	 * @param string[] $blocks  Block markup strings.
+	 * @return string
+	 */
+	public function distribute_evenly( $content, $blocks ) {
+		$blocks = array_values( array_filter( (array) $blocks ) );
+		$n      = count( $blocks );
+		if ( 0 === $n ) {
+			return $content;
+		}
+
+		if ( false !== strpos( $content, '<!-- wp:' ) ) {
+			$boundary = '/<!-- \/wp:(?:paragraph|heading|list|quote) -->/';
+		} elseif ( false !== stripos( $content, '</p>' ) ) {
+			$boundary = '#</p>#i';
+		} else {
+			$boundary = '/\n\s*\n/';
+		}
+
+		if ( ! preg_match_all( $boundary, $content, $m, PREG_OFFSET_CAPTURE ) ) {
+			return rtrim( $content ) . "\n\n" . implode( "\n\n", $blocks );
+		}
+
+		// End offset of each boundary (where a block may be inserted after it).
+		$positions = array();
+		foreach ( $m[0] as $match ) {
+			$positions[] = $match[1] + strlen( $match[0] );
+		}
+		$bn = count( $positions );
+
+		// Map each block to an evenly spaced boundary, then insert back-to-front so
+		// earlier offsets stay valid.
+		$inserts = array();
+		for ( $i = 0; $i < $n; $i++ ) {
+			$bi              = (int) round( $bn * ( $i + 1 ) / ( $n + 1 ) );
+			$bi              = min( $bn, max( 1, $bi ) ) - 1;
+			$pos             = $positions[ $bi ];
+			$inserts[ $pos ] = isset( $inserts[ $pos ] ) ? $inserts[ $pos ] : array();
+			$inserts[ $pos ][] = $blocks[ $i ];
+		}
+		krsort( $inserts );
+		foreach ( $inserts as $pos => $blks ) {
+			$content = substr( $content, 0, $pos ) . "\n\n" . implode( "\n\n", $blks ) . "\n\n" . substr( $content, $pos );
+		}
+		return $content;
 	}
 
 	/**

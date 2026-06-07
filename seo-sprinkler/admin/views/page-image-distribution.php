@@ -122,6 +122,10 @@ $has_saved  = ! empty( $saved_rows );
 				<span class="dashicons dashicons-list-view"></span>
 				<?php esc_html_e( 'Preview & edit all', 'seo-sprinkler' ); ?>
 			</button>
+			<button type="button" class="button" id="spr-imgdist-icons" title="<?php esc_attr_e( 'Place small icon images (≤150px) inline, left-aligned, at the start of a paragraph', 'seo-sprinkler' ); ?>">
+				<span class="dashicons dashicons-art"></span>
+				<?php esc_html_e( 'Sprinkle icons', 'seo-sprinkler' ); ?>
+			</button>
 			<button type="button" class="button button-link-delete" id="spr-imgdist-remove">
 				<span class="dashicons dashicons-trash"></span>
 				<?php esc_html_e( 'Remove inserted images', 'seo-sprinkler' ); ?>

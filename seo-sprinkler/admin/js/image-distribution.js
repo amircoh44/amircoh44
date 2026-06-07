@@ -121,38 +121,36 @@
 	}
 
 	/* ---- Fill the selected articles automatically (sequential; spreads images) ---- */
-	function runFill() {
+	function runFill( iconsMode ) {
 		var $rows = selectedRows();
 		if ( ! $rows.length ) {
 			window.alert( i18n.pickSome || 'Select at least one article.' );
 			return;
 		}
-		if ( ! window.confirm( i18n.confirm || 'Insert images into the selected articles?' ) ) {
+		var confirmMsg = iconsMode ? ( i18n.iconsConfirm || 'Sprinkle icons into the selected articles?' ) : ( i18n.confirm || 'Insert images into the selected articles?' );
+		if ( ! window.confirm( confirmMsg ) ) {
 			return;
 		}
 
-		var $btn    = $( '#spr-imgdist-fill' ),
-			$review = $( '#spr-imgdist-review' ),
-			$scan   = $( '#spr-imgdist-scan' ),
+		var $all    = $( '#spr-imgdist-fill, #spr-imgdist-review, #spr-imgdist-review-all, #spr-imgdist-icons, #spr-imgdist-remove, #spr-imgdist-scan' ),
 			$prog   = $( '#spr-imgdist-progress' ),
 			opts    = options(),
 			used    = [],
 			list    = $rows.toArray(),
 			total   = list.length,
 			i       = 0;
+		if ( iconsMode ) {
+			opts.icons = 1;
+		}
 
-		$btn.prop( 'disabled', true );
-		$review.prop( 'disabled', true );
-		$scan.prop( 'disabled', true );
+		$all.prop( 'disabled', true );
 		$prog.show();
 		$prog.find( '.spr-progress__bar > span' ).css( 'width', '0%' );
 
 		function step() {
 			if ( i >= total ) {
 				$prog.find( '.spr-progress__label' ).text( i18n.done || 'Done.' );
-				$btn.prop( 'disabled', false );
-				$review.prop( 'disabled', false );
-				$scan.prop( 'disabled', false );
+				$all.prop( 'disabled', false );
 				return;
 			}
 			var $tr  = $( list[ i ] ),
@@ -172,7 +170,7 @@
 							$res.html( '<span class="spr-badge spr-badge--ok">+' + d.inserted + '</span>' );
 							$tr.find( '.spr-badge--warn' ).removeClass( 'spr-badge--warn' ).addClass( 'spr-badge--ok' );
 						} else if ( 'no_images' === d.skipped ) {
-							$res.text( i18n.skipNone || 'no images' );
+							$res.text( iconsMode ? ( i18n.noIcons || 'no icons' ) : ( i18n.skipNone || 'no images' ) );
 						} else if ( 'enough' === d.skipped ) {
 							$res.text( i18n.skipEnough || 'enough' );
 						} else {
@@ -640,7 +638,8 @@
 
 	$( function () {
 		$( '#spr-imgdist-scan' ).on( 'click', runScan );
-		$( '#spr-imgdist-fill' ).on( 'click', runFill );
+		$( '#spr-imgdist-fill' ).on( 'click', function () { runFill( false ); } );
+		$( '#spr-imgdist-icons' ).on( 'click', function () { runFill( true ); } );
 		$( '#spr-imgdist-review' ).on( 'click', startReview );
 		$( '#spr-imgdist-review-all' ).on( 'click', startReviewAll );
 		$( '#spr-imgdist-remove' ).on( 'click', runRemove );

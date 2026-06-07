@@ -163,5 +163,27 @@ $rm = $filler->remove_inserted( $rp );
 check( 'remove_inserted reports removed >= 1', isset( $rm['removed'] ) && $rm['removed'] >= 1 );
 check( 'remove_inserted stripped our blocks', false === strpos( get_post( $rp )->post_content, 'spr-auto-image' ) );
 
+/* --- Icon images (<=150px) + even scatter ------------------------------- */
+
+$icon = wp_insert_attachment( array( 'post_mime_type' => 'image/png', 'post_title' => 'service-icon', 'post_status' => 'inherit', 'post_type' => 'attachment' ), false, 0 );
+update_post_meta( $icon, '_wp_attached_file', 'service-icon.png' );
+wp_update_attachment_metadata( $icon, array( 'width' => 50, 'height' => 50, 'file' => 'service-icon.png', 'sizes' => array() ) );
+
+check( 'is_icon true for 50x50', true === $filler->is_icon( $icon ) );
+check( 'is_icon false for 600x400', false === $filler->is_icon( $plumb ) );
+
+// An icon is forced left, no caption, with the icon class — even if asked otherwise.
+$iblock = $filler->build_image_block( $icon, 'center', 'large', 'Icon alt', 'Ignored caption' );
+check( 'icon block is left-aligned', false !== strpos( $iblock, 'alignleft' ) );
+check( 'icon block carries the icon class', false !== strpos( $iblock, 'spr-auto-icon' ) );
+check( 'icon block drops the caption', false === strpos( $iblock, 'figcaption' ) );
+
+// distribute_evenly spreads blocks across the content (no clumping).
+$content = '<p>a</p><p>b</p><p>c</p><p>d</p><p>e</p><p>f</p>';
+$spread  = $filler->distribute_evenly( $content, array( '[I1]', '[I2]', '[I3]' ) );
+check( 'distribute inserts every block once', 1 === substr_count( $spread, '[I1]' ) && 1 === substr_count( $spread, '[I2]' ) && 1 === substr_count( $spread, '[I3]' ) );
+check( 'distribute keeps document order', strpos( $spread, '[I1]' ) < strpos( $spread, '[I2]' ) && strpos( $spread, '[I2]' ) < strpos( $spread, '[I3]' ) );
+check( 'distribute does not clump at the end', strpos( $spread, '[I1]' ) < strpos( $spread, '<p>f</p>' ) );
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

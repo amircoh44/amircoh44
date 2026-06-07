@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.16.0
+Stable tag: 1.17.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,11 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.17.0 =
+* New: Image Distribution scatters images evenly across each article (no more clumping).
+* New: small images (≤150px) are treated as icons — placed left-aligned at the start of a paragraph, never with a caption — so your service icons sit inline with the text.
+* New: "Sprinkle icons" button on Image Distribution fills the selected articles with your icon-sized images only.
 
 = 1.16.0 =
 * New: "Fill from Google" now also imports your opening hours (when a Google Places API key is set) — Google's structured hours are converted straight into the plugin's schema hours format (e.g. "Mo 08:00-20:00"), including 24/7 and split shifts; closed days are simply left out.

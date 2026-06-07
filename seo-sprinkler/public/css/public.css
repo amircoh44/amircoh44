@@ -99,6 +99,18 @@ figure.spr-auto-image figcaption {
 	opacity: 0.85;
 }
 
+/* Icon-sized images (<=150px): a tight, left-floated icon that leads the text. */
+figure.spr-auto-icon {
+	max-width: 150px;
+	margin: 0.2em 1em 0.4em 0 !important;
+}
+
+figure.spr-auto-icon img {
+	width: auto;
+	max-width: 150px;
+	height: auto;
+}
+
 /* Device visibility. The wrapper carries one of these classes when a rule is
  * limited to desktop or mobile. The 782px breakpoint matches WordPress core. */
 @media ( max-width: 782px ) {
