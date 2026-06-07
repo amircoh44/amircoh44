@@ -194,6 +194,72 @@
 		step();
 	}
 
+	/* ---- Remove the images we inserted from the selected articles ---- */
+	function runRemove() {
+		var $rows = selectedRows();
+		if ( ! $rows.length ) {
+			window.alert( i18n.pickSome || 'Select at least one article.' );
+			return;
+		}
+		if ( ! window.confirm( i18n.removeConfirm || 'Remove inserted images from the selected articles?' ) ) {
+			return;
+		}
+
+		var $btn    = $( '#spr-imgdist-remove' ),
+			$fill   = $( '#spr-imgdist-fill' ),
+			$review = $( '#spr-imgdist-review' ),
+			$scan   = $( '#spr-imgdist-scan' ),
+			$prog   = $( '#spr-imgdist-progress' ),
+			list    = $rows.toArray(),
+			total   = list.length,
+			i       = 0;
+
+		$btn.prop( 'disabled', true );
+		$fill.prop( 'disabled', true );
+		$review.prop( 'disabled', true );
+		$scan.prop( 'disabled', true );
+		$prog.show();
+		$prog.find( '.spr-progress__bar > span' ).css( 'width', '0%' );
+
+		function step() {
+			if ( i >= total ) {
+				$prog.find( '.spr-progress__label' ).text( i18n.done || 'Done.' );
+				$btn.prop( 'disabled', false );
+				$fill.prop( 'disabled', false );
+				$review.prop( 'disabled', false );
+				$scan.prop( 'disabled', false );
+				return;
+			}
+			var $tr  = $( list[ i ] ),
+				id   = $tr.data( 'id' ),
+				$res = $tr.find( '.spr-imgdist-result' );
+			$res.text( ( i18n.removing || 'Removing' ) + '…' );
+
+			post( { action: 'spr_imgdist_remove', post_id: id } )
+				.done( function ( res ) {
+					if ( res && res.success ) {
+						var d = res.data || {};
+						if ( d.removed > 0 ) {
+							$res.html( '<span class="spr-badge spr-badge--neutral">-' + d.removed + '</span>' );
+						} else {
+							$res.text( i18n.removeNone || 'none' );
+						}
+						updateRowCount( id, d.count );
+					} else {
+						$res.text( i18n.error || 'error' );
+					}
+				} )
+				.fail( function () { $res.text( i18n.error || 'error' ); } )
+				.always( function () {
+					i++;
+					$prog.find( '.spr-progress__bar > span' ).css( 'width', Math.round( ( i / total ) * 100 ) + '%' );
+					$prog.find( '.spr-progress__label' ).text( ( i18n.removing || 'Removing' ) + ' ' + i + ' / ' + total );
+					step();
+				} );
+		}
+		step();
+	}
+
 	/* ---- Review each image one by one (edit alt/caption/title/description) ---- */
 	var review = {
 		queue: [],   // <tr> elements to review
@@ -401,6 +467,7 @@
 		$( '#spr-imgdist-scan' ).on( 'click', runScan );
 		$( '#spr-imgdist-fill' ).on( 'click', runFill );
 		$( '#spr-imgdist-review' ).on( 'click', startReview );
+		$( '#spr-imgdist-remove' ).on( 'click', runRemove );
 		$( '#spr-imgdist-all' ).on( 'change', function () {
 			$( '.spr-imgdist-cb' ).prop( 'checked', $( this ).is( ':checked' ) );
 			updateSelCount();

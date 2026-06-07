@@ -57,6 +57,7 @@ class SPR_Image_Distribution_Admin {
 		add_action( 'wp_ajax_spr_imgdist_fill', array( $this, 'ajax_fill' ) );
 		add_action( 'wp_ajax_spr_imgdist_propose', array( $this, 'ajax_propose' ) );
 		add_action( 'wp_ajax_spr_imgdist_apply', array( $this, 'ajax_apply' ) );
+		add_action( 'wp_ajax_spr_imgdist_remove', array( $this, 'ajax_remove' ) );
 	}
 
 	/**
@@ -103,7 +104,7 @@ class SPR_Image_Distribution_Admin {
 					'pickSome'  => __( 'Select at least one article first.', 'seo-sprinkler' ),
 					'confirm'   => __( 'Insert images into the selected articles? This updates the saved content (each change is backed up and can be reverted from the post editor).', 'seo-sprinkler' ),
 					'reviewing' => __( 'Reviewing', 'seo-sprinkler' ),
-					'approve'   => __( 'Approve &amp; insert', 'seo-sprinkler' ),
+					'approve'   => __( 'Approve & insert', 'seo-sprinkler' ),
 					'skip'      => __( 'Skip', 'seo-sprinkler' ),
 					'approveAll' => __( 'Approve all remaining', 'seo-sprinkler' ),
 					'finish'    => __( 'Finish', 'seo-sprinkler' ),
@@ -114,6 +115,10 @@ class SPR_Image_Distribution_Admin {
 					'ttlLabel'  => __( 'Image title', 'seo-sprinkler' ),
 					'descLabel' => __( 'Image description', 'seo-sprinkler' ),
 					'reviewConfirm' => __( 'Review images one by one for the selected articles? Each insert updates the saved content (backed up, revertable).', 'seo-sprinkler' ),
+					'removing'  => __( 'Removing', 'seo-sprinkler' ),
+					'removed'   => __( 'removed', 'seo-sprinkler' ),
+					'removeNone' => __( 'no inserted images', 'seo-sprinkler' ),
+					'removeConfirm' => __( 'Remove the images SEO Sprinkler inserted from the selected articles? This rewrites the saved content (your other content is untouched).', 'seo-sprinkler' ),
 				),
 			)
 		);
@@ -275,6 +280,33 @@ class SPR_Image_Distribution_Admin {
 
 		if ( class_exists( 'SPR_Activity' ) && ! empty( $res['inserted'] ) ) {
 			SPR_Activity::log( 'image_apply', sprintf( /* translators: %s: post title */ __( 'Approved 1 image into "%s".', 'seo-sprinkler' ), get_the_title( $post_id ) ) );
+		}
+
+		wp_send_json_success( $res );
+	}
+
+	/**
+	 * Remove the images this tool inserted from one post.
+	 */
+	public function ajax_remove() {
+		$this->guard();
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'You cannot edit this post.', 'seo-sprinkler' ) ), 403 );
+		}
+
+		$res = $this->filler->remove_inserted( $post_id );
+
+		if ( class_exists( 'SPR_Activity' ) && ! empty( $res['removed'] ) ) {
+			SPR_Activity::log(
+				'image_remove',
+				sprintf(
+					/* translators: 1: count, 2: post title. */
+					_n( 'Removed %1$d inserted image from "%2$s".', 'Removed %1$d inserted images from "%2$s".', (int) $res['removed'], 'seo-sprinkler' ),
+					(int) $res['removed'],
+					get_the_title( $post_id )
+				)
+			);
 		}
 
 		wp_send_json_success( $res );

@@ -430,6 +430,30 @@ class SPR_Image_Filler {
 		return true;
 	}
 
+	/**
+	 * Bulk "Image Distribution" remove: take back out only the images THIS tool
+	 * inserted (the spr-auto-image blocks/figures), save, refresh the cached count
+	 * and drop the fill backup. Unlike revert_post() it never restores other edits.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return array{removed:int,count:int}
+	 */
+	public function remove_inserted( $post_id ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return array( 'removed' => 0, 'count' => 0 );
+		}
+		$before = (int) $this->images->count_for_post( $post );
+		$clean  = $this->strip_filled( $post->post_content );
+		if ( $clean !== $post->post_content ) {
+			wp_update_post( array( 'ID' => $post_id, 'post_content' => $clean ) );
+			delete_post_meta( $post_id, self::META_BACKUP );
+		}
+		$count = (int) $this->images->count_for_post( get_post( $post_id ) );
+		update_post_meta( $post_id, SPR_META_IMAGE_COUNT, $count );
+		return array( 'removed' => max( 0, $before - $count ), 'count' => $count );
+	}
+
 	/* ---------------------------------------------------------------------
 	 * Bulk image distribution
 	 * ------------------------------------------------------------------- */

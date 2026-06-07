@@ -158,5 +158,10 @@ check( 'apply_single wrote the attachment title', 'Reviewed title' === get_the_t
 check( 'apply_single wrote the attachment alt', 'Reviewed alt' === get_post_meta( $rimg, '_wp_attachment_image_alt', true ) );
 check( 'apply_single reports the new count', isset( $ap['count'] ) && $ap['count'] >= 1 );
 
+// remove_inserted takes our images back out (and only ours).
+$rm = $filler->remove_inserted( $rp );
+check( 'remove_inserted reports removed >= 1', isset( $rm['removed'] ) && $rm['removed'] >= 1 );
+check( 'remove_inserted stripped our blocks', false === strpos( get_post( $rp )->post_content, 'spr-auto-image' ) );
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

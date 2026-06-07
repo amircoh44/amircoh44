@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.10.0
+Stable tag: 1.11.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,12 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.11.0 =
+* New: redesigned Dashboard — a colourful 2026 look with a branded header, icon stat cards, a clean status list, quick-action tiles and an activity timeline. The same design language (brand accent, soft cards) now carries across every SEO Sprinkler screen.
+* New: Image Distribution can now remove the images it inserted, in bulk, from the selected articles ("Remove inserted images").
+* New: Content Cleaner can clean articles one by one, and exclude any you don't want touched — scan, untick the ones to skip, then "Clean selected" (or use the per-row Clean button). "Clean all flagged" still cleans everything.
+* Fix: the reviewer's "Approve & insert" button no longer shows a literal "&amp;".
 
 = 1.10.0 =
 * New: "Review each image first" in Image Distribution — step through every proposed image and edit its alt text, caption, image title and description before it is inserted. Approve one by one, skip, or "approve all remaining"; each run spreads across your whole media library.

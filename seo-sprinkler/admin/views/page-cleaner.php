@@ -46,8 +46,11 @@ $log = $cleaner->get_log();
 		<h2><?php esc_html_e( 'Scan & clean', 'seo-sprinkler' ); ?></h2>
 		<p>
 			<button type="button" class="button" id="spr-junk-scan"><?php esc_html_e( 'Scan (preview only)', 'seo-sprinkler' ); ?></button>
-			<button type="button" class="button button-primary" id="spr-junk-clean"><?php esc_html_e( 'Clean all', 'seo-sprinkler' ); ?></button>
+			<button type="button" class="button button-primary" id="spr-junk-clean-sel" disabled><?php esc_html_e( 'Clean selected', 'seo-sprinkler' ); ?></button>
+			<button type="button" class="button" id="spr-junk-clean"><?php esc_html_e( 'Clean all flagged', 'seo-sprinkler' ); ?></button>
+			<span id="spr-junk-selcount" class="description" style="margin-left:8px"></span>
 		</p>
+		<p class="description"><?php esc_html_e( 'Scan first, then untick any articles you want to exclude and use “Clean selected” — or clean each one individually from the Action column.', 'seo-sprinkler' ); ?></p>
 		<div id="spr-junk-progress" class="spr-progress" style="display:none">
 			<div class="spr-progress__bar"><span></span></div>
 			<p class="spr-progress__label"></p>
@@ -55,8 +58,10 @@ $log = $cleaner->get_log();
 		<table class="widefat striped" id="spr-junk-results" style="display:none">
 			<thead>
 				<tr>
+					<th style="width:34px"><input type="checkbox" id="spr-junk-all" checked /></th>
 					<th><?php esc_html_e( 'Article', 'seo-sprinkler' ); ?></th>
 					<th><?php esc_html_e( 'Junk found', 'seo-sprinkler' ); ?></th>
+					<th style="width:170px"><?php esc_html_e( 'Action', 'seo-sprinkler' ); ?></th>
 				</tr>
 			</thead>
 			<tbody></tbody>

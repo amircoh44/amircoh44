@@ -118,6 +118,10 @@ $has_saved  = ! empty( $saved_rows );
 				<span class="dashicons dashicons-visibility"></span>
 				<?php esc_html_e( 'Review each image first', 'seo-sprinkler' ); ?>
 			</button>
+			<button type="button" class="button button-link-delete" id="spr-imgdist-remove">
+				<span class="dashicons dashicons-trash"></span>
+				<?php esc_html_e( 'Remove inserted images', 'seo-sprinkler' ); ?>
+			</button>
 			<span id="spr-imgdist-selcount" class="description" style="margin-left:8px"></span>
 		</p>
 		<table class="widefat striped" id="spr-imgdist-table">

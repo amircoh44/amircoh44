@@ -52,6 +52,7 @@ class SPR_Cleaner_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'wp_ajax_spr_scan_junk', array( $this, 'ajax_scan' ) );
 		add_action( 'wp_ajax_spr_clean_junk', array( $this, 'ajax_clean' ) );
+		add_action( 'wp_ajax_spr_clean_one', array( $this, 'ajax_clean_one' ) );
 		add_action( 'wp_ajax_spr_revert_clean', array( $this, 'ajax_revert' ) );
 	}
 
@@ -94,8 +95,14 @@ class SPR_Cleaner_Admin {
 					'error'         => __( 'Something went wrong.', 'seo-sprinkler' ),
 					'reverted'      => __( 'Reverted.', 'seo-sprinkler' ),
 					'confirmClean'  => __( 'This permanently rewrites your post content. A per-post backup is saved so you can revert. Continue?', 'seo-sprinkler' ),
+					'confirmCleanSel' => __( 'Clean the selected articles? Unchecked articles are excluded. Each change is backed up and revertable.', 'seo-sprinkler' ),
 					'confirmRevert' => __( 'Restore this post to its pre-clean content?', 'seo-sprinkler' ),
 					'noIssues'      => __( 'No generative junk found in the scanned posts.', 'seo-sprinkler' ),
+					'pickSome'      => __( 'Select at least one article first.', 'seo-sprinkler' ),
+					'cleanedTag'    => __( 'Cleaned', 'seo-sprinkler' ),
+					'cleanNone'     => __( 'Already clean', 'seo-sprinkler' ),
+					'cleanLabel'    => __( 'Clean', 'seo-sprinkler' ),
+					'selected'      => __( 'selected', 'seo-sprinkler' ),
 				),
 			)
 		);
@@ -189,6 +196,54 @@ class SPR_Cleaner_Admin {
 		}
 
 		wp_send_json_success( $batch );
+	}
+
+	/**
+	 * Clean ONE post (used by per-row "Clean" and "Clean selected"), so the user
+	 * can clean articles one by one and exclude any they don't want touched.
+	 */
+	public function ajax_clean_one() {
+		$this->guard();
+		if ( ! SPR_Edition::can( 'bulk_clean' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %s: edition label. */
+						__( 'Cleaning is a %s feature. Scanning and reverting stay free.', 'seo-sprinkler' ),
+						SPR_Edition::label( SPR_Edition::required_for( 'bulk_clean' ) )
+					),
+					'upgrade' => SPR_Edition::upgrade_url(),
+				),
+				402
+			);
+		}
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'You cannot edit this post.', 'seo-sprinkler' ) ), 403 );
+		}
+
+		$result  = $this->cleaner->clean_post( $post_id );
+		$removed = ! empty( $result['changed'] ) ? array_sum( $result['stats'] ) : 0;
+
+		if ( class_exists( 'SPR_Activity' ) && ! empty( $result['changed'] ) ) {
+			SPR_Activity::log(
+				'content_clean',
+				sprintf(
+					/* translators: 1: post title, 2: removed item count. */
+					__( 'Cleaned "%1$s" (%2$d junk item(s)).', 'seo-sprinkler' ),
+					get_the_title( $post_id ),
+					(int) $removed
+				)
+			);
+		}
+
+		wp_send_json_success(
+			array(
+				'post_id' => $post_id,
+				'changed' => ! empty( $result['changed'] ),
+				'removed' => (int) $removed,
+			)
+		);
 	}
 
 	/**
