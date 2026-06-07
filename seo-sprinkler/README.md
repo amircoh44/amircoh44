@@ -17,8 +17,42 @@ A WordPress plugin that boosts on-page SEO for your articles in several ways:
 9. **Multiple sitemaps + sitemap‑synced audit** — add any number of sitemaps (merged/de‑duplicated) and scan every sitemap URL for structured data.
 10. **SEO Sprinkler meta box** — on every post/page/CPT editor: one‑click "fill with related (randomised) images" (middle/left/right, thumbnail→full, reversible) + a live SEO checklist (images, internal/external links, schema, H1).
 11. **Export / Migrate** — download the whole site as JSON (all post types/CPTs, taxonomies, media + alt/caption/description, settings, SEO metadata) for Python/other platforms; optional media ZIP; SEO‑plugin detection (Yoast, Rank Math, AIOSEO, SEOPress, The SEO Framework); PII export gated behind an authorization checkbox.
+12. **Per‑post SEO score + AI assist** — a 0–100 on‑page SEO score on every editor, plus optional AI generation of a meta description / SEO title using *your own* OpenAI‑compatible endpoint and key (OpenAI, OpenRouter, Azure, local LLM — nothing is proxied through us).
+13. **Syndication** — auto‑push every newly published post to outbound webhooks (Zapier / Make / n8n / IFTTT → Google Business Profile, Facebook, LinkedIn, X).
 
 > Requires PHP 7.2+ and WordPress 5.6+. Works best alongside [Yoast SEO](https://wordpress.org/plugins/wordpress-seo/).
+
+---
+
+## Editions — Free vs Pro vs Expert
+
+> **Everything is free up to 25 published items.** On a site with **25 or fewer** published posts/pages/CPTs, *every* Pro **and** Expert feature is unlocked automatically — no licence key required. Past 25 items the **Free** column applies unless a Pro/Expert licence is active. (The 25‑item grace is filterable via `spr_free_page_limit`.)
+
+| Capability | Free | Pro | Expert |
+| --- | :---: | :---: | :---: |
+| Image‑minimum audit — count, sortable posts‑list column, editor notice | ✅ | ✅ | ✅ |
+| Schema audit — detect Schema.org types, flag missing / required types | ✅ | ✅ | ✅ |
+| Multiple sitemaps + sitemap‑synced schema audit | ✅ | ✅ | ✅ |
+| Link audit — internal/external counts + inline link editor | ✅ | ✅ | ✅ |
+| Content cleaner — scan, preview & per‑post revert | ✅ | ✅ | ✅ |
+| Duplicate‑H1 warning (dismissible per post) | ✅ | ✅ | ✅ |
+| Business‑profile questionnaire | ✅ | ✅ | ✅ |
+| "Fill with images" meta box + per‑post **SEO score (0–100)** | ✅ | ✅ | ✅ |
+| All settings | ✅ | ✅ | ✅ |
+| **Automatic internal linking** (display‑time, non‑destructive) | — | ✅ | ✅ |
+| **Permanent bulk apply / revert** of internal links | — | ✅ | ✅ |
+| **Auto inbound links** into older posts when you publish | — | ✅ | ✅ |
+| **Content distribution ("Sprinkler")** rules engine | — | ✅ | ✅ |
+| **Bulk clean** all content + **auto‑clean on save** | — | ✅ | ✅ |
+| **JSON‑LD `@graph` schema output** in `<head>` | — | ✅ | ✅ |
+| **AI assist** — generate meta description / SEO title (your own key) | — | ✅ | ✅ |
+| **Export / migrate** — full‑site JSON + optional media ZIP | — | — | ✅ |
+| **Syndication** — publish → webhooks → GMB / Facebook / LinkedIn / X | — | — | ✅ |
+| **Multisite / white‑label** | — | — | 🔜 |
+
+**In short:** **Free** gives you all the *audits*, the inline editors, image fill and the SEO score — the hands‑on checking tools. **Pro** adds *automation* (auto‑linking, distribution, bulk cleaning, schema output, AI). **Expert** is Pro **plus** full‑site export/migration and syndication.
+
+Licensing is provider‑agnostic — Freemius, Lemon Squeezy, Gumroad or direct sale (see [`MONETIZATION.md`](MONETIZATION.md)). A site activates a tier by entering a key, by defining the `SPR_EDITION` constant, or via the `spr_edition` / `spr_validate_license` filters.
 
 ---
 
@@ -179,9 +213,11 @@ touches the plugin, across PHP 7.4 / 8.0 / 8.2 / 8.3
 | Suite | Covers |
 | --- | --- |
 | `test-engines.php` | image/H1 counters, link enumerate/classify/inline-edit, every cleaner cleanup, backup→log→revert, link replacer, settings defaults |
+| `test-edition.php` | Free/Pro/Expert gating, the 25-item free grace, licence activation |
 | `test-frontend.php` | internal-link injection + content distribution on a real singular loop, auto-clean-on-save |
 | `test-schema.php` | schema `@graph` for articles + services, business-profile helpers, multi-sitemap merge |
 | `test-filler.php` | image relevance/randomisation, block markup, distribution, fill + revert |
+| `test-syndication.php` | publish payload, webhook parsing, edition gating |
 | `test-export.php` | export manifest sections, post meta/terms/SEO, media metadata, PII gating |
 | `test-admin.php` | every admin screen renders with no fatals |
 
