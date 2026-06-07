@@ -121,6 +121,21 @@ $list_url = admin_url( 'admin.php?page=' . SPR_Link_Audit_Admin::PAGE );
 	$rows     = isset( $snapshot['rows'] ) ? $snapshot['rows'] : array();
 	$updated  = isset( $snapshot['updated'] ) ? (int) $snapshot['updated'] : 0;
 	$has_rows = ! empty( $rows );
+
+	// Default order: weakest first — fewest internal links (then fewest links) on top.
+	usort(
+		$rows,
+		static function ( $a, $b ) {
+			$ai = isset( $a['internal'] ) ? (int) $a['internal'] : 0;
+			$bi = isset( $b['internal'] ) ? (int) $b['internal'] : 0;
+			if ( $ai !== $bi ) {
+				return $ai - $bi;
+			}
+			$ax = isset( $a['external'] ) ? (int) $a['external'] : 0;
+			$bx = isset( $b['external'] ) ? (int) $b['external'] : 0;
+			return $ax - $bx;
+		}
+	);
 	?>
 	<p>
 		<button type="button" class="button button-primary" id="spr-links-scan">
@@ -148,9 +163,9 @@ $list_url = admin_url( 'admin.php?page=' . SPR_Link_Audit_Admin::PAGE );
 	<table class="widefat striped" id="spr-links-results"<?php echo $has_rows ? '' : ' style="display:none"'; ?>>
 		<thead>
 			<tr>
-				<th><?php esc_html_e( 'Article', 'seo-sprinkler' ); ?></th>
-				<th style="width:120px"><?php esc_html_e( 'Internal', 'seo-sprinkler' ); ?></th>
-				<th style="width:120px"><?php esc_html_e( 'External', 'seo-sprinkler' ); ?></th>
+				<th class="spr-sort" data-key="title"><?php esc_html_e( 'Article', 'seo-sprinkler' ); ?> <span class="spr-sort__caret"></span></th>
+				<th class="spr-sort spr-sort--active spr-sort--asc" data-key="internal" style="width:120px"><?php esc_html_e( 'Internal', 'seo-sprinkler' ); ?> <span class="spr-sort__caret"></span></th>
+				<th class="spr-sort" data-key="external" style="width:120px"><?php esc_html_e( 'External', 'seo-sprinkler' ); ?> <span class="spr-sort__caret"></span></th>
 				<th style="width:120px"><?php esc_html_e( 'Links', 'seo-sprinkler' ); ?></th>
 			</tr>
 		</thead>
@@ -162,7 +177,7 @@ $list_url = admin_url( 'admin.php?page=' . SPR_Link_Audit_Admin::PAGE );
 				$r_view     = isset( $row['view_link'] ) ? $row['view_link'] : '';
 				$r_title    = isset( $row['title'] ) ? $row['title'] : '';
 				?>
-				<tr>
+				<tr data-internal="<?php echo (int) $r_internal; ?>" data-external="<?php echo (int) $r_external; ?>" data-title="<?php echo esc_attr( strtolower( $r_title ) ); ?>">
 					<td><a href="<?php echo esc_url( $r_view ); ?>"><?php echo esc_html( $r_title ); ?></a></td>
 					<td><span class="spr-badge <?php echo $r_internal > 0 ? 'spr-badge--ok' : 'spr-badge--warn'; ?>"><?php echo (int) $r_internal; ?></span></td>
 					<td><span class="spr-badge spr-badge--neutral"><?php echo (int) $r_external; ?></span></td>

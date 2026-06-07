@@ -396,6 +396,72 @@
 	color: var(--spr-ink);
 }
 
+/* Sortable table headers (Link Audit). */
+th.spr-sort {
+	cursor: pointer;
+	user-select: none;
+	white-space: nowrap;
+}
+
+th.spr-sort:hover {
+	color: #2271b1;
+}
+
+.spr-sort__caret::after {
+	content: "↕";
+	opacity: 0.35;
+	font-size: 11px;
+	margin-left: 2px;
+}
+
+th.spr-sort--active .spr-sort__caret::after {
+	opacity: 1;
+	color: #2271b1;
+}
+
+th.spr-sort--active.spr-sort--asc .spr-sort__caret::after {
+	content: "▲";
+}
+
+th.spr-sort--active.spr-sort--desc .spr-sort__caret::after {
+	content: "▼";
+}
+
+/* Guided "Connect" steps (Search Console). */
+.spr-steps {
+	margin: 6px 0 16px 18px;
+}
+
+.spr-steps > li {
+	margin: 0 0 16px;
+	padding-left: 4px;
+}
+
+.spr-steps .button {
+	margin: 4px 6px 0 0;
+}
+
+.spr-copy-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.spr-copy-uri {
+	display: inline-block;
+	padding: 6px 10px;
+	background: #f6f7f7;
+	border: 1px solid var(--spr-line);
+	border-radius: 6px;
+	overflow-wrap: anywhere;
+}
+
+.spr-copied {
+	color: #0a7c3f;
+	font-weight: 600;
+}
+
 /* Icon-sprinkle button + placement selector. */
 .spr-icon-sprinkle {
 	display: inline-flex;

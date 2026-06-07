@@ -49,6 +49,7 @@
 					if ( d.done ) {
 						$prog.find( '.spr-progress__label' ).text( i18n.done || 'Done.' );
 						$( '#spr-links-updated' ).text( i18n.justScanned || '' );
+						sortRows( 'internal', 'asc' ); // Weakest articles on top.
 						$btn.prop( 'disabled', false );
 						return;
 					}
@@ -63,12 +64,40 @@
 	}
 
 	function renderRow( row ) {
-		var $tr = $( '<tr/>' );
+		var $tr = $( '<tr/>' ).attr( {
+			'data-internal': row.internal | 0,
+			'data-external': row.external | 0,
+			'data-title': ( row.title || '' ).toLowerCase()
+		} );
 		$( '<td/>' ).append( $( '<a/>' ).attr( 'href', row.view_link ).text( row.title ) ).appendTo( $tr );
 		$( '<td/>' ).html( '<span class="spr-badge ' + ( row.internal > 0 ? 'spr-badge--ok' : 'spr-badge--warn' ) + '">' + row.internal + '</span>' ).appendTo( $tr );
 		$( '<td/>' ).html( '<span class="spr-badge spr-badge--neutral">' + row.external + '</span>' ).appendTo( $tr );
 		$( '<td/>' ).append( $( '<a class="button button-small"/>' ).attr( 'href', row.view_link ).text( 'View' ) ).appendTo( $tr );
 		return $tr;
+	}
+
+	/* Sort the results table by a column. Numeric for internal/external, text for
+	 * title. Default (and post-scan) order is internal ascending — weakest on top. */
+	function sortRows( key, dir ) {
+		var $tbody = $( '#spr-links-results tbody' );
+		var rows   = $tbody.children( 'tr' ).get();
+		rows.sort( function ( a, b ) {
+			var av, bv;
+			if ( 'title' === key ) {
+				av = $( a ).attr( 'data-title' ) || '';
+				bv = $( b ).attr( 'data-title' ) || '';
+				return 'asc' === dir ? av.localeCompare( bv ) : bv.localeCompare( av );
+			}
+			av = parseInt( $( a ).attr( 'data-' + key ), 10 ) || 0;
+			bv = parseInt( $( b ).attr( 'data-' + key ), 10 ) || 0;
+			return 'asc' === dir ? av - bv : bv - av;
+		} );
+		$.each( rows, function ( _, r ) { $tbody.append( r ); } );
+
+		$( '#spr-links-results thead .spr-sort' )
+			.removeClass( 'spr-sort--active spr-sort--asc spr-sort--desc' )
+			.filter( '[data-key="' + key + '"]' )
+			.addClass( 'spr-sort--active spr-sort--' + dir );
 	}
 
 	/* -----------------------------------------------------------------
@@ -156,6 +185,13 @@
 
 	$( function () {
 		$( '#spr-links-scan' ).on( 'click', runScan );
+
+		// Click a column header to sort; toggles asc/desc.
+		$( '#spr-links-results' ).on( 'click', '.spr-sort', function () {
+			var key = $( this ).data( 'key' ),
+				dir = $( this ).hasClass( 'spr-sort--active' ) && $( this ).hasClass( 'spr-sort--asc' ) ? 'desc' : 'asc';
+			sortRows( key, dir );
+		} );
 
 		// Toolbar formatting (simple WYSIWYG).
 		$( '.spr-wysiwyg-toolbar' ).on( 'click', 'button', function ( e ) {

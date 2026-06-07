@@ -103,5 +103,19 @@
 	$( function () {
 		$( '#spr-gsc-check' ).on( 'click', runCheck );
 		$( '#spr-gsc-submit' ).on( 'click', runSubmit );
+
+		// Copy the redirect URI to the clipboard for the one-time setup.
+		$( '.spr-copy-btn' ).on( 'click', function () {
+			var text = $( this ).data( 'copy' ),
+				$msg = $( this ).siblings( '.spr-copied' );
+			var done = function () { $msg.show().delay( 1800 ).fadeOut( 300 ); };
+			if ( navigator.clipboard && navigator.clipboard.writeText ) {
+				navigator.clipboard.writeText( text ).then( done, function () {} );
+			} else {
+				var $t = $( '<textarea>' ).val( text ).appendTo( 'body' ).select();
+				try { document.execCommand( 'copy' ); done(); } catch ( e ) {}
+				$t.remove();
+			}
+		} );
 	} );
 } )( jQuery );

@@ -129,10 +129,32 @@ $state    = $gsc->state();
 				<hr />
 			<?php endif; ?>
 
-			<p class="description">
-				<?php esc_html_e( 'One-time setup: in Google Cloud Console create an OAuth client (type: Web application), enable the “Google Search Console API” and the “Web Search Indexing API”, and add this exact redirect URI:', 'seo-sprinkler' ); ?>
-			</p>
-			<p><code><?php echo esc_html( $gsc->redirect_uri() ); ?></code></p>
+			<p class="description"><?php esc_html_e( 'One-time setup — about two minutes. After this, connecting is a single click. (A literal zero-setup connect would require a Google-verified hosted app, which a self-hosted plugin can’t bundle.)', 'seo-sprinkler' ); ?></p>
+
+			<ol class="spr-steps">
+				<li>
+					<strong><?php esc_html_e( 'Turn on the two Google APIs', 'seo-sprinkler' ); ?></strong>
+					<p>
+						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/searchconsole.googleapis.com"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Enable Search Console API', 'seo-sprinkler' ); ?></a>
+						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/indexing.googleapis.com"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Enable Indexing API', 'seo-sprinkler' ); ?></a>
+					</p>
+				</li>
+				<li>
+					<strong><?php esc_html_e( 'Create an OAuth client (type: Web application)', 'seo-sprinkler' ); ?></strong>
+					<p>
+						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/clients/create"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Open “Create OAuth client”', 'seo-sprinkler' ); ?></a>
+					</p>
+					<p class="description"><?php esc_html_e( 'Under “Authorised redirect URIs”, add this exact URI:', 'seo-sprinkler' ); ?></p>
+					<p class="spr-copy-row">
+						<code class="spr-copy-uri"><?php echo esc_html( $gsc->redirect_uri() ); ?></code>
+						<button type="button" class="button button-small spr-copy-btn" data-copy="<?php echo esc_attr( $gsc->redirect_uri() ); ?>"><?php esc_html_e( 'Copy', 'seo-sprinkler' ); ?></button>
+						<span class="spr-copied" style="display:none"><?php esc_html_e( 'Copied!', 'seo-sprinkler' ); ?></span>
+					</p>
+				</li>
+				<li>
+					<strong><?php esc_html_e( 'Paste the Client ID and Client secret below, Save, then click Connect.', 'seo-sprinkler' ); ?></strong>
+				</li>
+			</ol>
 
 			<form method="post" action="<?php echo esc_url( $post_url ); ?>">
 				<input type="hidden" name="action" value="spr_gsc_save" />

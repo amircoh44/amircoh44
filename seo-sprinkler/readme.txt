@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.19.0
+Stable tag: 1.20.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,10 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.20.0 =
+* New: Link Audit table is sortable — click any column header; by default the weakest articles (fewest internal links) sit at the top so you fix them first.
+* Improved: Search Console connect is now a guided, near-one-click setup — direct buttons to enable the two Google APIs and create the OAuth client, plus a one-click "Copy" for the redirect URI. After the two-minute setup, connecting is a single click.
 
 = 1.19.0 =
 * Fix: bulk image fill no longer dumps all images at the bottom — it now finds paragraph/heading/list seams in classic content too and scatters images evenly through the article.
