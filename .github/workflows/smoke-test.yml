@@ -1,13 +1,13 @@
-name: SEO Article Booster — smoke test
+name: SEO Sprinkler — smoke test
 
 on:
   push:
     paths:
-      - 'seo-article-booster/**'
+      - 'seo-sprinkler/**'
       - '.github/workflows/smoke-test.yml'
   pull_request:
     paths:
-      - 'seo-article-booster/**'
+      - 'seo-sprinkler/**'
       - '.github/workflows/smoke-test.yml'
   workflow_dispatch:
 
@@ -38,35 +38,35 @@ jobs:
 
       - name: Lint all PHP files
         run: |
-          find seo-article-booster -name '*.php' -print0 \
+          find seo-sprinkler -name '*.php' -print0 \
             | xargs -0 -n1 -P4 php -l
 
       - name: Bootstrap WordPress (SQLite)
-        run: bash seo-article-booster/tests/bootstrap-wp.sh
+        run: bash seo-sprinkler/tests/bootstrap-wp.sh
 
       - name: Engine tests
-        run: php seo-article-booster/tests/test-engines.php
+        run: php seo-sprinkler/tests/test-engines.php
 
       - name: Edition / licensing tests
-        run: php seo-article-booster/tests/test-edition.php
+        run: php seo-sprinkler/tests/test-edition.php
 
       - name: Front-end filter tests
-        run: php seo-article-booster/tests/test-frontend.php
+        run: php seo-sprinkler/tests/test-frontend.php
 
       - name: Schema generator tests
-        run: php seo-article-booster/tests/test-schema.php
+        run: php seo-sprinkler/tests/test-schema.php
 
       - name: Image filler tests
-        run: php seo-article-booster/tests/test-filler.php
+        run: php seo-sprinkler/tests/test-filler.php
 
       - name: Syndication tests
-        run: php seo-article-booster/tests/test-syndication.php
+        run: php seo-sprinkler/tests/test-syndication.php
 
       - name: Export / migration tests
-        run: php seo-article-booster/tests/test-export.php
+        run: php seo-sprinkler/tests/test-export.php
 
       - name: Admin render tests
-        run: php seo-article-booster/tests/test-admin.php
+        run: php seo-sprinkler/tests/test-admin.php
 
       - name: Show debug.log on failure
         if: failure()

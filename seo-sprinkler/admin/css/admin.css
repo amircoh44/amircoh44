@@ -1,0 +1,304 @@
+/**
+ * Admin styles for SEO Sprinkler.
+ */
+
+.spr-wrap .spr-intro {
+	max-width: 760px;
+	font-size: 14px;
+	color: #50575e;
+}
+
+/* Dashboard stat cards */
+.spr-cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin: 20px 0;
+}
+
+.spr-card {
+	flex: 1 1 180px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	padding: 18px 20px;
+	text-align: center;
+	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.04 );
+}
+
+.spr-card .dashicons {
+	font-size: 28px;
+	width: 28px;
+	height: 28px;
+	color: #2271b1;
+}
+
+.spr-card h2 {
+	font-size: 30px;
+	margin: 8px 0 4px;
+	line-height: 1.1;
+}
+
+.spr-card p {
+	margin: 0;
+	color: #646970;
+}
+
+/* Panels */
+.spr-panel {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	padding: 16px 20px;
+	margin: 20px 0;
+	max-width: 900px;
+}
+
+.spr-panel h2 {
+	margin-top: 0;
+}
+
+.spr-actions .button {
+	margin-right: 6px;
+}
+
+/* Status badges (also used in post list columns) */
+.spr-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.spr-badge .dashicons {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+}
+
+.spr-badge--ok {
+	background: #edfaef;
+	color: #007017;
+}
+
+.spr-badge--warn {
+	background: #fcf0f1;
+	color: #b32d2e;
+}
+
+.spr-badge--neutral {
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+/* Progress bar */
+.spr-progress {
+	max-width: 600px;
+	margin: 16px 0;
+}
+
+.spr-progress__bar {
+	background: #f0f0f1;
+	border-radius: 6px;
+	height: 16px;
+	overflow: hidden;
+}
+
+.spr-progress__bar > span {
+	display: block;
+	height: 100%;
+	width: 0;
+	background: #2271b1;
+	transition: width 0.25s ease;
+}
+
+.spr-progress__label {
+	margin: 6px 0 0;
+	color: #50575e;
+	font-size: 13px;
+}
+
+.spr-inline-status {
+	margin-left: 8px;
+	color: #50575e;
+	font-style: italic;
+}
+
+.spr-empty {
+	padding: 12px 16px;
+	background: #f6f7f7;
+	border-left: 4px solid #72aee6;
+	color: #50575e;
+}
+
+.spr-muted {
+	color: #787c82;
+	font-size: 12px;
+}
+
+.spr-rule-form .form-table th {
+	width: 220px;
+}
+
+/* Publish meta box lines */
+.spr-pub-images .dashicons,
+.spr-pub-schema .dashicons,
+.spr-pub-h1 .dashicons {
+	color: #2271b1;
+	vertical-align: text-bottom;
+}
+
+.spr-checklist {
+	margin: 0;
+}
+
+.spr-checklist li {
+	margin: 2px 0;
+}
+
+.spr-checklist .dashicons {
+	color: #007017;
+	vertical-align: text-bottom;
+}
+
+/* Per-post SEO score header */
+.spr-score {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	margin: 0 0 10px;
+	font-weight: 600;
+}
+
+.spr-score__num {
+	font-size: 28px;
+	line-height: 1;
+}
+
+.spr-score__max {
+	color: #646970;
+}
+
+.spr-score__label {
+	margin-left: auto;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #50575e;
+}
+
+.spr-score--ok {
+	background: #edfaef;
+}
+
+.spr-score--neutral {
+	background: #fcf9e8;
+}
+
+.spr-score--warn {
+	background: #fcf0f1;
+}
+
+/* ---------------------------------------------------------------------------
+ * Link Audit: edit modal + mini WYSIWYG
+ * ------------------------------------------------------------------------- */
+.spr-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.spr-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba( 0, 0, 0, 0.5 );
+}
+
+.spr-modal__box {
+	position: relative;
+	z-index: 1;
+	background: #fff;
+	border-radius: 6px;
+	padding: 20px 24px;
+	width: 520px;
+	max-width: calc( 100% - 40px );
+	box-shadow: 0 8px 30px rgba( 0, 0, 0, 0.25 );
+}
+
+.spr-modal__box h2 {
+	margin-top: 0;
+}
+
+.spr-modal__label {
+	display: block;
+	font-weight: 600;
+	margin: 12px 0 4px;
+}
+
+.spr-wysiwyg-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	border: 1px solid #c3c4c7;
+	border-bottom: 0;
+	padding: 4px 6px;
+	background: #f6f7f7;
+	border-radius: 4px 4px 0 0;
+}
+
+.spr-wysiwyg-toolbar button {
+	min-width: 28px;
+	height: 26px;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+	border-radius: 3px;
+	cursor: pointer;
+	line-height: 1;
+}
+
+.spr-charcount {
+	margin-left: auto;
+	font-size: 12px;
+	color: #646970;
+}
+
+.spr-charcount.spr-over {
+	color: #b32d2e;
+	font-weight: 700;
+}
+
+.spr-wysiwyg {
+	min-height: 64px;
+	border: 1px solid #c3c4c7;
+	border-radius: 0 0 4px 4px;
+	padding: 8px 10px;
+	background: #fff;
+	font-size: 14px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+
+.spr-wysiwyg:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: -1px;
+}
+
+.spr-modal__error {
+	color: #b32d2e;
+	background: #fcf0f1;
+	padding: 8px 10px;
+	border-radius: 4px;
+}
+
+.spr-modal__actions {
+	margin: 16px 0 0;
+}
