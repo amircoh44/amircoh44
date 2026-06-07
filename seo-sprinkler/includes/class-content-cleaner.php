@@ -274,8 +274,36 @@ class SPR_Content_Cleaner {
 	 * @return string
 	 */
 	protected function strip_classes( $html, &$stats ) {
-		$html = preg_replace( '/\s*class\s*=\s*("[^"]*"|\'[^\']*\')/i', '', $html, -1, $c );
-		$stats['clean_classes'] = (int) $c;
+		// Functional classes worth keeping: image alignment (so images stay
+		// centred/floated) and the plugin's own markers (so inserted images can
+		// still be removed). Everything else in class="…" is dropped.
+		$keep  = array( 'aligncenter', 'alignleft', 'alignright', 'alignnone', 'spr-auto-image', 'spr-auto-icon' );
+		$count = 0;
+		$html  = preg_replace_callback(
+			'/\sclass\s*=\s*("[^"]*"|\'[^\']*\')/i',
+			function ( $m ) use ( &$count, $keep ) {
+				$classes = array_filter( preg_split( '/\s+/', trim( $m[1], " \"'" ) ) );
+				$kept    = array_values(
+					array_filter(
+						$classes,
+						static function ( $cls ) use ( $keep ) {
+							// Keep alignment + plugin markers + the functional WordPress
+							// image classes (wp-image-ID / size-*) that drive responsive
+							// images and image counting.
+							return in_array( $cls, $keep, true )
+								|| preg_match( '/^wp-image-\d+$/', $cls )
+								|| preg_match( '/^size-[a-z0-9_-]+$/i', $cls );
+						}
+					)
+				);
+				if ( count( $kept ) !== count( $classes ) ) {
+					$count++; // Something was stripped from this attribute.
+				}
+				return empty( $kept ) ? '' : ' class="' . implode( ' ', $kept ) . '"';
+			},
+			$html
+		);
+		$stats['clean_classes'] = $count;
 		return $html;
 	}
 

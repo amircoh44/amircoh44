@@ -916,16 +916,13 @@ class SPR_Image_Filler {
 			$size    = 'full';
 		}
 
-		// Put the alignment class on the <img> itself (classic WP markup:
-		// "aligncenter size-large wp-image-123"). Themes universally style
-		// img.aligncenter/alignleft/alignright, so the image is aligned even when
-		// the block-editor CSS for figure.aligncenter isn't loaded.
-		$attr = array( 'class' => 'align' . $align . ' size-' . $size . ' wp-image-' . (int) $id );
-		if ( '' !== $alt ) {
-			$attr['alt'] = $alt;
-		}
-		$img = wp_get_attachment_image( $id, $size, false, $attr );
-		if ( ! $img ) {
+		// Build a LEAN <img> (no baked-in srcset/sizes): WordPress re-adds the
+		// responsive srcset at render time from the wp-image-{id} class, so the
+		// stored content stays clean. The alignment class lives on the <img> itself
+		// (classic WP markup: "aligncenter size-large wp-image-123"), which every
+		// theme styles — so it centres even without the block-editor CSS.
+		$img = $this->image_tag( $id, $size, 'align' . $align . ' size-' . $size . ' wp-image-' . (int) $id, $alt );
+		if ( '' === $img ) {
 			return '';
 		}
 
@@ -946,6 +943,32 @@ class SPR_Image_Filler {
 		);
 
 		return '<!-- wp:image ' . $attrs . " -->\n" . $figure . "\n<!-- /wp:image -->";
+	}
+
+	/**
+	 * Build one clean <img> tag for a size: just class, src, alt, width, height.
+	 * No srcset/sizes are stored — WordPress adds those at render from the
+	 * wp-image-{id} class, keeping the saved content lean.
+	 *
+	 * @param int    $id    Attachment ID.
+	 * @param string $size  Image size.
+	 * @param string $class Class attribute.
+	 * @param string $alt   Alt text.
+	 * @return string
+	 */
+	protected function image_tag( $id, $size, $class, $alt = '' ) {
+		$src = wp_get_attachment_image_src( $id, $size );
+		if ( ! $src || empty( $src[0] ) ) {
+			return '';
+		}
+		return sprintf(
+			'<img class="%s" src="%s" alt="%s" width="%d" height="%d" />',
+			esc_attr( $class ),
+			esc_url( $src[0] ),
+			esc_attr( $alt ),
+			(int) $src[1],
+			(int) $src[2]
+		);
 	}
 
 	/**
@@ -1313,11 +1336,6 @@ class SPR_Image_Filler {
 	 * @return string
 	 */
 	public function build_icon_img( $id, $alt = '' ) {
-		$attr = array( 'class' => 'alignleft size-full wp-image-' . (int) $id . ' ' . self::CSS_CLASS . ' spr-auto-icon' );
-		if ( '' !== $alt ) {
-			$attr['alt'] = $alt;
-		}
-		$img = wp_get_attachment_image( (int) $id, 'full', false, $attr );
-		return $img ? $img : '';
+		return $this->image_tag( $id, 'full', 'alignleft size-full wp-image-' . (int) $id . ' ' . self::CSS_CLASS . ' spr-auto-icon', $alt );
 	}
 }

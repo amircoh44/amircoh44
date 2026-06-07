@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.20.2
+Stable tag: 1.20.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,10 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.20.3 =
+* Cleaner output: inserted images are now lean — a simple <img class="aligncenter size-large wp-image-ID"> with no giant srcset baked into your content (WordPress still adds responsive srcset automatically at render).
+* The Content Cleaner no longer strips functional image classes: alignment (aligncenter/left/right), size-*, wp-image-ID and the plugin markers are kept even with "strip classes" on — so cleaning never un-centres or orphans distributed images.
 
 = 1.20.2 =
 * Fix: distributed images now carry the alignment class on the <img> itself (e.g. class="aligncenter size-large") — the classic WordPress markup every theme styles — so wide images centre (or float left/right) reliably even when the block-editor CSS isn't loaded. Clear your page cache (WP Rocket) after updating.

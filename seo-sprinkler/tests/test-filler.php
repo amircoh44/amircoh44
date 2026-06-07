@@ -75,6 +75,8 @@ check( 'block is a wp:image block', false !== strpos( $block, '<!-- wp:image' ) 
 check( 'block carries our class', false !== strpos( $block, 'spr-auto-image' ) );
 check( 'block honours alignment', false !== strpos( $block, 'aligncenter' ) );
 check( 'img itself carries the align class', (bool) preg_match( '/<img[^>]*\bclass="[^"]*\baligncenter\b/', $block ) );
+check( 'block markup is lean (no baked srcset)', false === strpos( $block, 'srcset' ) && false === strpos( $block, 'sizes=' ) );
+check( 'img keeps the wp-image id for responsive render', false !== strpos( $block, 'wp-image-' . $plumb ) );
 $left_block = $filler->build_image_block( $plumb, 'left', 'large' );
 check( 'left img carries alignleft', (bool) preg_match( '/<img[^>]*\bclass="[^"]*\balignleft\b/', $left_block ) );
 

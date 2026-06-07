@@ -98,6 +98,15 @@ check( 'custom regex rule removed', false === strpos( $ccclean, '[junk' ) );
 check( 'custom rules keep other text', false !== strpos( $ccclean, 'keep' ) && false !== strpos( $ccclean, 'end' ) );
 check( 'custom rules counted', isset( $ccstats['clean_custom'] ) && $ccstats['clean_custom'] >= 2 );
 
+// Stripping classes keeps functional image classes (alignment, wp-image-N,
+// size-*, plugin markers) so cleaning never un-centres or orphans our images.
+list( $kc ) = $cleaner->clean( '<figure class="wp-block-image aligncenter junk spr-auto-image"><img class="aligncenter size-large wp-image-9 elementor-x" src="a.jpg" /></figure>', array( 'clean_classes' => 1 ) );
+check( 'class strip keeps aligncenter', false !== strpos( $kc, 'aligncenter' ) );
+check( 'class strip keeps spr-auto-image', false !== strpos( $kc, 'spr-auto-image' ) );
+check( 'class strip keeps wp-image-id', false !== strpos( $kc, 'wp-image-9' ) );
+check( 'class strip keeps size-large', false !== strpos( $kc, 'size-large' ) );
+check( 'class strip drops junk classes', false === strpos( $kc, 'junk' ) && false === strpos( $kc, 'elementor-x' ) && false === strpos( $kc, 'wp-block-image' ) );
+
 // Cleaner backup + log + revert.
 $pid2   = wp_insert_post( array( 'post_title' => 'Clean Target', 'post_content' => $junk, 'post_status' => 'publish' ) );
 $before = get_post( $pid2 )->post_content;
