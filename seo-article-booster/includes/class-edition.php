@@ -36,6 +36,9 @@ class SAB_Edition {
 	/** Option storing the resolved edition. */
 	const OPTION = 'sab_edition';
 
+	/** Free tier grace: every feature is unlocked on sites up to this many published items. */
+	const FREE_LIMIT = 25;
+
 	/**
 	 * Edition ranks (higher unlocks everything below it).
 	 *
@@ -125,7 +128,46 @@ class SAB_Edition {
 	 */
 	public static function can( $feature ) {
 		$need = isset( self::$map[ $feature ] ) ? self::$map[ $feature ] : self::FREE;
-		return self::rank_of( self::current() ) >= self::rank_of( $need );
+		if ( self::FREE === $need ) {
+			return true;
+		}
+		if ( self::rank_of( self::current() ) >= self::rank_of( $need ) ) {
+			return true; // Properly licensed for this tier.
+		}
+		// Free grace: every premium feature is unlocked while the site is small
+		// (up to the free page limit). Beyond it, a paid licence is required.
+		return self::within_free_limit();
+	}
+
+	/**
+	 * The free-tier content limit (number of published items).
+	 *
+	 * @return int Negative disables the grace entirely.
+	 */
+	public static function free_limit() {
+		return (int) apply_filters( 'sab_free_page_limit', self::FREE_LIMIT );
+	}
+
+	/**
+	 * Is the site within the free grace limit?
+	 *
+	 * @return bool
+	 */
+	public static function within_free_limit() {
+		$limit = self::free_limit();
+		if ( $limit < 0 ) {
+			return false;
+		}
+		return self::content_count() <= $limit;
+	}
+
+	/**
+	 * Is an unlicensed site over the free limit (i.e. premium features locked)?
+	 *
+	 * @return bool
+	 */
+	public static function over_free_limit() {
+		return ! self::is_pro() && ! self::within_free_limit();
 	}
 
 	/**

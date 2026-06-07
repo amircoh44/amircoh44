@@ -75,14 +75,17 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 
 == Free vs Pro vs Expert ==
 
-* **Free** – every audit and manual tool, with no page limit: image-minimum audit, schema audit (incl. sitemap coverage), link audit + inline link editor, content-cleaner scan + revert, duplicate-H1 warning, business profile, the "fill with images" booster, and all settings.
-* **Pro** – adds automation, bulk tools and schema output: automatic internal linking, permanent bulk apply/revert, content distribution (Sprinkler), bulk + auto content cleaning, new-post auto inbound links, and the JSON-LD schema output in <head>.
+**Everything is free up to 25 pages.** On sites with 25 or fewer published items, every feature — including all the premium ones — is unlocked. Beyond 25 pages you choose a plan:
+
+* **Free** – all audits and manual tools at any size (image-minimum audit, schema audit incl. sitemap coverage, link audit + inline editor, content-cleaner scan + revert, duplicate-H1 warning, business profile, "fill with images" booster, settings), plus *every* premium feature while your site is within 25 pages.
+* **Pro** – removes the 25-page limit for the automation/output features: automatic internal linking, permanent bulk apply/revert, content distribution (Sprinkler), bulk + auto content cleaning, new-post auto inbound links, AI actions, and JSON-LD schema output in <head>.
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use.
 
 == Changelog ==
 
 = 1.6.0 =
-* New: Free / Pro / Expert editions with a feature-split licensing gate (no page cap). License-key field unlocks premium; integrate any provider (Freemius, Lemon Squeezy, …) via the `sab_validate_license` filter. Dashboard shows the current edition and an upgrade path.
+* New: Free / Pro / Expert editions. Everything is free up to 25 pages (a configurable grace via the `sab_free_page_limit` filter); beyond that, premium features need Pro (automation, bulk tools, AI, schema output) or Expert (export/migration, multisite). License-key field unlocks premium; integrate any provider (Freemius, Lemon Squeezy, …) via the `sab_validate_license` filter. Dashboard shows edition + free usage.
+* New: AI (bring-your-own API) — connect any OpenAI-compatible endpoint (OpenAI/OpenRouter/Azure/local) in Settings → AI; powers Pro AI actions.
 
 = 1.5.0 =
 * New: Export / Migrate — download the whole site as structured JSON (all post types/CPTs, taxonomies, full media library with alt/caption/description, settings, and SEO metadata from auto-detected SEO plugins) for import into Python or another platform; optional media-files ZIP. Personal data (logins/emails) requires explicit authorisation.

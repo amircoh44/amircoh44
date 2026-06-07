@@ -34,6 +34,8 @@ $rule_count  = class_exists( 'SAB_Injection_Rules' ) ? count( ( new SAB_Injectio
 	$is_pro   = SAB_Edition::is_pro();
 	$is_exp   = SAB_Edition::is_expert();
 	$content  = SAB_Edition::content_count();
+	$limit    = SAB_Edition::free_limit();
+	$within   = SAB_Edition::within_free_limit();
 	?>
 	<div class="sab-panel sab-edition sab-edition--<?php echo esc_attr( $edition ); ?>">
 		<h2>
@@ -45,18 +47,37 @@ $rule_count  = class_exists( 'SAB_Injection_Rules' ) ? count( ( new SAB_Injectio
 			);
 			?>
 		</h2>
-		<p class="description"><?php printf( /* translators: %d: content count. */ esc_html__( 'Published content items: %d', 'seo-article-booster' ), (int) $content ); ?></p>
-		<?php if ( ! $is_exp ) : ?>
+
+		<?php if ( ! $is_pro ) : ?>
 			<p>
 				<?php
-				if ( ! $is_pro ) {
-					esc_html_e( 'Free includes every audit and manual tool. Upgrade to Pro for automatic internal linking, bulk apply, content distribution and JSON-LD schema output — and to Expert for the Export / Migrate tool.', 'seo-article-booster' );
-				} else {
-					esc_html_e( 'Pro unlocks automation, bulk tools and schema output. Upgrade to Expert for the Export / Migrate tool and multisite.', 'seo-article-booster' );
-				}
+				printf(
+					/* translators: 1: content count, 2: free limit. */
+					esc_html__( 'Free usage: %1$d / %2$d pages.', 'seo-article-booster' ),
+					(int) $content,
+					(int) $limit
+				);
+				?>
+				<?php if ( $within ) : ?>
+					<span class="sab-badge sab-badge--ok"><span class="dashicons dashicons-yes"></span> <?php esc_html_e( 'Everything is unlocked free at your size.', 'seo-article-booster' ); ?></span>
+				<?php else : ?>
+					<span class="sab-badge sab-badge--warn"><span class="dashicons dashicons-warning"></span> <?php esc_html_e( 'Over the free limit — premium features are locked.', 'seo-article-booster' ); ?></span>
+				<?php endif; ?>
+			</p>
+			<p>
+				<?php
+				printf(
+					/* translators: %d: free limit. */
+					esc_html__( 'Everything is free up to %d pages. Beyond that, automatic linking, bulk tools, content distribution, AI and JSON-LD schema output need Pro; the Export / Migrate tool needs Expert.', 'seo-article-booster' ),
+					(int) $limit
+				);
 				?>
 			</p>
-			<p><a class="button button-primary" href="<?php echo esc_url( SAB_Edition::upgrade_url() ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade', 'seo-article-booster' ); ?></a></p>
+			<p><a class="button button-primary" href="<?php echo esc_url( SAB_Edition::upgrade_url() ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade to Pro / Expert', 'seo-article-booster' ); ?></a></p>
+		<?php elseif ( ! $is_exp ) : ?>
+			<p class="description"><?php printf( /* translators: %d: content count. */ esc_html__( 'Published content items: %d', 'seo-article-booster' ), (int) $content ); ?></p>
+			<p><?php esc_html_e( 'Pro unlocks unlimited automation, bulk tools, AI and schema output. Upgrade to Expert for the Export / Migrate tool and multisite.', 'seo-article-booster' ); ?></p>
+			<p><a class="button button-primary" href="<?php echo esc_url( SAB_Edition::upgrade_url() ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade to Expert', 'seo-article-booster' ); ?></a></p>
 		<?php else : ?>
 			<p><span class="sab-badge sab-badge--ok"><span class="dashicons dashicons-yes"></span> <?php esc_html_e( 'All features unlocked. Thank you!', 'seo-article-booster' ); ?></span></p>
 		<?php endif; ?>
