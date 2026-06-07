@@ -40,6 +40,31 @@ SUPPORT = {
 def support_for(edition):
     return SUPPORT.get(edition, SUPPORT["free"])
 
+
+# Response-time SLA per tier. Expert is the committed SLA: 12h on business days,
+# 24h over the weekend. Pro is a 48h target. Free / bug reports are best-effort.
+def sla_due(tier, created_at):
+    """Return the datetime a first response is due, or None for best-effort."""
+    from datetime import timedelta
+    if tier == "expert":
+        hours = 24 if created_at.weekday() >= 5 else 12   # Sat=5, Sun=6 -> weekend
+        return created_at + timedelta(hours=hours)
+    if tier == "pro":
+        return created_at + timedelta(hours=48)
+    return None
+
+
+def sla_target_label(tier):
+    return {
+        "expert": "12 hours (business days) / 24 hours (weekends)",
+        "pro": "within 48 hours",
+        "free": "best-effort (community & docs)",
+    }.get(tier, "best-effort")
+
+
+def is_priority(tier):
+    return tier == "expert"
+
 # Free-tier grace mirrored from the plugin (everything unlocked under N pages).
 FREE_PAGE_LIMIT = 25
 

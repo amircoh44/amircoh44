@@ -2,7 +2,7 @@
 
 
 def test_storefront_pages_render(client):
-    for path in ["/", "/features", "/pricing", "/faq", "/account", "/download", "/contact"]:
+    for path in ["/", "/features", "/pricing", "/faq", "/account", "/download", "/contact", "/support"]:
         assert client.get(path).status_code == 200, path
 
 

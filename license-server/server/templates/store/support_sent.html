@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Request received · {{ BRAND }}{% endblock %}
+{% block content %}
+<section class="hero" style="padding:46px 0 16px">
+  <span class="tag">✓ Received</span>
+  <h1 style="font-size:32px">Thanks — your {{ 'bug report' if t.type=='bug' else 'request' }} is in</h1>
+  <p class="lead">
+    Your reference is <strong>#{{ t.id }}</strong>.
+    {% if t.type == 'support' and t.status != 'flagged' and t.sla_due_at %}
+      As a {{ t.tier|capitalize }} customer we'll reply <strong>{{ sla_label }}</strong>.
+    {% elif t.type == 'bug' %}
+      Thanks for helping make {{ BRAND }} better.
+    {% else %}
+      We'll review it and get back to you.
+    {% endif %}
+  </p>
+  <p>
+    <a class="btn" href="{{ url_for('store.index') }}">Back to home</a>
+    <a class="btn btn--ghost" href="{{ url_for('store.account') }}">My account</a>
+  </p>
+</section>
+{% endblock %}

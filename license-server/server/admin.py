@@ -1,13 +1,15 @@
-"""Password-protected admin panel: dashboard, customers, licenses, coupons."""
+"""Password-protected admin panel: dashboard, customers, licenses, coupons,
+support tickets (triage + SLA) and the email outbox."""
+import os
 from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import (Blueprint, render_template, request, redirect, url_for,
-                   session, flash)
+                   session, flash, jsonify)
 from werkzeug.security import check_password_hash
 
-from .models import db, AdminUser, Customer, License, Activation, Coupon
-from . import licensing
+from .models import db, AdminUser, Customer, License, Activation, Coupon, Ticket, EmailMessage
+from . import licensing, notify
 
 bp = Blueprint("admin", __name__)
 
@@ -64,6 +66,11 @@ def dashboard():
         "activations": Activation.query.count(),
         "coupons": Coupon.query.filter_by(active=True).count(),
         "mrr": round(mrr),
+        "open_tickets": Ticket.query.filter(Ticket.status.in_(["queued", "held", "open"])).count(),
+        "overdue": Ticket.query.filter(Ticket.sla_due_at.isnot(None),
+                                       Ticket.sla_due_at < now,
+                                       Ticket.status != "closed").count(),
+        "flagged": Ticket.query.filter_by(status="flagged").count(),
     }
     recent = License.query.order_by(License.created_at.desc()).limit(8).all()
     return render_template("admin/dashboard.html", stats=stats, recent=recent,
@@ -225,3 +232,78 @@ def plans():
 def activations():
     rows = Activation.query.order_by(Activation.last_seen_at.desc()).limit(100).all()
     return render_template("admin/activations.html", rows=rows)
+
+
+@bp.route("/tickets")
+@login_required
+def tickets():
+    status = request.args.get("status", "")
+    tier = request.args.get("tier", "")
+    q = request.args.get("q", "").strip()
+    query = Ticket.query
+    if status:
+        query = query.filter_by(status=status)
+    if tier:
+        query = query.filter_by(tier=tier)
+    if q:
+        query = query.filter(Ticket.subject.contains(q) | Ticket.email.contains(q))
+    rows = query.order_by(Ticket.priority.desc(), Ticket.created_at.desc()).all()
+    return render_template("admin/tickets.html", rows=rows, now=datetime.utcnow(),
+                           status=status, tier=tier, q=q)
+
+
+@bp.route("/tickets/<int:tid>")
+@login_required
+def ticket_detail(tid):
+    t = db.get_or_404(Ticket, tid)
+    return render_template("admin/ticket_detail.html", t=t, now=datetime.utcnow())
+
+
+@bp.route("/tickets/<int:tid>/action", methods=["POST"])
+@login_required
+def ticket_action(tid):
+    t = db.get_or_404(Ticket, tid)
+    action = request.form.get("action")
+    if action == "delete":
+        db.session.delete(t)
+        db.session.commit()
+        flash("Ticket deleted.", "success")
+        return redirect(url_for("admin.tickets"))
+    if action == "close":
+        t.status = "closed"
+    elif action == "reopen":
+        t.status = "open"
+    elif action == "flag":
+        t.status = "flagged"
+    elif action == "approve":          # treat a flagged/held item as legitimate
+        t.status = "queued"
+        t.emailed_at = None            # make it eligible for the next digest
+    db.session.commit()
+    flash("Ticket updated.", "success")
+    return redirect(url_for("admin.ticket_detail", tid=t.id))
+
+
+@bp.route("/tickets/digest", methods=["POST"])
+@login_required
+def tickets_digest():
+    n = notify.send_pending_digest()
+    flash(("Emailed %d request(s) to %s." % (n, notify.admin_email())) if n
+          else "No new legitimate requests to send.", "success")
+    return redirect(url_for("admin.tickets"))
+
+
+@bp.route("/tickets/digest/cron", methods=["GET", "POST"])
+def tickets_digest_cron():
+    """Token-protected endpoint so a cron can send the digest. No login."""
+    token = os.environ.get("DIGEST_TOKEN")
+    given = request.args.get("token") or request.headers.get("X-Digest-Token")
+    if not token or given != token:
+        return jsonify(success=False, error="forbidden"), 403
+    return jsonify(success=True, sent=notify.send_pending_digest())
+
+
+@bp.route("/outbox")
+@login_required
+def outbox():
+    rows = EmailMessage.query.order_by(EmailMessage.created_at.desc()).limit(50).all()
+    return render_template("admin/outbox.html", rows=rows, smtp=bool(os.environ.get("SMTP_HOST")))

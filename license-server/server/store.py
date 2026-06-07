@@ -5,10 +5,26 @@ from datetime import datetime, timedelta
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
-from .models import db, Customer, License, Coupon
-from . import licensing, payments
+from .models import db, Customer, License, Coupon, Ticket
+from . import licensing, payments, triage
 
 bp = Blueprint("store", __name__)
+
+
+def _resolve_license(license_key, email):
+    """Find the submitter's best active license and resolve their tier."""
+    lic = None
+    if license_key:
+        lic = License.query.filter_by(key=license_key.strip().upper()).first()
+    if (not lic or not licensing.is_license_active(lic)) and email:
+        cust = Customer.query.filter_by(email=email.strip().lower()).first()
+        if cust:
+            actives = [l for l in cust.licenses if licensing.is_license_active(l)]
+            if actives:
+                rank = {"expert": 2, "pro": 1, "free": 0}
+                lic = sorted(actives, key=lambda l: rank.get(l.edition, 0), reverse=True)[0]
+    tier = licensing.edition_for_license(lic) if lic else "free"
+    return lic, tier
 
 
 @bp.route("/")
@@ -129,3 +145,50 @@ def success(key):
 def thanks():
     """Stripe success landing — the license arrives via webhook moments later."""
     return render_template("store/thanks.html")
+
+
+@bp.route("/support", methods=["GET", "POST"])
+def support():
+    """Open to everyone: support requests (tier-tagged + SLA) and bug reports."""
+    if request.method == "POST":
+        ttype = request.form.get("type", "support")
+        if ttype not in ("support", "bug"):
+            ttype = "support"
+        email = request.form.get("email", "").strip().lower()
+        license_key = request.form.get("license_key", "").strip()
+        subject = request.form.get("subject", "").strip()
+        message = request.form.get("message", "").strip()
+        page_url = request.form.get("url", "").strip()
+
+        if not message or (ttype == "support" and not email):
+            flash("Please include a message" + (" and your email." if ttype == "support" else "."), "error")
+        else:
+            lic, tier = _resolve_license(license_key, email)
+            verdict = triage.classify(subject, message, ttype)
+            now = datetime.utcnow()
+            status = {"quarantine": "flagged", "hold": "held", "queue": "queued"}[verdict["action"]]
+            # SLA applies to support requests; bug reports are best-effort.
+            due = licensing.sla_due(tier, now) if ttype == "support" else None
+            priority = (licensing.is_priority(tier) and ttype == "support") or verdict["category"] == "security_report"
+            ticket = Ticket(
+                type=ttype, email=email, license_id=(lic.id if lic else None),
+                license_key=(license_key.upper() if license_key else ""), tier=tier,
+                subject=subject[:200], message=message, url=page_url[:255], created_at=now,
+                sla_due_at=due, priority=priority, status=status,
+                category=verdict["category"], risk_score=verdict["score"],
+                reasons="; ".join(verdict["reasons"])[:400],
+            )
+            db.session.add(ticket)
+            db.session.commit()
+            return redirect(url_for("store.support_sent", tid=ticket.id))
+
+    return render_template("store/support.html",
+                           expert_sla=licensing.sla_target_label("expert"),
+                           pro_sla=licensing.sla_target_label("pro"))
+
+
+@bp.route("/support/sent/<int:tid>")
+def support_sent(tid):
+    ticket = db.get_or_404(Ticket, tid)
+    return render_template("store/support_sent.html", t=ticket,
+                           sla_label=licensing.sla_target_label(ticket.tier))

@@ -9,6 +9,9 @@
   <div class="kpi"><div class="n">{{ stats.activations }}</div><div class="l">Activations</div></div>
   <div class="kpi"><div class="n">${{ stats.mrr }}</div><div class="l">Est. MRR</div></div>
   <div class="kpi"><div class="n">{{ stats.coupons }}</div><div class="l">Coupons</div></div>
+  <a class="kpi" href="{{ url_for('admin.tickets', status='open') }}" style="text-decoration:none;color:inherit"><div class="n">{{ stats.open_tickets }}</div><div class="l">Open tickets</div></a>
+  <a class="kpi" href="{{ url_for('admin.tickets') }}" style="text-decoration:none;color:inherit"><div class="n" style="{{ 'color:var(--warn)' if stats.overdue }}">{{ stats.overdue }}</div><div class="l">Overdue SLA</div></a>
+  <a class="kpi" href="{{ url_for('admin.tickets', status='flagged') }}" style="text-decoration:none;color:inherit"><div class="n" style="{{ 'color:var(--warn)' if stats.flagged }}">{{ stats.flagged }}</div><div class="l">Flagged</div></a>
 </div>
 
 <div class="toolbar">

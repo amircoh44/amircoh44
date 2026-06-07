@@ -119,6 +119,38 @@ The SQLite DB persists in the `license-data` volume. Provide `SECRET_KEY`,
 `ADMIN_PASS` and the Stripe vars via an `.env` file or your host's secrets.
 Without Docker: `gunicorn --bind 0.0.0.0:8000 wsgi:app`.
 
+## Support inbox, triage & digest
+
+`/support` is open to everyone (bug reports from anyone; support requests resolve
+the submitter's licence → tier). Each ticket gets:
+
+- a **tier tag** (free/pro/expert) and an **SLA clock** — Expert: **12h on business
+  days, 24h on weekends**; Pro: 48h target; Free / bug reports: best-effort;
+- **triage** (`server/triage.py`): piracy/cracking requests and exploit attempts are
+  **quarantined**, spam/low-quality held, genuine **security reports** flagged as
+  priority, and legitimate, reasonable requests **queued** for the digest.
+
+In **Admin → Tickets** you can filter, see the triage reasons + SLA (overdue is
+flagged), approve/flag/close, and click **"Email me new requests"** to send a
+digest of the queued legit requests to `ADMIN_EMAIL`. Quarantined/held items are
+never auto-emailed. Every email is recorded in **Admin → Outbox** (and actually
+sent if SMTP is configured).
+
+Env vars:
+
+- `ADMIN_EMAIL` — where the digest goes.
+- `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` / `SMTP_STARTTLS` — real sending (optional; without it, messages are just recorded in the outbox).
+- `DIGEST_TOKEN` — enables the cron endpoint:
+
+```bash
+# send the digest on a schedule (e.g. hourly cron)
+curl -X POST "https://YOUR-SERVER/admin/tickets/digest/cron?token=$DIGEST_TOKEN"
+```
+
+> The triage analyzer is rule-based and offline by design (deterministic + testable).
+> `triage.classify()` is the single seam — swap in an LLM call there to keep the same
+> return shape if you want fuzzier classification later.
+
 ## Going to production
 
 - Put it behind a real WSGI server (gunicorn/uwsgi) + HTTPS; set a strong `SECRET_KEY`.

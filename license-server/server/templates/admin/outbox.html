@@ -1,0 +1,19 @@
+{% extends "admin/_base.html" %}
+{% block title %}Outbox · Admin{% endblock %}
+{% block content %}
+<h2>Email outbox</h2>
+<p class="section-sub">Digests &amp; notifications.{% if not smtp %} SMTP isn't configured — messages are recorded here only (set <code>SMTP_HOST</code> to actually send).{% endif %}</p>
+<table>
+  <tr><th>When</th><th>To</th><th>Subject / body</th><th>Sent</th></tr>
+  {% for m in rows %}
+  <tr>
+    <td class="muted">{{ m.created_at.strftime('%d %b %H:%M') }}</td>
+    <td>{{ m.to }}</td>
+    <td><details><summary>{{ m.subject }}</summary><pre style="white-space:pre-wrap;font-size:13px;margin-top:8px;font-family:ui-monospace,Menlo,Consolas,monospace">{{ m.body }}</pre></details></td>
+    <td>{% if m.sent %}<span class="badge badge--ok">sent</span>{% elif m.error %}<span class="badge badge--warn">error</span>{% else %}<span class="badge badge--off">recorded</span>{% endif %}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="4" class="muted">No emails yet — use “Email me new requests” on the Tickets page.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -72,3 +72,39 @@ class AdminUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+
+
+class Ticket(db.Model):
+    """A support request or bug report, tier-tagged with an SLA clock + triage."""
+    __tablename__ = "tickets"
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(10), default="support")        # support|bug
+    email = db.Column(db.String(190), default="", index=True)
+    license_id = db.Column(db.Integer, db.ForeignKey("licenses.id"), nullable=True)
+    license_key = db.Column(db.String(40), default="")
+    tier = db.Column(db.String(10), default="free")           # free|pro|expert
+    subject = db.Column(db.String(200), default="")
+    message = db.Column(db.Text, default="")
+    url = db.Column(db.String(255), default="")               # page a bug was seen on
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    sla_due_at = db.Column(db.DateTime, nullable=True)
+    priority = db.Column(db.Boolean, default=False)
+    status = db.Column(db.String(12), default="queued")       # queued|flagged|held|open|closed
+    category = db.Column(db.String(20), default="legit")      # legit|security_report|spam|abuse|low_quality
+    risk_score = db.Column(db.Integer, default=0)
+    reasons = db.Column(db.String(400), default="")
+    emailed_at = db.Column(db.DateTime, nullable=True)
+
+    license = db.relationship("License")
+
+
+class EmailMessage(db.Model):
+    """Outbox so digests are auditable even without SMTP configured."""
+    __tablename__ = "email_outbox"
+    id = db.Column(db.Integer, primary_key=True)
+    to = db.Column(db.String(190), nullable=False)
+    subject = db.Column(db.String(255), nullable=False)
+    body = db.Column(db.Text, default="")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    sent = db.Column(db.Boolean, default=False)
+    error = db.Column(db.String(255), default="")
