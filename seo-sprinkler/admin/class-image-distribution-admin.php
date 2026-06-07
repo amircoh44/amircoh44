@@ -119,6 +119,11 @@ class SPR_Image_Distribution_Admin {
 					'removed'   => __( 'removed', 'seo-sprinkler' ),
 					'removeNone' => __( 'no inserted images', 'seo-sprinkler' ),
 					'removeConfirm' => __( 'Remove the images SEO Sprinkler inserted from the selected articles? This rewrites the saved content (your other content is untouched).', 'seo-sprinkler' ),
+					'reviewAllConfirm' => __( 'Build an editable preview of every proposed image for the selected articles?', 'seo-sprinkler' ),
+					'gathering' => __( 'Preparing images…', 'seo-sprinkler' ),
+					'insertingAll' => __( 'Inserting', 'seo-sprinkler' ),
+					'raEmpty'   => __( 'Nothing to preview — the selected articles already meet the target, or no library images were found.', 'seo-sprinkler' ),
+					'selected'  => __( 'to insert', 'seo-sprinkler' ),
 				),
 			)
 		);

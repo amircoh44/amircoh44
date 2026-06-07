@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.11.0
+Stable tag: 1.12.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,10 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.12.0 =
+* New: "Preview & edit all" in Image Distribution — see every proposed image for the selected articles in one editable list, tweak alt text / caption / image title / description (or tick Skip), then insert them all at once.
+* Fix: centered images now actually render centered. We set alignment on our own figure class in the front-end stylesheet, so center/left/right work even on themes or page builders that don't load WordPress's block-library CSS (which previously left "center" images stuck on the left).
 
 = 1.11.0 =
 * New: redesigned Dashboard — a colourful 2026 look with a branded header, icon stat cards, a clean status list, quick-action tiles and an activity timeline. The same design language (brand accent, soft cards) now carries across every SEO Sprinkler screen.

@@ -51,6 +51,54 @@ a.spr-internal-link {
 	height: auto;
 }
 
+/* ---------------------------------------------------------------------------
+ * Auto-distributed images ("Fill with images" / Image Distribution).
+ *
+ * Every figure we insert carries the .spr-auto-image class. We set alignment on
+ * that class directly so center/left/right work even on themes (or page
+ * builders) that don't load WordPress's block-library stylesheet — without
+ * which a "center" image would otherwise fall to the left. !important is used
+ * deliberately here: it only ever targets our own inserted figures.
+ * ------------------------------------------------------------------------- */
+figure.spr-auto-image {
+	margin: 1.25em 0;
+}
+
+figure.spr-auto-image img {
+	max-width: 100%;
+	height: auto;
+}
+
+figure.spr-auto-image.aligncenter {
+	text-align: center;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+figure.spr-auto-image.aligncenter img {
+	display: block;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+figure.spr-auto-image.alignleft {
+	float: left !important;
+	margin: 0.25em 1.5em 1em 0;
+	max-width: 50%;
+}
+
+figure.spr-auto-image.alignright {
+	float: right !important;
+	margin: 0.25em 0 1em 1.5em;
+	max-width: 50%;
+}
+
+figure.spr-auto-image figcaption {
+	text-align: center;
+	font-size: 0.9em;
+	opacity: 0.85;
+}
+
 /* Device visibility. The wrapper carries one of these classes when a rule is
  * limited to desktop or mobile. The 782px breakpoint matches WordPress core. */
 @media ( max-width: 782px ) {

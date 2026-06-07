@@ -260,6 +260,181 @@
 		step();
 	}
 
+	/* ---- Preview & edit ALL proposed images, then insert them in one go ---- */
+	function disableBars( on ) {
+		$( '#spr-imgdist-fill, #spr-imgdist-review, #spr-imgdist-review-all, #spr-imgdist-remove, #spr-imgdist-scan' ).prop( 'disabled', on );
+	}
+
+	function raField( labelText, value, cls, isArea ) {
+		var $p = $( '<p/>' );
+		$( '<label/>' ).text( labelText ).appendTo( $p );
+		var $input = isArea ? $( '<textarea rows="2" class="widefat"/>' ) : $( '<input type="text" class="widefat"/>' );
+		$input.addClass( cls ).val( value || '' ).appendTo( $p );
+		return $p;
+	}
+
+	function buildRaCard( postId, p ) {
+		var $card = $( '<div class="spr-ra-card"/>' ).attr( { 'data-post': postId, 'data-att': p.id } );
+
+		var $thumb = $( '<div class="spr-ra-card__thumb"/>' );
+		$( '<img/>' ).attr( 'src', p.thumb || '' ).attr( 'alt', p.alt || '' ).appendTo( $thumb );
+		var $skip = $( '<label class="spr-ra-skip"/>' );
+		$( '<input type="checkbox" class="spr-ra-skipcb"/>' ).appendTo( $skip );
+		$skip.append( document.createTextNode( ' ' + ( i18n.skip || 'Skip' ) ) );
+		$( '<div/>' ).append( $skip ).appendTo( $thumb );
+		$card.append( $thumb );
+
+		var $f = $( '<div class="spr-ra-card__fields"/>' );
+		$f.append( raField( i18n.altLabel || 'Alt text', p.alt, 'spr-ra-alt' ) );
+		$f.append( raField( i18n.capLabel || 'Caption', p.caption, 'spr-ra-cap' ) );
+		$f.append( raField( i18n.ttlLabel || 'Image title', p.title, 'spr-ra-ttl' ) );
+		$f.append( raField( i18n.descLabel || 'Image description', p.description, 'spr-ra-desc', true ) );
+		$card.append( $f );
+		return $card;
+	}
+
+	function buildRaGroup( postId, title, proposals ) {
+		var $g = $( '<div class="spr-ra-group"/>' ).attr( 'data-post', postId );
+		$( '<div class="spr-ra-group__title"/>' )
+			.append( $( '<span class="dashicons dashicons-media-document"></span>' ) )
+			.append( document.createTextNode( ' ' + ( title || '' ) ) )
+			.appendTo( $g );
+		$.each( proposals, function ( _, p ) { $g.append( buildRaCard( postId, p ) ); } );
+		return $g;
+	}
+
+	function activeRaCards() {
+		return $( '#spr-review-all-list .spr-ra-card' ).filter( function () {
+			return ! $( this ).find( '.spr-ra-skipcb' ).is( ':checked' );
+		} );
+	}
+
+	function updateRaCount() {
+		var n = activeRaCards().length;
+		$( '#spr-review-all-count' ).text( n + ' ' + ( i18n.selected || 'to insert' ) );
+		$( '#spr-review-all-insert' ).prop( 'disabled', n === 0 );
+	}
+
+	function startReviewAll() {
+		var $rows = selectedRows();
+		if ( ! $rows.length ) {
+			window.alert( i18n.pickSome || 'Select at least one article.' );
+			return;
+		}
+		if ( ! window.confirm( i18n.reviewAllConfirm || 'Build an editable preview of every image for the selected articles?' ) ) {
+			return;
+		}
+
+		var $panel = $( '#spr-review-all' ),
+			$list  = $( '#spr-review-all-list' ).empty(),
+			$empty = $( '#spr-review-all-empty' ).hide(),
+			$prog  = $( '#spr-imgdist-progress' ),
+			ids    = $rows.toArray().map( function ( tr ) { return $( tr ).data( 'id' ); } ),
+			used   = [],
+			opts   = options(),
+			i      = 0,
+			any    = false;
+
+		disableBars( true );
+		$panel.hide();
+		$prog.show();
+		$prog.find( '.spr-progress__bar > span' ).css( 'width', '0%' );
+		$prog.find( '.spr-progress__label' ).text( i18n.gathering || 'Preparing images…' );
+
+		function nextPost() {
+			if ( i >= ids.length ) {
+				$prog.hide();
+				disableBars( false );
+				if ( ! any ) {
+					$empty.text( i18n.raEmpty || 'Nothing to insert.' ).show();
+				}
+				$panel.show();
+				updateRaCount();
+				if ( $panel.offset() ) {
+					$( 'html, body' ).animate( { scrollTop: $panel.offset().top - 40 }, 250 );
+				}
+				return;
+			}
+			var id = ids[ i ];
+			post( $.extend( { action: 'spr_imgdist_propose', post_id: id, 'exclude[]': used }, opts ) )
+				.done( function ( res ) {
+					if ( res && res.success ) {
+						var d = res.data || {};
+						if ( ( d.proposals || [] ).length ) {
+							any = true;
+							$list.append( buildRaGroup( id, d.title, d.proposals ) );
+							$.each( d.proposals, function ( _, p ) { used.push( p.id ); } );
+						}
+					}
+				} )
+				.always( function () {
+					i++;
+					$prog.find( '.spr-progress__bar > span' ).css( 'width', Math.round( ( i / ids.length ) * 100 ) + '%' );
+					nextPost();
+				} );
+		}
+		nextPost();
+	}
+
+	function insertReviewedAll() {
+		var cards = activeRaCards().toArray();
+		if ( ! cards.length ) {
+			return;
+		}
+		var $prog   = $( '#spr-imgdist-progress' ),
+			opts    = options(),
+			total   = cards.length,
+			i       = 0,
+			perPost = {};
+
+		disableBars( true );
+		$( '#spr-review-all-insert, #spr-review-all-cancel' ).prop( 'disabled', true );
+		$prog.show();
+		$prog.find( '.spr-progress__bar > span' ).css( 'width', '0%' );
+		$prog.find( '.spr-progress__label' ).text( ( i18n.insertingAll || 'Inserting' ) + ' 0 / ' + total );
+
+		function step() {
+			if ( i >= cards.length ) {
+				$prog.find( '.spr-progress__label' ).text( i18n.done || 'Done.' );
+				$.each( perPost, function ( pid, n ) {
+					var $tr = rowById( pid );
+					$tr.find( '.spr-imgdist-result' ).html( '<span class="spr-badge spr-badge--ok">+' + n + '</span>' );
+					$tr.find( '.spr-badge--warn' ).removeClass( 'spr-badge--warn' ).addClass( 'spr-badge--ok' );
+				} );
+				$( '#spr-review-all' ).hide();
+				disableBars( false );
+				return;
+			}
+			var $card = $( cards[ i ] ).css( 'opacity', 0.45 ),
+				pid   = $card.data( 'post' ),
+				att   = $card.data( 'att' );
+
+			post( $.extend( {
+				action: 'spr_imgdist_apply',
+				post_id: pid,
+				attachment_id: att,
+				alt: $card.find( '.spr-ra-alt' ).val(),
+				caption: $card.find( '.spr-ra-cap' ).val(),
+				title: $card.find( '.spr-ra-ttl' ).val(),
+				description: $card.find( '.spr-ra-desc' ).val()
+			}, opts ) )
+				.done( function ( res ) {
+					if ( res && res.success ) {
+						var d = res.data || {};
+						perPost[ pid ] = ( perPost[ pid ] || 0 ) + ( d.inserted || 0 );
+						updateRowCount( pid, d.count );
+					}
+				} )
+				.always( function () {
+					i++;
+					$prog.find( '.spr-progress__bar > span' ).css( 'width', Math.round( ( i / total ) * 100 ) + '%' );
+					$prog.find( '.spr-progress__label' ).text( ( i18n.insertingAll || 'Inserting' ) + ' ' + i + ' / ' + total );
+					step();
+				} );
+		}
+		step();
+	}
+
 	/* ---- Review each image one by one (edit alt/caption/title/description) ---- */
 	var review = {
 		queue: [],   // <tr> elements to review
@@ -467,7 +642,16 @@
 		$( '#spr-imgdist-scan' ).on( 'click', runScan );
 		$( '#spr-imgdist-fill' ).on( 'click', runFill );
 		$( '#spr-imgdist-review' ).on( 'click', startReview );
+		$( '#spr-imgdist-review-all' ).on( 'click', startReviewAll );
 		$( '#spr-imgdist-remove' ).on( 'click', runRemove );
+
+		// Bulk "preview & edit all" controls.
+		$( '#spr-review-all' ).on( 'change', '.spr-ra-skipcb', function () {
+			$( this ).closest( '.spr-ra-card' ).toggleClass( 'is-skipped', $( this ).is( ':checked' ) );
+			updateRaCount();
+		} );
+		$( '#spr-review-all-insert' ).on( 'click', insertReviewedAll );
+		$( '#spr-review-all-cancel' ).on( 'click', function () { $( '#spr-review-all' ).hide(); } );
 		$( '#spr-imgdist-all' ).on( 'change', function () {
 			$( '.spr-imgdist-cb' ).prop( 'checked', $( this ).is( ':checked' ) );
 			updateSelCount();

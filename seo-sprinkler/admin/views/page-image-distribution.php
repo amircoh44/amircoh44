@@ -118,6 +118,10 @@ $has_saved  = ! empty( $saved_rows );
 				<span class="dashicons dashicons-visibility"></span>
 				<?php esc_html_e( 'Review each image first', 'seo-sprinkler' ); ?>
 			</button>
+			<button type="button" class="button" id="spr-imgdist-review-all">
+				<span class="dashicons dashicons-list-view"></span>
+				<?php esc_html_e( 'Preview & edit all', 'seo-sprinkler' ); ?>
+			</button>
 			<button type="button" class="button button-link-delete" id="spr-imgdist-remove">
 				<span class="dashicons dashicons-trash"></span>
 				<?php esc_html_e( 'Remove inserted images', 'seo-sprinkler' ); ?>
@@ -150,6 +154,19 @@ $has_saved  = ! empty( $saved_rows );
 				<?php endforeach; ?>
 			</tbody>
 		</table>
+	</div>
+
+	<?php /* Preview & edit ALL proposed images before inserting. */ ?>
+	<div id="spr-review-all" class="spr-panel" style="display:none">
+		<h2 class="spr-panel__h"><span class="dashicons dashicons-list-view"></span> <?php esc_html_e( 'Preview & edit images before inserting', 'seo-sprinkler' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Edit any alt text, caption, image title or description. Tick “Skip” to drop an image, then insert them all at once. Images use the alignment and size you chose above.', 'seo-sprinkler' ); ?></p>
+		<div id="spr-review-all-list"></div>
+		<p id="spr-review-all-empty" class="spr-empty" style="display:none"></p>
+		<p class="spr-ra-foot">
+			<button type="button" class="button button-primary" id="spr-review-all-insert"><?php esc_html_e( 'Insert all approved images', 'seo-sprinkler' ); ?></button>
+			<button type="button" class="button" id="spr-review-all-cancel"><?php esc_html_e( 'Cancel', 'seo-sprinkler' ); ?></button>
+			<span id="spr-review-all-count" class="description" style="margin-left:6px"></span>
+		</p>
 	</div>
 
 	<?php /* Per-image reviewer modal (Approve / Skip / Approve-all). */ ?>
