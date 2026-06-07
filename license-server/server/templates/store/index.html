@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <span class="tag">Works alongside Yoast &amp; Rank Math — not instead of them</span>
+  <h1>30 years of SEO,<br>in one click.</h1>
+  <p class="lead">SEO Sprinkler is the on-page toolkit that does the hands-on, page-by-page work your SEO plugin doesn't: images, internal links, schema, cleanup, AI and migration.</p>
+  <p>
+    <a class="btn" href="{{ url_for('store.pricing') }}">See pricing</a>
+    <a class="btn btn--ghost" href="{{ url_for('store.features') }}">Explore features</a>
+  </p>
+  <p class="muted" style="margin-top:14px">✓ Free forever under 25 pages &nbsp; ✓ 14-day money-back guarantee &nbsp; ✓ Your site never breaks</p>
+</section>
+
+<h2>Everything your SEO plugin leaves to you</h2>
+<p class="section-sub">Keep Yoast/Rank Math for titles, meta &amp; sitemaps. SEO Sprinkler handles the rest.</p>
+<div class="grid grid-3">
+  <div class="card feature"><div class="ico">🔗</div><h3>Automatic internal linking</h3><p>Builds a phrase→URL index from your sitemap and links related content — display-time or baked in permanently.</p></div>
+  <div class="card feature"><div class="ico">🖼️</div><h3>Fill with images</h3><p>One click drops related, randomised images through an article so it's never a wall of text.</p></div>
+  <div class="card feature"><div class="ico">🧩</div><h3>Complete JSON-LD schema</h3><p>A business profile becomes a full <code>@graph</code> in <code>&lt;head&gt;</code> — Organization, Service, Article, breadcrumbs and more.</p></div>
+  <div class="card feature"><div class="ico">🧹</div><h3>Content cleaner</h3><p>Strips "generative junk" markup to clean HTML — logged, backed up, one-click revert.</p></div>
+  <div class="card feature"><div class="ico">🤖</div><h3>AI meta &amp; titles</h3><p>Generate meta descriptions and SEO titles with <em>your own</em> API key. Nothing is proxied through us.</p></div>
+  <div class="card feature"><div class="ico">🚀</div><h3>Export &amp; syndication</h3><p>Migrate your whole site as JSON, and auto-push new posts to Google Business, Facebook, LinkedIn &amp; X.</p></div>
+</div>
+
+<div class="card" style="margin-top:28px;text-align:center;background:#e6f4f5;border-color:#bfe3e6">
+  <h3 style="font-size:22px">Free up to 25 pages — <span class="muted" style="font-weight:500">every feature unlocked</span></h3>
+  <p>On a site with 25 or fewer published items, <strong>all Pro and Expert features are on</strong>, no key required. Grow past 25 and you pick a plan.</p>
+  <p style="margin-top:12px"><a class="btn" href="{{ url_for('store.pricing') }}">Choose your plan →</a></p>
+</div>
+{% endblock %}

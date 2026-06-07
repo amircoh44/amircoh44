@@ -1,0 +1,26 @@
+{% extends "admin/_base.html" %}
+{% block title %}{{ c.email }} · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.customers') }}">← Customers</a></p>
+<h2>{{ c.email }}</h2>
+<p class="muted">{{ c.name or 'No name' }} · joined {{ c.created_at.strftime('%d %b %Y') }}</p>
+
+<div class="toolbar">
+  <h3 style="margin:0;flex:1">Licenses</h3>
+  <a class="btn btn--sm" href="{{ url_for('admin.license_new') }}">+ Issue license</a>
+</div>
+<table>
+  <tr><th>Key</th><th>Plan</th><th>Edition now</th><th>Sites</th><th>Renews</th></tr>
+  {% for lic in c.licenses %}
+  <tr>
+    <td><a href="{{ url_for('admin.license_detail', lid=lic.id) }}"><code>{{ lic.key }}</code></a></td>
+    <td><span class="badge badge--{{ lic.edition }}">{{ lic.edition|capitalize }}</span> · {{ lic.term }}</td>
+    <td>{% if active_fn(lic) %}<span class="badge badge--ok">{{ edition_for(lic) }}</span>{% else %}<span class="badge badge--off">free</span>{% endif %}</td>
+    <td>{{ lic.activations|length }} / {{ 'unlimited' if lic.site_limit==0 else lic.site_limit }}</td>
+    <td>{{ lic.expires_at.strftime('%d %b %Y') if lic.expires_at else 'lifetime' }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5" class="muted">No licenses.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

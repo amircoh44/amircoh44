@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Pricing · {{ BRAND }}{% endblock %}
+{% block content %}
+<h2 style="text-align:center">Simple pricing. Free until you grow.</h2>
+<p class="section-sub" style="text-align:center">Annual licences shown. One-time lifetime option under each plan. 14-day money-back guarantee.</p>
+
+<div class="plans">
+  <!-- Free -->
+  <div class="plan">
+    <h3>Free</h3>
+    <div class="price">$0</div>
+    <p class="sub">Every audit &amp; manual tool. All features unlocked under 25 pages.</p>
+    <ul>
+      <li>Image, schema &amp; link audits</li>
+      <li>Inline link editor</li>
+      <li>Content cleaner (scan + revert)</li>
+      <li>"Fill with images" + SEO score</li>
+      <li>Business profile</li>
+    </ul>
+    <a class="btn btn--ghost btn--block" href="{{ url_for('store.download') }}">Download free</a>
+  </div>
+
+  <!-- Pro -->
+  <div class="plan plan--featured">
+    <span class="plan__badge">MOST POPULAR</span>
+    <h3>Pro</h3>
+    <div class="price">${{ PRICES['pro']['annual']['1'] }}<small>/yr</small></div>
+    <p class="sub">{{ PRICES['pro']['tagline'] }}</p>
+    <ul>
+      <li>Everything in Free</li>
+      <li>Automatic internal linking</li>
+      <li>Bulk apply / revert links</li>
+      <li>Content distribution</li>
+      <li>Bulk + auto content cleaning</li>
+      <li>JSON-LD schema output</li>
+      <li>AI meta &amp; titles</li>
+    </ul>
+    <a class="btn btn--block" href="{{ url_for('store.checkout', edition='pro', tier='1', term='annual') }}">Get Pro</a>
+    <p class="lifetime">or ${{ PRICES['pro']['lifetime']['1'] }} once — lifetime</p>
+  </div>
+
+  <!-- Expert -->
+  <div class="plan">
+    <h3>Expert</h3>
+    <div class="price">${{ PRICES['expert']['annual']['1'] }}<small>/yr</small></div>
+    <p class="sub">{{ PRICES['expert']['tagline'] }}</p>
+    <ul>
+      <li>Everything in Pro</li>
+      <li>Full-site export / migration</li>
+      <li>Syndication to GMB / FB / LinkedIn / X</li>
+      <li class="no">White-label (coming soon)</li>
+    </ul>
+    <a class="btn btn--block" href="{{ url_for('store.checkout', edition='expert', tier='1', term='annual') }}">Get Expert</a>
+    <p class="lifetime">or ${{ PRICES['expert']['lifetime']['1'] }} once — lifetime</p>
+  </div>
+</div>
+
+<h2>Full price list</h2>
+<p class="section-sub">More sites? Pick a tier at checkout. Agency = unlimited sites.</p>
+<table>
+  <tr><th>Plan</th><th class="c">1 site</th><th class="c">5 sites</th><th class="c">Agency (unlimited)</th></tr>
+  {% for ed in ['pro','expert'] %}
+  <tr>
+    <td><strong>{{ PRICES[ed]['label'] }}</strong> — annual</td>
+    {% for t in ['1','5','agency'] %}<td class="c">${{ PRICES[ed]['annual'][t] }}/yr</td>{% endfor %}
+  </tr>
+  <tr>
+    <td class="muted">{{ PRICES[ed]['label'] }} — lifetime</td>
+    {% for t in ['1','5','agency'] %}<td class="c muted">${{ PRICES[ed]['lifetime'][t] }} once</td>{% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+
+<h2>Discounts &amp; offers</h2>
+<table>
+  <tr><th>Offer</th><th>Discount</th><th class="c">Code</th></tr>
+  <tr><td>Launch (first year)</td><td>40% off</td><td class="c"><code>LAUNCH40</code></td></tr>
+  <tr><td>Black Friday / Cyber Monday</td><td>50% off (incl. lifetime)</td><td class="c"><code>BFCM50</code></td></tr>
+  <tr><td>Crossed 25 pages</td><td>25% off Pro</td><td class="c"><code>GROW25</code></td></tr>
+  <tr><td>Cart abandonment</td><td>15% off</td><td class="c"><code>COMEBACK15</code></td></tr>
+  <tr><td>Newsletter signup</td><td>10% off</td><td class="c"><code>WELCOME10</code></td></tr>
+  <tr><td>Renewal loyalty</td><td>30% off renewals, for life</td><td class="c">auto</td></tr>
+  <tr><td>Nonprofit / education / FOSS</td><td>50% off</td><td class="c">on request</td></tr>
+</table>
+
+<div class="note" style="margin-top:24px">💡 <strong>Your site never breaks.</strong> If a licence lapses, premium automation simply pauses — your content and links stay exactly as they are, and everything is still free under 25 pages.</div>
+{% endblock %}

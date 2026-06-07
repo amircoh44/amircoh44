@@ -1,0 +1,52 @@
+{% extends "admin/_base.html" %}
+{% block title %}{{ lic.key }} · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.licenses') }}">← Licenses</a></p>
+<h2><code>{{ lic.key }}</code></h2>
+<p>
+  <span class="badge badge--{{ lic.edition }}">{{ lic.edition|capitalize }}</span>
+  {% if active %}<span class="badge badge--ok">active</span>{% else %}<span class="badge badge--warn">{{ lic.status if lic.status!='active' else 'expired' }}</span>{% endif %}
+  · <a href="{{ url_for('admin.customer', cid=lic.customer.id) }}">{{ lic.customer.email }}</a>
+</p>
+
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <h3>Details</h3>
+    <table style="border:0">
+      <tr><td>Term</td><td style="text-align:right">{{ lic.term }}</td></tr>
+      <tr><td>Site limit</td><td style="text-align:right">{{ 'unlimited' if lic.site_limit==0 else lic.site_limit }}</td></tr>
+      <tr><td>Seats used</td><td style="text-align:right">{{ seats }}</td></tr>
+      <tr><td>Created</td><td style="text-align:right">{{ lic.created_at.strftime('%d %b %Y') }}</td></tr>
+      <tr><td>Expires</td><td style="text-align:right">{{ lic.expires_at.strftime('%d %b %Y') if lic.expires_at else 'never (lifetime)' }}</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Actions</h3>
+    <form method="post" action="{{ url_for('admin.license_action', lid=lic.id) }}">
+      <div class="row" style="gap:8px">
+        {% if lic.status=='active' %}<button class="btn btn--ghost btn--sm" name="action" value="revoke">Revoke</button>
+        {% else %}<button class="btn btn--sm" name="action" value="reactivate">Reactivate</button>{% endif %}
+        <button class="btn btn--ghost btn--sm" name="action" value="extend">+1 year</button>
+        <button class="btn btn--ghost btn--sm" name="action" value="make_lifetime">Make lifetime</button>
+        <button class="btn btn--ghost btn--sm" name="action" value="regenerate" onclick="return confirm('Generate a new key? The old key stops working.')">Regenerate key</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<h3>Activations ({{ seats }})</h3>
+<table>
+  <tr><th>Site</th><th>Name</th><th>Activated</th><th>Last seen</th><th></th></tr>
+  {% for a in lic.activations %}
+  <tr>
+    <td>{{ a.site_url }}</td>
+    <td>{{ a.site_name or '—' }}</td>
+    <td class="muted">{{ a.activated_at.strftime('%d %b %Y') }}</td>
+    <td class="muted">{{ a.last_seen_at.strftime('%d %b %Y') }}</td>
+    <td><form method="post" action="{{ url_for('admin.activation_delete', aid=a.id) }}" onsubmit="return confirm('Free this seat?')"><button class="btn btn--ghost btn--sm" type="submit">Remove</button></form></td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5" class="muted">No activations yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block header %}
+<header class="nav adminbar">
+  <div class="container nav__row">
+    <a class="brand" href="{{ url_for('admin.dashboard') }}">💧 {{ BRAND }} · Admin</a>
+    <nav class="nav__links">
+      <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('admin.customers') }}">Customers</a>
+      <a href="{{ url_for('admin.licenses') }}">Licenses</a>
+      <a href="{{ url_for('admin.coupons') }}">Coupons</a>
+      <a href="{{ url_for('admin.activations') }}">Activations</a>
+      <a href="{{ url_for('admin.plans') }}">Plans</a>
+      {% if session.admin_id %}<a href="{{ url_for('admin.logout') }}">Sign out</a>{% endif %}
+    </nav>
+  </div>
+</header>
+{% endblock %}
+{% block footer %}{% endblock %}

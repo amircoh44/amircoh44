@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Order complete · {{ BRAND }}{% endblock %}
+{% block content %}
+<section class="hero" style="padding:48px 0 18px">
+  <span class="tag">✓ Order complete</span>
+  <h1 style="font-size:34px">You're all set 🎉</h1>
+  <p class="lead">Your <strong>{{ lic.edition|capitalize }}</strong> licence is ready. Keep this key safe — you'll paste it into the plugin.</p>
+  <p><span class="key">{{ lic.key }}</span></p>
+</section>
+
+<div class="card">
+  <h3>Activate in 30 seconds</h3>
+  <ol>
+    <li>Install &amp; activate SEO Sprinkler (<a href="{{ url_for('store.download') }}">download</a>).</li>
+    <li>Go to <strong>SEO Sprinkler → Settings → License &amp; edition</strong>.</li>
+    <li>Paste your key and click <strong>Activate</strong>.</li>
+  </ol>
+  <p class="muted">Covers {% if lic.site_limit==0 %}unlimited sites{% else %}up to {{ lic.site_limit }} site(s){% endif %} ·
+    {% if lic.expires_at %}renews {{ lic.expires_at.strftime('%d %b %Y') }}{% else %}lifetime — never expires{% endif %}.</p>
+</div>
+
+<p style="margin-top:18px"><a class="btn" href="{{ url_for('store.account') }}">View my account →</a></p>
+{% endblock %}

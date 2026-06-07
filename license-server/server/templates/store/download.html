@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Download · {{ BRAND }}{% endblock %}
+{% block content %}
+<h2>Download SEO Sprinkler</h2>
+<p class="section-sub">Free to install. Premium features unlock with a licence key (or automatically under 25 pages).</p>
+
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <h3>1 · Get the plugin</h3>
+    <p>Download the latest build and upload it via <strong>Plugins → Add New → Upload Plugin</strong>.</p>
+    <p style="margin-top:12px"><a class="btn" href="https://github.com/amircoh44/amircoh44" target="_blank" rel="noopener">Download .zip</a></p>
+    <p class="muted" style="font-size:13px;margin-top:10px">Requires WordPress 5.6+ and PHP 7.2+.</p>
+  </div>
+  <div class="card">
+    <h3>2 · Activate your licence</h3>
+    <p>Open <strong>SEO Sprinkler → Settings → License &amp; edition</strong>, paste your key and click <strong>Activate</strong>. Lost your key? <a href="{{ url_for('store.account') }}">Look it up</a>.</p>
+    <p class="muted" style="font-size:13px;margin-top:10px">No key yet? Everything is free while your site is under 25 pages.</p>
+  </div>
+</div>
+{% endblock %}

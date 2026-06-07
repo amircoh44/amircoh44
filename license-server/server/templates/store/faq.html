@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}FAQ · {{ BRAND }}{% endblock %}
+{% block content %}
+<h2>Frequently asked questions</h2>
+
+<div class="card" style="margin-bottom:14px"><h3>What counts as a "site"?</h3><p>Each WordPress install where the plugin is active. A 5-site licence activates on up to five; Agency is unlimited.</p></div>
+<div class="card" style="margin-bottom:14px"><h3>What happens when I hit 25 pages on Free?</h3><p>Nothing breaks. Premium features switch off until you upgrade — and we'll show a one-click 25%-off offer right in the dashboard.</p></div>
+<div class="card" style="margin-bottom:14px"><h3>Annual vs lifetime?</h3><p>Annual includes updates &amp; support while active. Lifetime is a single payment with updates forever, capped at your site count.</p></div>
+<div class="card" style="margin-bottom:14px"><h3>Can I upgrade later?</h3><p>Yes — Free → Pro → Expert, or 1 → 5 → Agency. You only pay the prorated difference.</p></div>
+<div class="card" style="margin-bottom:14px"><h3>Refunds?</h3><p>14 days, no questions asked.</p></div>
+<div class="card" style="margin-bottom:14px"><h3>Does it replace Yoast or Rank Math?</h3><p>No — it works <em>alongside</em> them. Keep your SEO plugin for titles, meta and sitemaps; SEO Sprinkler does the page-by-page work they don't.</p></div>
+<div class="card" style="margin-bottom:14px"><h3>Does the AI feature send my content to you?</h3><p>No. AI uses <em>your own</em> OpenAI-compatible endpoint and key. Nothing is proxied through us.</p></div>
+<div class="card"><h3>Taxes?</h3><p>Listed prices exclude VAT/sales tax; it's added at checkout and remitted for you by our payment partner.</p></div>
+
+<p style="margin-top:24px"><a class="btn" href="{{ url_for('store.pricing') }}">Back to pricing →</a></p>
+{% endblock %}

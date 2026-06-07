@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Features · {{ BRAND }}{% endblock %}
+{% block content %}
+<h2>Features</h2>
+<p class="section-sub">Thirteen on-page tools in one plugin. Free tier in green, automation in Pro, migration &amp; syndication in Expert.</p>
+
+<h3>🟢 Free — the hands-on checking tools</h3>
+<div class="grid grid-2">
+  <div class="card"><h3>Image-minimum audit</h3><p>Counts inline images, gallery blocks and the featured image; flags articles below your minimum, with a sortable posts-list column.</p></div>
+  <div class="card"><h3>Schema audit</h3><p>Fetches rendered pages and detects every Schema.org type; flags missing or required types.</p></div>
+  <div class="card"><h3>Link audit + inline editor</h3><p>Internal vs external counts per post, plus a mini-WYSIWYG to fix a link's text/URL in place.</p></div>
+  <div class="card"><h3>Content cleaner (scan &amp; revert)</h3><p>Find generative-junk markup; clean it with a per-post backup and one-click revert.</p></div>
+  <div class="card"><h3>Duplicate-H1 warning</h3><p>Warns when content includes an <code>&lt;h1&gt;</code> that duplicates the theme title. Dismissible per post.</p></div>
+  <div class="card"><h3>Business profile + SEO score</h3><p>A guided questionnaire, "fill with images", and a live 0–100 per-post SEO score on every editor.</p></div>
+</div>
+
+<h3>🔵 Pro — automation &amp; AI</h3>
+<div class="grid grid-2">
+  <div class="card"><h3>Automatic internal linking</h3><p>Display-time (non-destructive) or permanent bulk apply/revert, with whole-word and per-article caps.</p></div>
+  <div class="card"><h3>Content distribution ("Sprinkler")</h3><p>Inject shortcodes, images or HTML into matched articles, placed exactly where you want — without touching stored content.</p></div>
+  <div class="card"><h3>Bulk &amp; auto cleaning</h3><p>Clean every article at once, or auto-clean on every save.</p></div>
+  <div class="card"><h3>JSON-LD <code>@graph</code> output</h3><p>Full structured-data graph in <code>&lt;head&gt;</code> for pages, services, posts and archives.</p></div>
+  <div class="card"><h3>Auto inbound links on publish</h3><p>New posts get inbound links from older related articles automatically.</p></div>
+  <div class="card"><h3>AI meta &amp; titles</h3><p>Bring your own OpenAI-compatible endpoint and key.</p></div>
+</div>
+
+<h3>🟣 Expert — scale &amp; move</h3>
+<div class="grid grid-2">
+  <div class="card"><h3>Export / migrate</h3><p>Whole-site JSON (post types, taxonomies, media + alt/caption, settings, SEO meta) plus an optional media ZIP.</p></div>
+  <div class="card"><h3>Syndication</h3><p>Auto-push each new post to webhooks → Google Business Profile, Facebook, LinkedIn, X (via Zapier/Make/n8n).</p></div>
+</div>
+
+<p style="margin-top:26px"><a class="btn" href="{{ url_for('store.pricing') }}">See pricing →</a></p>
+{% endblock %}
