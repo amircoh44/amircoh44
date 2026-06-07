@@ -147,9 +147,24 @@ Env vars:
 curl -X POST "https://YOUR-SERVER/admin/tickets/digest/cron?token=$DIGEST_TOKEN"
 ```
 
-> The triage analyzer is rule-based and offline by design (deterministic + testable).
-> `triage.classify()` is the single seam — swap in an LLM call there to keep the same
-> return shape if you want fuzzier classification later.
+### Smarter triage (optional Claude-backed)
+
+Triage is rule-based and offline by default (deterministic + testable). For fuzzier
+judgement, enable the Claude backend — `triage.classify()` then asks Claude (forced
+tool use) to classify, **but only for tickets the rules did not already flag as
+piracy / abuse / spam.** Those are quarantined by the rule *floor* without ever being
+sent to the model, so a prompt-injection inside a ticket can't talk the LLM into
+"legit"; any API error falls back to the rules.
+
+```bash
+pip install anthropic            # already in requirements.txt
+export ANTHROPIC_API_KEY=sk-ant-...
+export TRIAGE_LLM=1              # off by default
+export TRIAGE_MODEL=claude-opus-4-8   # default; e.g. claude-haiku-4-5 for a cheaper classifier
+```
+
+With `TRIAGE_LLM` unset the server makes no API calls (and the test suite stays
+fully offline).
 
 ## Going to production
 
