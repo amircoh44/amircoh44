@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +39,10 @@ It combines several on-page SEO tools in one place:
 10. **SEO Booster meta box (fill with images)** – On every post, page and custom-post editor: a one-click button that fills the content with **related, randomised** images from your media library — choose alignment (middle/left/right) and size (thumbnail → full) — distributed through the article so it's full of visuals. The same box shows a live SEO checklist (images vs the minimum, internal/external link counts, schema status, H1). Every fill is backed up and can be undone.
 
 11. **Export / Migrate** – Download your whole site as structured JSON for import into Python or another platform: all post types and custom post types, every taxonomy/term, the full media library with alt/caption/description/sizes/URLs, general settings, and SEO metadata (Yoast, Rank Math, AIOSEO, SEOPress, The SEO Framework are auto-detected). Optionally bundle the actual media files as a ZIP. Anything containing personal data (user logins/emails) requires an explicit authorisation checkbox before it is exported.
+
+12. **Per-post SEO score + AI assist** – A 0–100 SEO score on every editor, plus optional AI actions (generate meta description / SEO title) that use *your own* OpenAI-compatible endpoint and key (OpenAI, OpenRouter, Azure, local LLM) — nothing is proxied through us.
+
+13. **Syndication** – Automatically push each newly published post to outbound webhooks; connect them to Zapier / Make / n8n / IFTTT to share to Google Business Profile, Facebook, LinkedIn, X and more.
 
 = New post awareness =
 
@@ -82,6 +86,11 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use.
 
 == Changelog ==
+
+= 1.7.0 =
+* New: Per-post SEO score (free) in the SEO Booster meta box.
+* New: AI assist (Pro) — generate meta description / SEO title via your own OpenAI-compatible endpoint (Settings → AI).
+* New: Syndication (Expert) — push newly published posts to outbound webhooks (Zapier/Make/n8n/IFTTT → GMB, Facebook, LinkedIn, X).
 
 = 1.6.0 =
 * New: Free / Pro / Expert editions. Everything is free up to 25 pages (a configurable grace via the `sab_free_page_limit` filter); beyond that, premium features need Pro (automation, bulk tools, AI, schema output) or Expert (export/migration, multisite). License-key field unlocks premium; integrate any provider (Freemius, Lemon Squeezy, …) via the `sab_validate_license` filter. Dashboard shows edition + free usage.

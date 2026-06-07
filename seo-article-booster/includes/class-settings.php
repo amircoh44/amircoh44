@@ -90,6 +90,11 @@ class SAB_Settings {
 			'sitemap_urls'           => '',     // One sitemap URL per line (index or urlset). Blank = auto-detect.
 			'restrict_to_sitemap'    => 1,      // Only link to URLs present in the sitemap(s).
 
+			// --- Syndication (push to other platforms) -----------------.
+			'syndicate_enabled'      => 0,      // Push published posts to webhooks.
+			'syndicate_webhooks'     => '',     // One outbound webhook URL per line.
+			'syndicate_post_types'   => array( 'post' ),
+
 			// --- New post awareness ------------------------------------.
 			'auto_link_new_posts'    => 1,             // React to newly published content.
 			'auto_apply_inbound'     => 0,             // Permanently write inbound links on publish.
@@ -118,6 +123,7 @@ class SAB_Settings {
 		'clean_inline_styles',
 		'clean_classes',
 		'cleaner_autosave',
+		'syndicate_enabled',
 		'enable_auto_linking',
 		'case_sensitive',
 		'open_new_tab',
@@ -237,7 +243,7 @@ class SAB_Settings {
 			}
 
 			// Post-type lists: keep only registered, public post types.
-			if ( in_array( $key, array( 'audit_post_types', 'link_post_types' ), true ) ) {
+			if ( in_array( $key, array( 'audit_post_types', 'link_post_types', 'syndicate_post_types' ), true ) ) {
 				$submitted        = isset( $input[ $key ] ) ? (array) $input[ $key ] : array();
 				$valid_types      = get_post_types( array( 'public' => true ) );
 				$clean[ $key ]    = array_values( array_intersect( array_map( 'sanitize_key', $submitted ), $valid_types ) );
@@ -254,8 +260,8 @@ class SAB_Settings {
 				continue;
 			}
 
-			// Multiple sitemap URLs (one per line).
-			if ( 'sitemap_urls' === $key ) {
+			// Multi-line URL fields (one URL per line).
+			if ( in_array( $key, array( 'sitemap_urls', 'syndicate_webhooks' ), true ) ) {
 				$lines = isset( $input[ $key ] ) ? preg_split( '/\r\n|\r|\n/', (string) $input[ $key ] ) : array();
 				$urls  = array();
 				foreach ( (array) $lines as $line ) {

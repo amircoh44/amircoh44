@@ -65,6 +65,7 @@ class SAB_Edition {
 		'schema_output'  => self::PRO,
 		'ai'             => self::PRO,
 		'export'         => self::EXPERT,
+		'syndication'    => self::EXPERT,
 		'multisite'      => self::EXPERT,
 	);
 

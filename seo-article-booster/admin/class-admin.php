@@ -236,6 +236,7 @@ class SAB_Admin {
 		add_settings_section( 'sab_schema', __( 'Schema (structured data)', 'seo-article-booster' ), array( $this, 'section_schema' ), 'sab-settings' );
 		add_settings_section( 'sab_distribution', __( 'Content distribution (Sprinkler)', 'seo-article-booster' ), array( $this, 'section_distribution' ), 'sab-settings' );
 		add_settings_section( 'sab_cleaner', __( 'Content cleaner (generative junk)', 'seo-article-booster' ), array( $this, 'section_cleaner' ), 'sab-settings' );
+		add_settings_section( 'sab_syndication', __( 'Syndication (Expert)', 'seo-article-booster' ), array( $this, 'section_syndication' ), 'sab-settings' );
 		add_settings_section( 'sab_linking', __( 'Internal linking', 'seo-article-booster' ), array( $this, 'section_linking' ), 'sab-settings' );
 		add_settings_section( 'sab_sitemap', __( 'Yoast sitemap', 'seo-article-booster' ), array( $this, 'section_sitemap' ), 'sab-settings' );
 		add_settings_section( 'sab_newposts', __( 'New post awareness', 'seo-article-booster' ), array( $this, 'section_newposts' ), 'sab-settings' );
@@ -261,6 +262,11 @@ class SAB_Admin {
 			}
 		}
 		$this->add_checkbox_field( 'cleaner_autosave', __( 'Auto-clean content every time a post is saved', 'seo-article-booster' ), 'sab_cleaner' );
+
+		// Syndication fields.
+		$this->add_checkbox_field( 'syndicate_enabled', __( 'Push newly published posts to webhooks', 'seo-article-booster' ), 'sab_syndication' );
+		$this->add_textarea_field( 'syndicate_webhooks', __( 'Webhook URLs', 'seo-article-booster' ), 'sab_syndication', __( 'One URL per line. Point these at Zapier / Make / n8n / IFTTT, which post to Google Business Profile, Facebook, LinkedIn, X, etc.', 'seo-article-booster' ) );
+		$this->add_post_types_field( 'syndicate_post_types', __( 'Syndicate these post types', 'seo-article-booster' ), 'sab_syndication' );
 
 		// Linking fields.
 		$this->add_checkbox_field( 'enable_auto_linking', __( 'Enable automatic internal linking (display-time)', 'seo-article-booster' ), 'sab_linking' );
@@ -312,6 +318,9 @@ class SAB_Admin {
 			esc_url( admin_url( 'admin.php?page=' . SAB_Distribution_Admin::PAGE ) ),
 			esc_html__( 'Content Distribution →', 'seo-article-booster' )
 		);
+	}
+	public function section_syndication() {
+		echo '<p>' . esc_html__( 'Automatically push each newly published post to outbound webhooks. Connect them to Zapier / Make / n8n / IFTTT to share to Google Business Profile, Facebook, LinkedIn, X and more. Active on the Expert edition (or any site within the free page limit).', 'seo-article-booster' ) . '</p>';
 	}
 	public function section_cleaner() {
 		printf(

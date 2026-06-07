@@ -74,10 +74,11 @@ final class SAB_Plugin {
 		$cleaner  = new SAB_Content_Cleaner();
 		$heading  = new SAB_Heading_Checker();
 		$filler   = new SAB_Image_Filler( $scanner, $link_scan, $schema, $heading );
+		$syndication = new SAB_Syndication();
 		$exporter = new SAB_Exporter();
 		$ajax     = new SAB_Ajax( $scanner, $schema, $index, $applier, $sitemap );
 
-		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'exporter', 'ajax' );
+		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'syndication', 'exporter', 'ajax' );
 
 		// --- Register settings + i18n. ------------------------------------.
 		add_action( 'admin_init', array( 'SAB_Settings', 'register' ) );
@@ -89,6 +90,7 @@ final class SAB_Plugin {
 		$schema_gen->init();
 		$injector->init();
 		$new_post->init();
+		$syndication->init();
 		$distrib->init();
 		$link_scan->init();
 		$cleaner->init();
