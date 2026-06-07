@@ -224,23 +224,23 @@ class SPR_Admin {
 	 */
 	public function register_settings_fields() {
 		// Sections.
-		add_settings_section( 'spr_license', __( 'License &amp; edition', 'seo-sprinkler' ), array( $this, 'section_license' ), 'spr-settings' );
+		add_settings_section( 'spr_license', __( 'License &amp; edition', 'seo-sprinkler' ), array( $this, 'section_license' ), $this->page_for( 'spr_license' ) );
 		$this->add_text_field( 'license_key', __( 'License key', 'seo-sprinkler' ), 'spr_license', __( 'Paste your Pro/Expert license key to unlock premium features.', 'seo-sprinkler' ) );
 		$this->add_text_field( 'license_server_url', __( 'License server URL', 'seo-sprinkler' ), 'spr_license', __( 'Base URL of your SEO Sprinkler license server, e.g. https://license.example.com (or define SPR_LICENSE_SERVER). Leave blank if you activate keys another way.', 'seo-sprinkler' ) );
 
-		add_settings_section( 'spr_ai', __( 'AI (bring your own API)', 'seo-sprinkler' ), array( $this, 'section_ai' ), 'spr-settings' );
+		add_settings_section( 'spr_ai', __( 'AI (bring your own API)', 'seo-sprinkler' ), array( $this, 'section_ai' ), $this->page_for( 'spr_ai' ) );
 		$this->add_text_field( 'ai_endpoint', __( 'API endpoint', 'seo-sprinkler' ), 'spr_ai', __( 'Any OpenAI-compatible /chat/completions URL (OpenAI, OpenRouter, Azure, local LLM…).', 'seo-sprinkler' ), 'url', 'https://api.openai.com/v1/chat/completions' );
 		$this->add_text_field( 'ai_key', __( 'API key', 'seo-sprinkler' ), 'spr_ai', __( 'Stored on your site only — never sent anywhere except your chosen endpoint.', 'seo-sprinkler' ) );
 		$this->add_text_field( 'ai_model', __( 'Model', 'seo-sprinkler' ), 'spr_ai', '', 'text', 'gpt-4o-mini' );
 
-		add_settings_section( 'spr_images', __( 'Image minimum', 'seo-sprinkler' ), array( $this, 'section_images' ), 'spr-settings' );
-		add_settings_section( 'spr_schema', __( 'Schema (structured data)', 'seo-sprinkler' ), array( $this, 'section_schema' ), 'spr-settings' );
-		add_settings_section( 'spr_distribution', __( 'Content distribution (Sprinkler)', 'seo-sprinkler' ), array( $this, 'section_distribution' ), 'spr-settings' );
-		add_settings_section( 'spr_cleaner', __( 'Content cleaner (generative junk)', 'seo-sprinkler' ), array( $this, 'section_cleaner' ), 'spr-settings' );
-		add_settings_section( 'spr_syndication', __( 'Syndication (Expert)', 'seo-sprinkler' ), array( $this, 'section_syndication' ), 'spr-settings' );
-		add_settings_section( 'spr_linking', __( 'Internal linking', 'seo-sprinkler' ), array( $this, 'section_linking' ), 'spr-settings' );
-		add_settings_section( 'spr_sitemap', __( 'Yoast sitemap', 'seo-sprinkler' ), array( $this, 'section_sitemap' ), 'spr-settings' );
-		add_settings_section( 'spr_newposts', __( 'New post awareness', 'seo-sprinkler' ), array( $this, 'section_newposts' ), 'spr-settings' );
+		add_settings_section( 'spr_images', __( 'Image minimum', 'seo-sprinkler' ), array( $this, 'section_images' ), $this->page_for( 'spr_images' ) );
+		add_settings_section( 'spr_schema', __( 'Schema (structured data)', 'seo-sprinkler' ), array( $this, 'section_schema' ), $this->page_for( 'spr_schema' ) );
+		add_settings_section( 'spr_distribution', __( 'Content distribution (Sprinkler)', 'seo-sprinkler' ), array( $this, 'section_distribution' ), $this->page_for( 'spr_distribution' ) );
+		add_settings_section( 'spr_cleaner', __( 'Content cleaner (generative junk)', 'seo-sprinkler' ), array( $this, 'section_cleaner' ), $this->page_for( 'spr_cleaner' ) );
+		add_settings_section( 'spr_syndication', __( 'Syndication (Expert)', 'seo-sprinkler' ), array( $this, 'section_syndication' ), $this->page_for( 'spr_syndication' ) );
+		add_settings_section( 'spr_linking', __( 'Internal linking', 'seo-sprinkler' ), array( $this, 'section_linking' ), $this->page_for( 'spr_linking' ) );
+		add_settings_section( 'spr_sitemap', __( 'Yoast sitemap', 'seo-sprinkler' ), array( $this, 'section_sitemap' ), $this->page_for( 'spr_sitemap' ) );
+		add_settings_section( 'spr_newposts', __( 'New post awareness', 'seo-sprinkler' ), array( $this, 'section_newposts' ), $this->page_for( 'spr_newposts' ) );
 
 		// Image fields.
 		$this->add_number_field( 'min_images', __( 'Minimum images per article', 'seo-sprinkler' ), 'spr_images', __( 'Articles with fewer images than this are flagged in the audit and the editor.', 'seo-sprinkler' ) );
@@ -293,11 +293,60 @@ class SPR_Admin {
 		$this->add_number_field( 'inbound_apply_limit', __( 'Max older posts to edit per new post', 'seo-sprinkler' ), 'spr_newposts' );
 	}
 
-	/** Section intros. */
+	/**
+	 * Settings tabs (slug => label), in nav order.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function settings_tabs() {
+		return array(
+			'license'     => __( 'License', 'seo-sprinkler' ),
+			'linking'     => __( 'Internal links', 'seo-sprinkler' ),
+			'content'     => __( 'Images &amp; schema', 'seo-sprinkler' ),
+			'tools'       => __( 'Content tools', 'seo-sprinkler' ),
+			'ai'          => __( 'AI', 'seo-sprinkler' ),
+			'syndication' => __( 'Syndication', 'seo-sprinkler' ),
+		);
+	}
+
+	/**
+	 * Which tab a settings section belongs to.
+	 *
+	 * @param string $section Section id.
+	 * @return string Tab slug.
+	 */
+	public function tab_for_section( $section ) {
+		$map = array(
+			'spr_license'      => 'license',
+			'spr_linking'      => 'linking',
+			'spr_sitemap'      => 'linking',
+			'spr_newposts'     => 'linking',
+			'spr_images'       => 'content',
+			'spr_schema'       => 'content',
+			'spr_distribution' => 'tools',
+			'spr_cleaner'      => 'tools',
+			'spr_ai'           => 'ai',
+			'spr_syndication'  => 'syndication',
+		);
+		return isset( $map[ $section ] ) ? $map[ $section ] : 'license';
+	}
+
+	/**
+	 * The settings-page slug a section (and its fields) render under — one per tab.
+	 *
+	 * @param string $section Section id.
+	 * @return string
+	 */
+	public function page_for( $section ) {
+		return 'spr-settings-' . $this->tab_for_section( $section );
+	}
+
+	/** Section intros — generous, plain-language explanations for each tab. */
 	public function section_ai() {
-		echo '<p>' . esc_html__( 'Connect your own AI provider (OpenAI-compatible). Your key stays on your site and is only sent to the endpoint you choose. Powers Pro AI actions such as generating meta descriptions.', 'seo-sprinkler' ) . '</p>';
+		echo '<p>' . esc_html__( 'Bring your own AI provider — any OpenAI-compatible chat endpoint (OpenAI, OpenRouter, Azure OpenAI, or a local model). Your API key is stored only in your own database and is sent only to the endpoint you enter below — never to us. It powers the optional AI buttons in the editor, such as generating a meta description or an SEO title from your content. Leave the key blank to keep AI features off.', 'seo-sprinkler' ) . '</p>';
 	}
 	public function section_license() {
+		echo '<p>' . esc_html__( 'SEO Sprinkler is free to use, with optional Pro and Expert tiers that add automation, AI, full JSON-LD schema output and whole-site migration. Everything is unlocked free while a site stays under the free page limit; beyond that, paste a key here to unlock premium features. On sites you own you can also activate with the SPR_EDITION constant or your own license server (below).', 'seo-sprinkler' ) . '</p>';
 		printf(
 			'<p>%s <strong>%s</strong>. <a href="%s" target="_blank" rel="noopener">%s</a></p>',
 			esc_html__( 'Current edition:', 'seo-sprinkler' ),
@@ -307,38 +356,38 @@ class SPR_Admin {
 		);
 	}
 	public function section_images() {
-		echo '<p>' . esc_html__( 'Define how many images an article should contain. The plugin counts inline images, gallery blocks/shortcodes and (optionally) the featured image.', 'seo-sprinkler' ) . '</p>';
+		echo '<p>' . esc_html__( 'Strong articles are not walls of text. Set the minimum number of images you expect per article and SEO Sprinkler flags anything that falls short — in the audit and right inside the editor. It counts inline images, gallery blocks and shortcodes, and (optionally) the featured image, so the number reflects what a reader actually sees.', 'seo-sprinkler' ) . '</p>';
 	}
 	public function section_schema() {
-		echo '<p>' . esc_html__( 'Verify that your articles output Schema.org structured data (JSON-LD or microdata). The audit fetches each article and reports the schema types found.', 'seo-sprinkler' ) . '</p>';
+		echo '<p>' . esc_html__( 'Structured data (Schema.org) is how Google understands what each page is — an Article, a LocalBusiness, a Service, and so on. This audit fetches each published article and reports exactly which schema types it finds in the rendered HTML (JSON-LD or microdata), so you can spot pages that are missing it. The plugin can also output its own complete JSON-LD graph built from your Business Profile.', 'seo-sprinkler' ) . '</p>';
 	}
 	public function section_distribution() {
 		printf(
 			'<p>%s <a href="%s">%s</a></p>',
-			esc_html__( 'Distribute shortcodes, images or HTML into articles by tag, category or keyword, placed around your headings and paragraphs. Manage the rules on the dedicated screen:', 'seo-sprinkler' ),
+			esc_html__( 'Inject a shortcode (such as an Elementor template), an image, or custom HTML into the articles you choose — matched by tag, category or keyword, and placed exactly where you want around headings and paragraphs. Your stored content is never modified; the insert happens at display time, so you can change or remove it any time. Build and manage the rules on the dedicated screen:', 'seo-sprinkler' ),
 			esc_url( admin_url( 'admin.php?page=' . SPR_Distribution_Admin::PAGE ) ),
 			esc_html__( 'Content Distribution →', 'seo-sprinkler' )
 		);
 	}
 	public function section_syndication() {
-		echo '<p>' . esc_html__( 'Automatically push each newly published post to outbound webhooks. Connect them to Zapier / Make / n8n / IFTTT to share to Google Business Profile, Facebook, LinkedIn, X and more. Active on the Expert edition (or any site within the free page limit).', 'seo-sprinkler' ) . '</p>';
+		echo '<p>' . esc_html__( 'Reach more people automatically: whenever you publish a new post, SEO Sprinkler can POST it to one or more webhook URLs. Point those at Zapier, Make, n8n or IFTTT to fan the post out to Google Business Profile, Facebook, LinkedIn, X and more — no manual reposting. Available on the Expert edition, and on any site within the free page limit.', 'seo-sprinkler' ) . '</p>';
 	}
 	public function section_cleaner() {
 		printf(
 			'<p>%s <a href="%s">%s</a></p>',
-			esc_html__( 'Choose which kinds of "generative trash" to remove from your HTML. Cleaning leaves plain markup — no CSS, no inline styles — and never adds anything to your links. Run a scan or clean from:', 'seo-sprinkler' ),
+			esc_html__( 'Pasted or AI-generated content often carries invisible junk — markdown code fences, zero-width characters, empty paragraphs, Word/Office cruft and more. Choose what to strip; cleaning leaves plain, valid markup (no CSS, no inline styles) and never touches your links. Every change is logged with a per-post backup and a one-click revert. Run a scan or clean from:', 'seo-sprinkler' ),
 			esc_url( admin_url( 'admin.php?page=' . ( class_exists( 'SPR_Cleaner_Admin' ) ? SPR_Cleaner_Admin::PAGE : 'spr-cleaner' ) ) ),
 			esc_html__( 'Content Cleaner →', 'seo-sprinkler' )
 		);
 	}
 	public function section_linking() {
-		echo '<p>' . esc_html__( 'Control how related articles are linked. Matching uses each post’s title and/or Yoast focus keyword as the anchor phrase.', 'seo-sprinkler' ) . '</p>';
+		echo '<p>' . esc_html__( 'Internal links guide readers through your site and spread ranking signal between related pages. SEO Sprinkler finds phrases in your content — each post title and/or its Yoast focus keyword — and turns matches into links to the right page. By default this happens at display time, so nothing is written to your posts, and the caps below keep it tasteful (limit links per article and per phrase).', 'seo-sprinkler' ) . '</p>';
 	}
 	public function section_sitemap() {
-		echo '<p>' . esc_html__( 'The linkable URL set is taken from the Yoast SEO sitemap so only indexed, public pages are linked.', 'seo-sprinkler' ) . '</p>';
+		echo '<p>' . esc_html__( 'So links only ever point at real, indexable pages, SEO Sprinkler reads your XML sitemap and links only to URLs it lists. Add more sitemaps if your site has several — they are merged and de-duplicated. If no sitemap is found, the plugin falls back to all published posts and says so on the Dashboard.', 'seo-sprinkler' ) . '</p>';
 	}
 	public function section_newposts() {
-		echo '<p>' . esc_html__( 'When a post or page is published, the link index is rebuilt so older related articles immediately link to the new URL. You can also bake those inbound links permanently into a limited number of older posts.', 'seo-sprinkler' ) . '</p>';
+		echo '<p>' . esc_html__( 'Fresh content should not sit unlinked. When you publish a post or page, SEO Sprinkler rebuilds its link index so older, related articles start linking to the new URL right away. Optionally it can bake those inbound links permanently into a limited number of older posts, giving a new page an immediate internal-link boost.', 'seo-sprinkler' ) . '</p>';
 	}
 
 	/* --- Field renderers ------------------------------------------------- */
@@ -366,7 +415,7 @@ class SPR_Admin {
 					echo '<p class="description">' . esc_html( $help ) . '</p>';
 				}
 			},
-			'spr-settings',
+			$this->page_for( $section ),
 			$section,
 			array( 'label_for' => $key )
 		);
@@ -392,7 +441,7 @@ class SPR_Admin {
 					esc_html( $label )
 				);
 			},
-			'spr-settings',
+			$this->page_for( $section ),
 			$section
 		);
 	}
@@ -422,7 +471,7 @@ class SPR_Admin {
 					echo '<p class="description">' . esc_html( $help ) . '</p>';
 				}
 			},
-			'spr-settings',
+			$this->page_for( $section ),
 			$section,
 			array( 'label_for' => $key )
 		);
@@ -455,7 +504,7 @@ class SPR_Admin {
 					echo '<p class="description">' . wp_kses( $help, array( 'code' => array() ) ) . '</p>';
 				}
 			},
-			'spr-settings',
+			$this->page_for( $section ),
 			$section,
 			array( 'label_for' => $key )
 		);
@@ -489,7 +538,7 @@ class SPR_Admin {
 					);
 				}
 			},
-			'spr-settings',
+			$this->page_for( $section ),
 			$section
 		);
 	}

@@ -55,6 +55,12 @@ $textarea = function ( $key, $label, $rows, $placeholder = '' ) use ( $opt, $g )
 	<form action="options.php" method="post">
 		<?php settings_fields( SPR_Business_Admin::GROUP ); ?>
 
+			<p class="spr-autofill-bar">
+				<button type="button" class="button" id="spr-autofill"><?php esc_html_e( 'Auto-fill from this site', 'seo-sprinkler' ); ?></button>
+				<span id="spr-autofill-status" class="description" style="margin-left:8px"></span>
+			</p>
+			<p class="description" style="margin-top:-4px"><?php esc_html_e( 'Pulls your business Name, Website URL, description and logo from WordPress — only fills fields that are still blank.', 'seo-sprinkler' ); ?></p>
+
 		<h2 class="title"><?php esc_html_e( 'Identity', 'seo-sprinkler' ); ?></h2>
 		<table class="form-table" role="presentation">
 			<tr>
@@ -129,6 +135,14 @@ $textarea = function ( $key, $label, $rows, $placeholder = '' ) use ( $opt, $g )
 			$field( 'latitude', __( 'Latitude', 'seo-sprinkler' ) );
 			$field( 'longitude', __( 'Longitude', 'seo-sprinkler' ) );
 			?>
+			<tr>
+				<th scope="row"></th>
+				<td>
+					<button type="button" class="button" id="spr-geocode"><?php esc_html_e( 'Look up coordinates from address', 'seo-sprinkler' ); ?></button>
+					<span id="spr-geocode-status" class="description" style="margin-left:8px"></span>
+					<p class="description"><?php esc_html_e( 'Fills latitude & longitude from the address above using OpenStreetMap — free, no API key needed.', 'seo-sprinkler' ); ?></p>
+				</td>
+			</tr>
 		</table>
 
 		<h2 class="title"><?php esc_html_e( 'Hours, pricing & service area', 'seo-sprinkler' ); ?></h2>

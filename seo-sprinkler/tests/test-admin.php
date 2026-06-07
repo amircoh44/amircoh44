@@ -65,6 +65,9 @@ foreach ( array(
 	'cleaner label is HTML-escaped'              => false !== strpos( $settings_html, 'Stray &lt;script&gt;' ),
 	'no raw <script> injected by a field title'  => false === strpos( $settings_html, 'Stray <script>' ),
 	'Save button renders after all sections'     => false !== strpos( $settings_html, 'Save Changes' ),
+	'settings render as tabs'                    => false !== strpos( $settings_html, 'nav-tab-wrapper' ),
+	'a panel exists for every tab'               => substr_count( $settings_html, 'spr-tab-panel' ) >= count( SPR_Admin::settings_tabs() ),
+	'sections still render inside tabs'          => false !== strpos( $settings_html, 'AI (bring your own API)' ),
 ) as $check_name => $cond ) {
 	if ( $cond ) { $pass++; echo "PASS  $check_name\n"; } else { $fail++; echo "FAIL  $check_name\n"; }
 }
@@ -89,6 +92,26 @@ render( 'content cleaner', function () use ( $ca ) { $ca->render(); }, 'Change l
 $ba = $plugin->service( 'business_admin' );
 $ba->register_setting();
 render( 'business profile', function () use ( $ba ) { $ba->render(); }, 'Business Profile' );
+
+// Geocoder: address -> coordinates (HTTP mocked, no network).
+add_filter( 'pre_http_request', function ( $pre, $args, $url ) {
+	if ( false !== strpos( $url, 'nominatim.openstreetmap.org' ) ) {
+		return array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array(),
+			'body'     => wp_json_encode( array( array( 'lat' => '40.7128', 'lon' => '-74.0060', 'display_name' => 'New York, NY, USA' ) ) ),
+		);
+	}
+	return $pre;
+}, 10, 3 );
+$geo = $ba->geocode( 'Empire State Building, New York' );
+foreach ( array(
+	'geocode parses latitude'  => ( is_array( $geo ) && abs( $geo['lat'] - 40.7128 ) < 0.001 ),
+	'geocode parses longitude' => ( is_array( $geo ) && abs( $geo['lon'] + 74.0060 ) < 0.001 ),
+	'geocode returns a label'  => ( is_array( $geo ) && false !== strpos( $geo['display'], 'New York' ) ),
+) as $check_name => $cond ) {
+	if ( $cond ) { $pass++; echo "PASS  $check_name\n"; } else { $fail++; echo "FAIL  $check_name\n"; }
+}
 
 $ea = $plugin->service( 'export_admin' );
 render( 'export / migrate', function () use ( $ea ) { $ea->render(); }, 'Export / Migrate' );
