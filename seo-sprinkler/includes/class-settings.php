@@ -71,7 +71,9 @@ class SPR_Settings {
 			'clean_html_comments'    => 0,      // Remove HTML comments (keep wp: blocks).
 			'clean_inline_styles'    => 1,      // Strip inline style="" (no CSS).
 			'clean_classes'          => 0,      // Strip class="" (aggressive; off by default).
+			'clean_custom'           => 0,      // Apply the user's own custom removal rules.
 			'cleaner_autosave'       => 0,      // Auto-clean content on save.
+			'cleaner_custom_rules'   => '',     // One rule per line: /regex/flags or literal text.
 
 			// --- Internal linking --------------------------------------.
 			'enable_auto_linking'    => 1,      // Master switch for display-time linking.
@@ -123,6 +125,7 @@ class SPR_Settings {
 		'clean_html_comments',
 		'clean_inline_styles',
 		'clean_classes',
+		'clean_custom',
 		'cleaner_autosave',
 		'syndicate_enabled',
 		'enable_auto_linking',
@@ -258,6 +261,17 @@ class SPR_Settings {
 			if ( 'sitemap_url' === $key ) {
 				$raw           = isset( $input[ $key ] ) ? trim( (string) $input[ $key ] ) : '';
 				$clean[ $key ] = ( '' === $raw ) ? '' : esc_url_raw( $raw );
+				continue;
+			}
+
+			// Custom cleanup rules: free-text, one rule per line. Kept close to raw
+			// (admin-only) so regex patterns and literal markup survive; we only
+			// drop null bytes and normalise line endings.
+			if ( 'cleaner_custom_rules' === $key ) {
+				$raw           = isset( $input[ $key ] ) ? (string) $input[ $key ] : '';
+				$raw           = str_replace( "\0", '', $raw );
+				$raw           = preg_replace( '/\r\n|\r/', "\n", $raw );
+				$clean[ $key ] = trim( $raw );
 				continue;
 			}
 

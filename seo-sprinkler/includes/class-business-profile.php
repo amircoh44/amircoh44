@@ -65,6 +65,9 @@ class SPR_Business_Profile {
 			'founding_date'     => 'text',   // YYYY or YYYY-MM-DD.
 			'vat_id'            => 'text',
 
+			// Integrations.
+			'places_api_key'    => 'text',   // Optional Google Places API key for "Fill from Google".
+
 			// Social profiles (sameAs).
 			'facebook'          => 'url',
 			'instagram'         => 'url',

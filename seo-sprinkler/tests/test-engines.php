@@ -87,6 +87,17 @@ check( 'th/td style= kept', false !== strpos( $tclean, '<td style="padding:8px;b
 check( 'non-table <p> style= removed', false === strpos( $tclean, 'color:red' ) );
 check( 'only the <p> style counted', 1 === (int) $tstats['clean_inline_styles'] );
 
+// Custom cleanup rules — a literal line and a /regex/ line.
+$cs                         = (array) get_option( 'spr_settings' );
+$cs['cleaner_custom_rules'] = "REMOVE_ME\n/\\[junk[^\\]]*\\]/i";
+update_option( 'spr_settings', $cs );
+SPR_Settings::flush_cache();
+list( $ccclean, , $ccstats ) = $cleaner->clean( '<p>REMOVE_ME keep [junk a=1] end</p>', array( 'clean_custom' => 1 ) );
+check( 'custom literal rule removed', false === strpos( $ccclean, 'REMOVE_ME' ) );
+check( 'custom regex rule removed', false === strpos( $ccclean, '[junk' ) );
+check( 'custom rules keep other text', false !== strpos( $ccclean, 'keep' ) && false !== strpos( $ccclean, 'end' ) );
+check( 'custom rules counted', isset( $ccstats['clean_custom'] ) && $ccstats['clean_custom'] >= 2 );
+
 // Cleaner backup + log + revert.
 $pid2   = wp_insert_post( array( 'post_title' => 'Clean Target', 'post_content' => $junk, 'post_status' => 'publish' ) );
 $before = get_post( $pid2 )->post_content;

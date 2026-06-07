@@ -36,6 +36,7 @@ class SPR_Business_Admin {
 		add_action( 'admin_init', array( $this, 'register_setting' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'wp_ajax_spr_geocode', array( $this, 'ajax_geocode' ) );
+		add_action( 'wp_ajax_spr_gmb_lookup', array( $this, 'ajax_gmb' ) );
 	}
 
 	/**
@@ -103,6 +104,9 @@ class SPR_Business_Admin {
 					'looking' => __( 'Looking up…', 'seo-sprinkler' ),
 					'matched' => __( 'Matched:', 'seo-sprinkler' ),
 					'geoFail' => __( 'Could not find coordinates for that address.', 'seo-sprinkler' ),
+					'gmbNeed' => __( 'Paste your Google Maps link first.', 'seo-sprinkler' ),
+					'gmbOk'   => __( 'Filled from Google — review and Save.', 'seo-sprinkler' ),
+					'gmbFail' => __( 'Could not read that Google link.', 'seo-sprinkler' ),
 				),
 			)
 		);
@@ -143,6 +147,210 @@ class SPR_Business_Admin {
 			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
 		}
 		wp_send_json_success( $result );
+	}
+
+	/**
+	 * AJAX: read a Google Maps / Business link and fill the profile.
+	 *
+	 * The business name + coordinates come straight from the link (free). When a
+	 * Google Places API key is supplied, we additionally fetch the phone, address
+	 * and website from the Places API.
+	 */
+	public function ajax_gmb() {
+		if ( ! check_ajax_referer( 'spr_geocode', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'seo-sprinkler' ) ), 403 );
+		}
+		if ( ! current_user_can( self::CAP ) ) {
+			wp_send_json_error( array( 'message' => __( 'Not allowed.', 'seo-sprinkler' ) ), 403 );
+		}
+		$url = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
+		$key = isset( $_POST['api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['api_key'] ) ) : '';
+		if ( '' === $url ) {
+			wp_send_json_error( array( 'message' => __( 'Paste your Google Maps link first.', 'seo-sprinkler' ) ) );
+		}
+
+		// Resolve short links (maps.app.goo.gl / goo.gl) to the full Maps URL.
+		if ( preg_match( '#(goo\.gl|app\.goo\.gl|maps\.app\.goo\.gl)#i', $url ) ) {
+			$url = $this->resolve_url( $url );
+		}
+
+		$data = $this->parse_google_url( $url );
+
+		if ( '' !== $key ) {
+			$details = $this->places_details( $data, $key );
+			if ( is_array( $details ) ) {
+				$data = array_merge( $data, $details );
+			}
+		}
+
+		if ( empty( $data ) || ( empty( $data['lat'] ) && empty( $data['name'] ) ) ) {
+			wp_send_json_error( array( 'message' => __( 'Could not read that link. Make sure it is a Google Maps place link.', 'seo-sprinkler' ) ) );
+		}
+
+		wp_send_json_success( $data );
+	}
+
+	/**
+	 * Follow redirects to the final URL (for shortened Google links).
+	 *
+	 * @param string $url  URL.
+	 * @param int    $hops Max redirects.
+	 * @return string
+	 */
+	protected function resolve_url( $url, $hops = 5 ) {
+		for ( $i = 0; $i < $hops; $i++ ) {
+			$resp = wp_remote_head(
+				$url,
+				array(
+					'redirection' => 0,
+					'timeout'     => 10,
+					'headers'     => array( 'User-Agent' => 'SEO Sprinkler/' . SPR_VERSION . ' (' . home_url( '/' ) . ')' ),
+				)
+			);
+			if ( is_wp_error( $resp ) ) {
+				break;
+			}
+			$code = (int) wp_remote_retrieve_response_code( $resp );
+			$loc  = wp_remote_retrieve_header( $resp, 'location' );
+			if ( $code >= 300 && $code < 400 && $loc ) {
+				$url = $loc;
+				continue;
+			}
+			break;
+		}
+		return $url;
+	}
+
+	/**
+	 * Pull the place name + coordinates out of a Google Maps URL.
+	 *
+	 * @param string $url Maps URL.
+	 * @return array { name?, lat?, lng? }
+	 */
+	protected function parse_google_url( $url ) {
+		$out = array();
+		if ( preg_match( '/@(-?\d+\.\d+),(-?\d+\.\d+)/', $url, $m ) ) {
+			$out['lat'] = round( (float) $m[1], 6 );
+			$out['lng'] = round( (float) $m[2], 6 );
+		} elseif ( preg_match( '/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', $url, $m ) ) {
+			$out['lat'] = round( (float) $m[1], 6 );
+			$out['lng'] = round( (float) $m[2], 6 );
+		}
+		if ( preg_match( '#/place/([^/@]+)#', $url, $m ) ) {
+			$name = trim( str_replace( '+', ' ', rawurldecode( $m[1] ) ) );
+			if ( '' !== $name ) {
+				$out['name'] = $name;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Fetch full details from the Google Places API (needs an API key).
+	 *
+	 * @param array  $known Already-known data (name/lat/lng) used to find the place.
+	 * @param string $key   Google Places API key.
+	 * @return array|null Filled fields, or null on failure.
+	 */
+	protected function places_details( $known, $key ) {
+		$query = isset( $known['name'] ) ? $known['name'] : '';
+		if ( '' === $query ) {
+			return null;
+		}
+
+		$find_args = array(
+			'input'     => $query,
+			'inputtype' => 'textquery',
+			'fields'    => 'place_id',
+			'key'       => $key,
+		);
+		if ( isset( $known['lat'], $known['lng'] ) ) {
+			$find_args['locationbias'] = 'point:' . $known['lat'] . ',' . $known['lng'];
+		}
+		$find = wp_remote_get(
+			add_query_arg( $find_args, 'https://maps.googleapis.com/maps/api/place/findplacefromtext/json' ),
+			array( 'timeout' => 15 )
+		);
+		if ( is_wp_error( $find ) ) {
+			return null;
+		}
+		$fbody = json_decode( wp_remote_retrieve_body( $find ), true );
+		$pid   = isset( $fbody['candidates'][0]['place_id'] ) ? $fbody['candidates'][0]['place_id'] : '';
+		if ( '' === $pid ) {
+			return null;
+		}
+
+		$det = wp_remote_get(
+			add_query_arg(
+				array(
+					'place_id' => $pid,
+					'fields'   => 'name,formatted_phone_number,international_phone_number,website,address_components,geometry',
+					'key'      => $key,
+				),
+				'https://maps.googleapis.com/maps/api/place/details/json'
+			),
+			array( 'timeout' => 15 )
+		);
+		if ( is_wp_error( $det ) ) {
+			return null;
+		}
+		$dbody = json_decode( wp_remote_retrieve_body( $det ), true );
+		$r     = isset( $dbody['result'] ) && is_array( $dbody['result'] ) ? $dbody['result'] : null;
+		if ( ! $r ) {
+			return null;
+		}
+
+		$out = array();
+		if ( ! empty( $r['name'] ) ) {
+			$out['name'] = $r['name'];
+		}
+		if ( ! empty( $r['formatted_phone_number'] ) ) {
+			$out['telephone'] = $r['formatted_phone_number'];
+		} elseif ( ! empty( $r['international_phone_number'] ) ) {
+			$out['telephone'] = $r['international_phone_number'];
+		}
+		if ( ! empty( $r['website'] ) ) {
+			$out['website'] = $r['website'];
+		}
+		if ( ! empty( $r['geometry']['location']['lat'] ) ) {
+			$out['lat'] = round( (float) $r['geometry']['location']['lat'], 6 );
+			$out['lng'] = round( (float) $r['geometry']['location']['lng'], 6 );
+		}
+		if ( ! empty( $r['address_components'] ) && is_array( $r['address_components'] ) ) {
+			$pick = function ( $types ) use ( $r ) {
+				foreach ( $r['address_components'] as $c ) {
+					foreach ( (array) $types as $t ) {
+						if ( in_array( $t, (array) $c['types'], true ) ) {
+							return $c;
+						}
+					}
+				}
+				return null;
+			};
+			$num   = $pick( 'street_number' );
+			$route = $pick( 'route' );
+			$street = trim( ( $num ? $num['long_name'] . ' ' : '' ) . ( $route ? $route['long_name'] : '' ) );
+			if ( '' !== $street ) {
+				$out['street'] = $street;
+			}
+			$loc = $pick( array( 'locality', 'postal_town' ) );
+			if ( $loc ) {
+				$out['locality'] = $loc['long_name'];
+			}
+			$reg = $pick( 'administrative_area_level_1' );
+			if ( $reg ) {
+				$out['region'] = $reg['short_name'];
+			}
+			$pc = $pick( 'postal_code' );
+			if ( $pc ) {
+				$out['postal_code'] = $pc['long_name'];
+			}
+			$co = $pick( 'country' );
+			if ( $co ) {
+				$out['country'] = $co['short_name'];
+			}
+		}
+		return $out;
 	}
 
 	/**

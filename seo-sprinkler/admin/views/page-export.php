@@ -85,6 +85,18 @@ $check = function ( $name, $label, $checked = true, $class = '' ) {
 		</div>
 
 		<div class="spr-panel">
+			<h2 class="spr-panel__h"><span class="dashicons dashicons-admin-page"></span> <?php esc_html_e( 'Content mirror', 'seo-sprinkler' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Capture the real, rendered content of every page — including Elementor and other page builders, whose layout lives outside the post content — so the export is a complete, portable mirror you can rebuild anywhere.', 'seo-sprinkler' ); ?></p>
+			<?php
+			$check( 'render_content', __( 'Render full page content (Elementor, page builders, blocks &amp; shortcodes)', 'seo-sprinkler' ), true );
+			$check( 'clean_html', __( 'Add a clean, semantic-HTML mirror — no scripts, styles, classes or builder/WordPress markup', 'seo-sprinkler' ), true );
+			$check( 'extract_media', __( 'Extract each page&#8217;s content images and internal/external links (connections)', 'seo-sprinkler' ), true );
+			$check( 'include_menus', __( 'Navigation menus &amp; their items', 'seo-sprinkler' ), true );
+			?>
+			<p class="description"><?php esc_html_e( 'Rendering every page can take a little longer on large sites.', 'seo-sprinkler' ); ?></p>
+		</div>
+
+		<div class="spr-panel">
 			<h2><?php esc_html_e( 'Personal data', 'seo-sprinkler' ); ?></h2>
 			<div class="notice notice-warning inline"><p><?php esc_html_e( 'The options below include personal data. Only export data you are authorised to handle. Keep the downloaded file in a safe place — do not upload it to an unsecured or public server, and never commit it to a public repository such as GitHub.', 'seo-sprinkler' ); ?></p></div>
 			<?php

@@ -148,6 +148,10 @@ class SPR_Export_Admin {
 			'include_emails'      => $bool( 'include_emails' ),
 			'include_comments'    => $bool( 'include_comments' ),
 			'include_all_options' => $bool( 'include_all_options' ),
+			'render_content'      => $bool( 'render_content' ),
+			'clean_html'          => $bool( 'clean_html' ),
+			'extract_media'       => $bool( 'extract_media' ),
+			'include_menus'       => $bool( 'include_menus' ),
 		);
 
 		// Emails imply users.

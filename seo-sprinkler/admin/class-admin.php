@@ -271,6 +271,12 @@ class SPR_Admin {
 			}
 		}
 		$this->add_checkbox_field( 'cleaner_autosave', __( 'Auto-clean content every time a post is saved', 'seo-sprinkler' ), 'spr_cleaner' );
+		$this->add_textarea_field(
+			'cleaner_custom_rules',
+			__( 'Custom cleanup rules', 'seo-sprinkler' ),
+			'spr_cleaner',
+			__( 'One rule per line. A line wrapped in slashes is a regular expression (e.g. /\\[contact-form[^\\]]*\\]/i); anything else is removed as literal text. Tick the “Custom rules” box above to apply them.', 'seo-sprinkler' )
+		);
 
 		// Syndication fields.
 		$this->add_checkbox_field( 'syndicate_enabled', __( 'Push newly published posts to webhooks', 'seo-sprinkler' ), 'spr_syndication' );

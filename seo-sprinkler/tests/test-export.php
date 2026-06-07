@@ -81,6 +81,31 @@ check( 'media has alt/caption/description', $mrec && 'faucet alt' === $mrec['alt
 check( 'seo section lists active plugin', isset( $m['seo'] ) && ! empty( $m['seo']['active_plugins'] ) );
 check( 'taxonomies section present', isset( $m['taxonomies']['category'] ) );
 
+// Content mirror: rendered content, clean HTML, images, links, menus.
+$post2 = wp_insert_post(
+	array(
+		'post_title'   => 'Mirror Test',
+		'post_content' => '<p>See <a href="' . home_url( '/leaky-faucet/' ) . '">faucet</a> and <a href="https://example.com">ext</a>.</p><img src="' . wp_get_attachment_url( $att ) . '" alt="faucet alt" />',
+		'post_status'  => 'publish',
+	)
+);
+$m4 = $exporter->build_manifest();
+$r2 = find_by_id( $m4['posts'], $post2 );
+check( 'content_rendered present', $r2 && isset( $r2['content_rendered'] ) && '' !== $r2['content_rendered'] );
+check( 'content_clean present', $r2 && isset( $r2['content_clean'] ) );
+check( 'builder detected (classic)', $r2 && 'classic' === $r2['builder'] );
+check( 'content images extracted', $r2 && ! empty( $r2['content_images'] ) );
+check( 'content links extracted', $r2 && isset( $r2['links']['external'] ) && ! empty( $r2['links']['external'] ) );
+check( 'menus section present', isset( $m4['menus'] ) && is_array( $m4['menus'] ) );
+
+// clean_export_html removes scripts, classes, styles and data-attributes but keeps content.
+$dirty = '<div class="elementor x" style="color:red" data-id="9"><h2 class="t">Hi</h2><script>bad()</script><p>Keep <a href="/x" class="lnk">me</a></p></div>';
+$clean = $exporter->clean_export_html( $dirty );
+check( 'clean drops scripts', false === stripos( $clean, '<script' ) && false === strpos( $clean, 'bad()' ) );
+check( 'clean drops class/style/data', false === stripos( $clean, 'class=' ) && false === stripos( $clean, 'style=' ) && false === stripos( $clean, 'data-id' ) );
+check( 'clean keeps heading + text', false !== stripos( $clean, '<h2' ) && false !== strpos( $clean, 'Hi' ) );
+check( 'clean keeps link href', false !== strpos( $clean, 'href="/x"' ) );
+
 // PII gating.
 $m2 = $exporter->build_manifest( array( 'include_users' => true ) );
 check( 'users included when opted in', isset( $m2['users'] ) && ! empty( $m2['users'] ) );

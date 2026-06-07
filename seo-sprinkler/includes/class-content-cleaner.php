@@ -50,6 +50,7 @@ class SPR_Content_Cleaner {
 			'clean_html_comments'   => __( 'HTML comments (Gutenberg blocks preserved)', 'seo-sprinkler' ),
 			'clean_inline_styles'   => __( 'Inline style="…" attributes (CSS) — keeps table layout styles', 'seo-sprinkler' ),
 			'clean_classes'         => __( 'class="…" attributes (CSS hooks — may affect layout/blocks)', 'seo-sprinkler' ),
+			'clean_custom'          => __( 'Custom rules (define your own in Settings)', 'seo-sprinkler' ),
 		);
 	}
 
@@ -106,6 +107,9 @@ class SPR_Content_Cleaner {
 		}
 		if ( $this->on( 'clean_multiple_br', $force ) ) {
 			$html = $this->collapse_br( $html, $stats );
+		}
+		if ( $this->on( 'clean_custom', $force ) ) {
+			$html = $this->apply_custom_rules( $html, $stats );
 		}
 
 		return array( $html, ( $html !== $original ), array_filter( $stats ) );
@@ -326,6 +330,44 @@ class SPR_Content_Cleaner {
 			$b
 		);
 		$stats['clean_empty_paragraphs'] = (int) $a + (int) $b;
+		return $html;
+	}
+
+	/**
+	 * Apply the user's own custom removal rules (one per line in Settings).
+	 *
+	 * A line wrapped in slashes — e.g. /\[my_shortcode[^\]]*\]/i — is treated as a
+	 * regular expression; any other line is removed as a literal string. Invalid
+	 * patterns are skipped safely.
+	 *
+	 * @param string $html  HTML.
+	 * @param array  $stats Stats.
+	 * @return string
+	 */
+	protected function apply_custom_rules( $html, &$stats ) {
+		$rules = (string) SPR_Settings::get( 'cleaner_custom_rules' );
+		$total = 0;
+		if ( '' !== trim( $rules ) ) {
+			foreach ( preg_split( '/\r\n|\r|\n/', $rules ) as $line ) {
+				$line = trim( $line );
+				if ( '' === $line ) {
+					continue;
+				}
+				if ( preg_match( '#^/.+/[a-zA-Z]*$#', $line ) ) {
+					$count  = 0;
+					$result = @preg_replace( $line, '', $html, -1, $count ); // phpcs:ignore WordPress.PHP.NoSilentErrors -- guard invalid user regex.
+					if ( null !== $result ) {
+						$html   = $result;
+						$total += (int) $count;
+					}
+				} else {
+					$count  = 0;
+					$html   = str_replace( $line, '', $html, $count );
+					$total += (int) $count;
+				}
+			}
+		}
+		$stats['clean_custom'] = $total;
 		return $html;
 	}
 

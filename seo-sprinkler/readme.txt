@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.12.0
+Stable tag: 1.13.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,12 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.13.0 =
+* New: Export / Migrate now produces a complete, portable mirror — it renders the *real* content of every page (including Elementor and other page builders, whose layout lives outside the post content), adds a clean semantic-HTML version (no scripts, styles, classes or builder/WordPress markup), and extracts each page's content images and internal/external link connections. Navigation menus are exported too.
+* New: Content Cleaner custom rules — define your own removal rules in Settings (one per line; a line wrapped in slashes is a regular expression, anything else is literal text) and run them with the other cleanups.
+* New: Business Profile logo defaults to your WordPress site logo (or site icon) automatically.
+* New: "Connect your Google listing" on the Business Profile — paste your Google Maps / Business link to fill the name and map coordinates (free); add a Google Places API key to also pull the phone, full address and website.
 
 = 1.12.0 =
 * New: "Preview & edit all" in Image Distribution — see every proposed image for the selected articles in one editable list, tweak alt text / caption / image title / description (or tick Skip), then insert them all at once.

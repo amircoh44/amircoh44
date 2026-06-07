@@ -61,6 +61,23 @@ $textarea = function ( $key, $label, $rows, $placeholder = '' ) use ( $opt, $g )
 			</p>
 			<p class="description" style="margin-top:-4px"><?php esc_html_e( 'Pulls your business Name, Website URL, description and logo from WordPress — only fills fields that are still blank.', 'seo-sprinkler' ); ?></p>
 
+		<h2 class="title"><?php esc_html_e( 'Connect your Google listing', 'seo-sprinkler' ); ?></h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><label for="spr-gmb-url"><?php esc_html_e( 'Google Maps / Business link', 'seo-sprinkler' ); ?></label></th>
+				<td>
+					<input type="url" id="spr-gmb-url" class="large-text" placeholder="https://maps.app.goo.gl/…  or  https://www.google.com/maps/place/…" />
+					<p style="margin:6px 0">
+						<button type="button" class="button" id="spr-gmb-fill"><span class="dashicons dashicons-location" style="margin-top:4px"></span> <?php esc_html_e( 'Fill from Google', 'seo-sprinkler' ); ?></button>
+						<span id="spr-gmb-status" class="description" style="margin-left:8px"></span>
+					</p>
+					<p class="description"><?php esc_html_e( 'Paste the link to your Google Business Profile / Maps listing. The business name and map coordinates are read straight from the link (free). Add a Google Places API key below to also pull the phone, full address and website.', 'seo-sprinkler' ); ?></p>
+				</td>
+			</tr>
+			<?php $field( 'places_api_key', __( 'Google Places API key (optional)', 'seo-sprinkler' ), 'text', 'AIza…' ); ?>
+			<tr><td colspan="2" class="description" style="padding-top:0"><?php esc_html_e( 'Stored on your site only and sent only to Google when you click “Fill from Google”. Leave blank to use the link-only (name + coordinates) lookup.', 'seo-sprinkler' ); ?></td></tr>
+		</table>
+
 		<h2 class="title"><?php esc_html_e( 'Identity', 'seo-sprinkler' ); ?></h2>
 		<table class="form-table" role="presentation">
 			<tr>
@@ -105,9 +122,23 @@ $textarea = function ( $key, $label, $rows, $placeholder = '' ) use ( $opt, $g )
 			$field( 'url', __( 'Website URL', 'seo-sprinkler' ), 'url', home_url( '/' ) );
 			$textarea( 'description', __( 'Short description', 'seo-sprinkler' ), 3 );
 			?>
+			<?php
+			// Default the logo to the WordPress site logo (or site icon) when the
+			// profile doesn't set one — pre-filled and saved on first Save.
+			$spr_logo_id = (int) $g( 'logo_id' );
+			if ( ! $spr_logo_id ) {
+				$spr_logo_id = (int) get_theme_mod( 'custom_logo' );
+			}
+			if ( ! $spr_logo_id ) {
+				$spr_logo_id = (int) get_option( 'site_icon' );
+			}
+			?>
 			<tr>
 				<th scope="row"><?php esc_html_e( 'Logo', 'seo-sprinkler' ); ?></th>
-				<td><?php spr_business_media_field( 'logo_id', $g( 'logo_id' ), $opt ); ?></td>
+				<td>
+					<?php spr_business_media_field( 'logo_id', $spr_logo_id, $opt ); ?>
+					<p class="description"><?php esc_html_e( 'Defaults to your WordPress site logo. Choose another image to override.', 'seo-sprinkler' ); ?></p>
+				</td>
 			</tr>
 			<tr>
 				<th scope="row"><?php esc_html_e( 'Primary image', 'seo-sprinkler' ); ?></th>

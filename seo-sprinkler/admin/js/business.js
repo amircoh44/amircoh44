@@ -68,6 +68,56 @@
 			$( '#spr-autofill-status' ).text( i18n.filled || 'Filled — review and Save.' );
 		} );
 
+		// ---- Fill the profile from a Google Maps / Business link ----
+		function setIfEmpty( id, val ) {
+			if ( val === undefined || val === null || '' === ( '' + val ) ) { return; }
+			var $f = $( '#spr-' + id );
+			if ( ! $f.length ) { return; }
+			var cur = $.trim( $f.val() );
+			if ( '' === cur || '0' === cur ) { $f.val( val ); }
+		}
+
+		$( '#spr-gmb-fill' ).on( 'click', function () {
+			var $btn = $( this ),
+				$status = $( '#spr-gmb-status' ),
+				url = $.trim( $( '#spr-gmb-url' ).val() );
+			if ( '' === url ) {
+				$status.css( 'color', '#b3261e' ).text( i18n.gmbNeed || 'Paste your Google Maps link first.' );
+				return;
+			}
+			$btn.prop( 'disabled', true );
+			$status.css( 'color', '' ).text( i18n.looking || 'Looking up…' );
+			$.post( cfg.ajax, {
+				action: 'spr_gmb_lookup',
+				nonce: cfg.geocodeNonce,
+				url: url,
+				api_key: $( '#spr-places_api_key' ).val() || ''
+			} ).done( function ( res ) {
+				if ( res && res.success && res.data ) {
+					var d = res.data;
+					setIfEmpty( 'name', d.name );
+					setIfEmpty( 'url', d.website );
+					setIfEmpty( 'telephone', d.telephone );
+					setIfEmpty( 'street', d.street );
+					setIfEmpty( 'locality', d.locality );
+					setIfEmpty( 'region', d.region );
+					setIfEmpty( 'postal_code', d.postal_code );
+					setIfEmpty( 'country', d.country );
+					setIfEmpty( 'latitude', d.lat );
+					setIfEmpty( 'longitude', d.lng );
+					$status.css( 'color', '#0a7c3f' ).text( i18n.gmbOk || 'Filled from Google — review and Save.' );
+				} else {
+					$status.css( 'color', '#b3261e' ).text(
+						( res && res.data && res.data.message ) ? res.data.message : ( i18n.gmbFail || 'Could not read that Google link.' )
+					);
+				}
+			} ).fail( function () {
+				$status.css( 'color', '#b3261e' ).text( i18n.gmbFail || 'Could not read that Google link.' );
+			} ).always( function () {
+				$btn.prop( 'disabled', false );
+			} );
+		} );
+
 		// ---- Geocode the address into latitude / longitude ----
 		$( '#spr-geocode' ).on( 'click', function () {
 			var $btn = $( this ),
