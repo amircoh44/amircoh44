@@ -19,13 +19,14 @@
   {% if result.licenses %}
   <h3>Licences for {{ result.customer.email }}</h3>
   <table>
-    <tr><th>Key</th><th>Plan</th><th>Status</th><th>Sites</th><th>Renews</th></tr>
+    <tr><th>Key</th><th>Plan</th><th>Status</th><th>Sites</th><th>Support</th><th>Renews</th></tr>
     {% for lic in result.licenses %}
     <tr>
       <td><code>{{ lic.key }}</code></td>
       <td><span class="badge badge--{{ lic.edition }}">{{ lic.edition|capitalize }}</span> · {{ lic.term }}</td>
       <td>{% if active_fn(lic) %}<span class="badge badge--ok">active</span>{% else %}<span class="badge badge--warn">{{ lic.status if lic.status!='active' else 'expired' }}</span>{% endif %}</td>
       <td>{{ seats(lic) }} / {{ 'unlimited' if lic.site_limit==0 else lic.site_limit }}</td>
+      <td>{{ SUPPORT[lic.edition if active_fn(lic) else 'free'] }}</td>
       <td>{{ lic.expires_at.strftime('%d %b %Y') if lic.expires_at else 'lifetime' }}</td>
     </tr>
     {% endfor %}

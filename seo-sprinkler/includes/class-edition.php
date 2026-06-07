@@ -198,6 +198,25 @@ class SPR_Edition {
 	}
 
 	/**
+	 * Support entitlement for an edition (defaults to current).
+	 *
+	 * Free: community forum & docs. Pro: email support. Expert: priority email
+	 * support with a 24-hour response. Tied to the paid plan, not the free grace.
+	 *
+	 * @param string|null $edition Edition or null for current.
+	 * @return string
+	 */
+	public static function support_label( $edition = null ) {
+		$edition = $edition ? $edition : self::current();
+		$support = array(
+			self::FREE   => __( 'Community forum & documentation', 'seo-sprinkler' ),
+			self::PRO    => __( 'Email support', 'seo-sprinkler' ),
+			self::EXPERT => __( 'Priority email support — 24-hour response', 'seo-sprinkler' ),
+		);
+		return isset( $support[ $edition ] ) ? $support[ $edition ] : $support[ self::FREE ];
+	}
+
+	/**
 	 * Upgrade URL (filterable — point this at your store / Freemius checkout).
 	 *
 	 * @return string

@@ -31,6 +31,7 @@ def create_app(config=Config):
             "BRAND": "SEO Sprinkler",
             "PRICES": licensing.PRICES,
             "SITE_TIERS": licensing.SITE_TIERS,
+            "SUPPORT": licensing.SUPPORT,
             "now": datetime.utcnow(),
         }
 

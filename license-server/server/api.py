@@ -21,10 +21,12 @@ def _payload():
 
 def _state(lic, site_url=None):
     active = licensing.is_license_active(lic)
+    edition = lic.edition if active else "free"
     return {
-        "edition": lic.edition if active else "free",
+        "edition": edition,
         "active": active,
         "plan": lic.edition,
+        "support": licensing.support_for(edition),
         "term": lic.term,
         "lifetime": lic.expires_at is None,
         "site_limit": lic.site_limit,

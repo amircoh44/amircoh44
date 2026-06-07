@@ -48,6 +48,16 @@ $rule_count  = class_exists( 'SPR_Injection_Rules' ) ? count( ( new SPR_Injectio
 			?>
 		</h2>
 
+		<p class="spr-support">
+			<?php
+			printf(
+				/* translators: %s: support entitlement for the current edition. */
+				esc_html__( 'Support: %s', 'seo-sprinkler' ),
+				esc_html( SPR_Edition::support_label() )
+			);
+			?>
+		</p>
+
 		<?php if ( ! $is_pro ) : ?>
 			<p>
 				<?php

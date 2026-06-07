@@ -10,6 +10,8 @@ def test_pricing_shows_aggressive_numbers(client):
     body = client.get("/pricing").get_data(as_text=True)
     assert "$39" in body and "$69" in body          # Pro / Expert annual
     assert "LAUNCH40" in body
+    assert "24-hour response" in body                # Expert support SLA
+    assert "Email support" in body                   # Pro support
 
 
 def test_sandbox_checkout_issues_license(client):

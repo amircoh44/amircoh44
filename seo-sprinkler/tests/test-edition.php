@@ -72,6 +72,11 @@ check( 'valid key resolves to pro via filter', 'pro' === SPR_Edition::current() 
 check( 'export requires expert', 'expert' === SPR_Edition::required_for( 'export' ) );
 check( 'label maps', 'Pro' === SPR_Edition::label( 'pro' ) );
 
+/* ---- Support entitlement per tier ---- */
+check( 'free support is community/docs', 'Community forum & documentation' === SPR_Edition::support_label( 'free' ) );
+check( 'pro support is email', 'Email support' === SPR_Edition::support_label( 'pro' ) );
+check( 'expert support is 24-hour priority email', false !== strpos( SPR_Edition::support_label( 'expert' ), '24-hour' ) );
+
 update_option( 'spr_edition', 'free' );
 
 echo "\n===== $pass passed, $fail failed =====\n";

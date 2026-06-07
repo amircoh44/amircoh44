@@ -49,6 +49,7 @@ A WordPress plugin that boosts on-page SEO for your articles in several ways:
 | **Export / migrate** — full‑site JSON + optional media ZIP | — | — | ✅ |
 | **Syndication** — publish → webhooks → GMB / Facebook / LinkedIn / X | — | — | ✅ |
 | **Multisite / white‑label** | — | — | 🔜 |
+| **Support** | Community & docs | Email support | Priority email — 24‑hour response |
 
 **In short:** **Free** gives you all the *audits*, the inline editors, image fill and the SEO score — the hands‑on checking tools. **Pro** adds *automation* (auto‑linking, distribution, bulk cleaning, schema output, AI). **Expert** is Pro **plus** full‑site export/migration and syndication.
 

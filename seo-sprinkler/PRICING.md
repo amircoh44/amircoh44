@@ -38,11 +38,22 @@ prices after traction (locked-in customers keep their rate).
 - **Free** — every audit (images, schema, links), the inline link editor, content-cleaner
   scan + revert, business-profile questionnaire, "fill with images", and the live
   **SEO score**. *Plus every Pro/Expert feature free while the site is under 25 pages.*
+  Support: community forum & documentation.
 - **Pro** — automation: automatic internal linking, permanent bulk apply/revert,
   auto inbound links on publish, **content distribution ("Sprinkler")**, bulk clean +
   auto-clean on save, **JSON-LD `@graph` schema output**, and **AI** meta/title generation.
+  Support: **email support**.
 - **Expert** — everything in Pro **plus** full-site **export/migration** and
   **syndication** (publish → Google Business, Facebook, LinkedIn, X). White-label is on the roadmap.
+  Support: **priority email support — 24-hour response**.
+
+### Support at a glance
+
+| Plan | Support |
+| --- | --- |
+| Free | Community forum & documentation |
+| Pro | Email support |
+| Expert | Priority email support — **24-hour response** (business days) |
 
 ---
 

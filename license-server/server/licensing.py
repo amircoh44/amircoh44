@@ -29,6 +29,17 @@ SITE_TIERS = [
 
 EDITIONS = ("free", "pro", "expert")
 
+# Support entitlement per edition (advertised + shown in-product).
+SUPPORT = {
+    "free": "Community forum & documentation",
+    "pro": "Email support",
+    "expert": "Priority email support — 24-hour response",
+}
+
+
+def support_for(edition):
+    return SUPPORT.get(edition, SUPPORT["free"])
+
 # Free-tier grace mirrored from the plugin (everything unlocked under N pages).
 FREE_PAGE_LIMIT = 25
 

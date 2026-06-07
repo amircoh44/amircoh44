@@ -81,9 +81,9 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 
 **Everything is free up to 25 pages.** On sites with 25 or fewer published items, every feature — including all the premium ones — is unlocked. Beyond 25 pages you choose a plan:
 
-* **Free** – all audits and manual tools at any size (image-minimum audit, schema audit incl. sitemap coverage, link audit + inline editor, content-cleaner scan + revert, duplicate-H1 warning, business profile, "fill with images" tool, settings), plus *every* premium feature while your site is within 25 pages.
-* **Pro** – removes the 25-page limit for the automation/output features: automatic internal linking, permanent bulk apply/revert, content distribution (Sprinkler), bulk + auto content cleaning, new-post auto inbound links, AI actions, and JSON-LD schema output in <head>.
-* **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use.
+* **Free** – all audits and manual tools at any size (image-minimum audit, schema audit incl. sitemap coverage, link audit + inline editor, content-cleaner scan + revert, duplicate-H1 warning, business profile, "fill with images" tool, settings), plus *every* premium feature while your site is within 25 pages. Support: community forum & documentation.
+* **Pro** – removes the 25-page limit for the automation/output features: automatic internal linking, permanent bulk apply/revert, content distribution (Sprinkler), bulk + auto content cleaning, new-post auto inbound links, AI actions, and JSON-LD schema output in <head>. Support: email support.
+* **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
 
