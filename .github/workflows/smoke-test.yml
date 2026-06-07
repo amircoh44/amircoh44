@@ -50,6 +50,9 @@ jobs:
       - name: Edition / licensing tests
         run: php seo-sprinkler/tests/test-edition.php
 
+      - name: License client tests
+        run: php seo-sprinkler/tests/test-license.php
+
       - name: Front-end filter tests
         run: php seo-sprinkler/tests/test-frontend.php
 

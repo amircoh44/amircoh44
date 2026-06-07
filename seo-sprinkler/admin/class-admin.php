@@ -226,6 +226,7 @@ class SPR_Admin {
 		// Sections.
 		add_settings_section( 'spr_license', __( 'License &amp; edition', 'seo-sprinkler' ), array( $this, 'section_license' ), 'spr-settings' );
 		$this->add_text_field( 'license_key', __( 'License key', 'seo-sprinkler' ), 'spr_license', __( 'Paste your Pro/Expert license key to unlock premium features.', 'seo-sprinkler' ) );
+		$this->add_text_field( 'license_server_url', __( 'License server URL', 'seo-sprinkler' ), 'spr_license', __( 'Base URL of your SEO Sprinkler license server, e.g. https://license.example.com (or define SPR_LICENSE_SERVER). Leave blank if you activate keys another way.', 'seo-sprinkler' ) );
 
 		add_settings_section( 'spr_ai', __( 'AI (bring your own API)', 'seo-sprinkler' ), array( $this, 'section_ai' ), 'spr-settings' );
 		$this->add_text_field( 'ai_endpoint', __( 'API endpoint', 'seo-sprinkler' ), 'spr_ai', __( 'Any OpenAI-compatible /chat/completions URL (OpenAI, OpenRouter, Azure, local LLM…).', 'seo-sprinkler' ), 'url', 'https://api.openai.com/v1/chat/completions' );

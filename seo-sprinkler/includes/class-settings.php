@@ -39,6 +39,7 @@ class SPR_Settings {
 		return array(
 			// --- License -----------------------------------------------.
 			'license_key'            => '',     // Validated on save into the edition.
+			'license_server_url'     => '',     // Companion license server base URL.
 
 			// --- AI (bring-your-own API) -------------------------------.
 			'ai_endpoint'            => 'https://api.openai.com/v1/chat/completions',
@@ -280,8 +281,8 @@ class SPR_Settings {
 				continue;
 			}
 
-			// AI endpoint URL.
-			if ( 'ai_endpoint' === $key ) {
+			// Single URL fields.
+			if ( in_array( $key, array( 'ai_endpoint', 'license_server_url' ), true ) ) {
 				$raw           = isset( $input[ $key ] ) ? trim( (string) $input[ $key ] ) : '';
 				$clean[ $key ] = ( '' === $raw ) ? '' : esc_url_raw( $raw );
 				continue;

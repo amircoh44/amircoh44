@@ -55,6 +55,7 @@ define( 'SPR_TRANSIENT_SITEMAP', 'spr_sitemap_urls' );
  */
 require_once SPR_PLUGIN_DIR . 'includes/class-settings.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-edition.php';
+require_once SPR_PLUGIN_DIR . 'includes/class-license-client.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-ai.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-business-profile.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-image-scanner.php';

@@ -75,10 +75,11 @@ final class SPR_Plugin {
 		$heading  = new SPR_Heading_Checker();
 		$filler   = new SPR_Image_Filler( $scanner, $link_scan, $schema, $heading );
 		$syndication = new SPR_Syndication();
+		$license  = new SPR_License_Client();
 		$exporter = new SPR_Exporter();
 		$ajax     = new SPR_Ajax( $scanner, $schema, $index, $applier, $sitemap );
 
-		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'syndication', 'exporter', 'ajax' );
+		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'syndication', 'license', 'exporter', 'ajax' );
 
 		// --- Register settings + i18n. ------------------------------------.
 		add_action( 'admin_init', array( 'SPR_Settings', 'register' ) );
@@ -91,6 +92,7 @@ final class SPR_Plugin {
 		$injector->init();
 		$new_post->init();
 		$syndication->init();
+		$license->init();
 		$distrib->init();
 		$link_scan->init();
 		$cleaner->init();
