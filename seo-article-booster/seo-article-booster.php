@@ -55,6 +55,7 @@ define( 'SAB_TRANSIENT_SITEMAP', 'sab_sitemap_urls' );
  */
 require_once SAB_PLUGIN_DIR . 'includes/class-settings.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-edition.php';
+require_once SAB_PLUGIN_DIR . 'includes/class-ai.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-business-profile.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-image-scanner.php';
 require_once SAB_PLUGIN_DIR . 'includes/class-schema-scanner.php';

@@ -227,6 +227,11 @@ class SAB_Admin {
 		add_settings_section( 'sab_license', __( 'License &amp; edition', 'seo-article-booster' ), array( $this, 'section_license' ), 'sab-settings' );
 		$this->add_text_field( 'license_key', __( 'License key', 'seo-article-booster' ), 'sab_license', __( 'Paste your Pro/Expert license key to unlock premium features.', 'seo-article-booster' ) );
 
+		add_settings_section( 'sab_ai', __( 'AI (bring your own API)', 'seo-article-booster' ), array( $this, 'section_ai' ), 'sab-settings' );
+		$this->add_text_field( 'ai_endpoint', __( 'API endpoint', 'seo-article-booster' ), 'sab_ai', __( 'Any OpenAI-compatible /chat/completions URL (OpenAI, OpenRouter, Azure, local LLM…).', 'seo-article-booster' ), 'url', 'https://api.openai.com/v1/chat/completions' );
+		$this->add_text_field( 'ai_key', __( 'API key', 'seo-article-booster' ), 'sab_ai', __( 'Stored on your site only — never sent anywhere except your chosen endpoint.', 'seo-article-booster' ) );
+		$this->add_text_field( 'ai_model', __( 'Model', 'seo-article-booster' ), 'sab_ai', '', 'text', 'gpt-4o-mini' );
+
 		add_settings_section( 'sab_images', __( 'Image minimum', 'seo-article-booster' ), array( $this, 'section_images' ), 'sab-settings' );
 		add_settings_section( 'sab_schema', __( 'Schema (structured data)', 'seo-article-booster' ), array( $this, 'section_schema' ), 'sab-settings' );
 		add_settings_section( 'sab_distribution', __( 'Content distribution (Sprinkler)', 'seo-article-booster' ), array( $this, 'section_distribution' ), 'sab-settings' );
@@ -282,6 +287,9 @@ class SAB_Admin {
 	}
 
 	/** Section intros. */
+	public function section_ai() {
+		echo '<p>' . esc_html__( 'Connect your own AI provider (OpenAI-compatible). Your key stays on your site and is only sent to the endpoint you choose. Powers Pro AI actions such as generating meta descriptions.', 'seo-article-booster' ) . '</p>';
+	}
 	public function section_license() {
 		printf(
 			'<p>%s <strong>%s</strong>. <a href="%s" target="_blank" rel="noopener">%s</a></p>',

@@ -60,6 +60,7 @@ class SAB_Edition {
 		'autosave_clean' => self::PRO,
 		'auto_inbound'   => self::PRO,
 		'schema_output'  => self::PRO,
+		'ai'             => self::PRO,
 		'export'         => self::EXPERT,
 		'multisite'      => self::EXPERT,
 	);

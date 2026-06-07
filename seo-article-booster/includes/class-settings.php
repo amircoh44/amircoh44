@@ -40,6 +40,11 @@ class SAB_Settings {
 			// --- License -----------------------------------------------.
 			'license_key'            => '',     // Validated on save into the edition.
 
+			// --- AI (bring-your-own API) -------------------------------.
+			'ai_endpoint'            => 'https://api.openai.com/v1/chat/completions',
+			'ai_key'                 => '',     // Your provider API key.
+			'ai_model'               => 'gpt-4o-mini',
+
 			// --- Image minimum auditing ---------------------------------.
 			'min_images'             => 3,      // Minimum images required per article.
 			'count_featured_image'   => 1,      // Count the featured image toward the total.
@@ -266,6 +271,13 @@ class SAB_Settings {
 			// Service post type.
 			if ( 'service_post_type' === $key ) {
 				$clean[ $key ] = isset( $input[ $key ] ) ? sanitize_key( $input[ $key ] ) : $default_value;
+				continue;
+			}
+
+			// AI endpoint URL.
+			if ( 'ai_endpoint' === $key ) {
+				$raw           = isset( $input[ $key ] ) ? trim( (string) $input[ $key ] ) : '';
+				$clean[ $key ] = ( '' === $raw ) ? '' : esc_url_raw( $raw );
 				continue;
 			}
 
