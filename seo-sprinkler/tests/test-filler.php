@@ -39,6 +39,17 @@ function mkimg( $title, $alt ) {
 	return $id;
 }
 
+/** Create a small icon-sized attachment (<=150px). */
+function mkicon( $title, $alt ) {
+	$id = wp_insert_attachment( array( 'post_mime_type' => 'image/png', 'post_title' => $title, 'post_status' => 'inherit', 'post_type' => 'attachment' ), false, 0 );
+	update_post_meta( $id, '_wp_attached_file', $title . '.png' );
+	wp_update_attachment_metadata( $id, array( 'width' => 48, 'height' => 48, 'file' => $title . '.png', 'sizes' => array() ) );
+	if ( $alt ) {
+		update_post_meta( $id, '_wp_attachment_image_alt', $alt );
+	}
+	return $id;
+}
+
 $plumb = mkimg( 'plumbing-hero', 'plumbing leak repair' );
 mkimg( 'sunset-beach', 'ocean view' );
 mkimg( 'cute-cat', 'animal' );
@@ -184,6 +195,38 @@ $spread  = $filler->distribute_evenly( $content, array( '[I1]', '[I2]', '[I3]' )
 check( 'distribute inserts every block once', 1 === substr_count( $spread, '[I1]' ) && 1 === substr_count( $spread, '[I2]' ) && 1 === substr_count( $spread, '[I3]' ) );
 check( 'distribute keeps document order', strpos( $spread, '[I1]' ) < strpos( $spread, '[I2]' ) && strpos( $spread, '[I2]' ) < strpos( $spread, '[I3]' ) );
 check( 'distribute does not clump at the end', strpos( $spread, '[I1]' ) < strpos( $spread, '<p>f</p>' ) );
+
+/* --- Icon sprinkle: placement + context matching + scatter -------------- */
+
+$ic_chim = mkicon( 'chimney-repair-icon', 'chimney repair' );
+$ic_fire = mkicon( 'fireplace-cleaning-icon', 'fireplace cleaning' );
+
+$svc = wp_insert_post( array(
+	'post_title'   => 'Our Services',
+	'post_content' => '<h2>Chimney Repair</h2><p>' . str_repeat( 'chimney repair ', 20 ) . '</p><h2>Fireplace Cleaning</h2><p>' . str_repeat( 'fireplace cleaning ', 20 ) . '</p>',
+	'post_status'  => 'publish',
+) );
+
+// build_icon_img is an inline, left-aligned icon (no figure/caption).
+$iconimg = $filler->build_icon_img( $ic_chim, 'Chimney repair' );
+check( 'build_icon_img is left-aligned', false !== strpos( $iconimg, 'alignleft' ) );
+check( 'build_icon_img carries the icon class', false !== strpos( $iconimg, 'spr-auto-icon' ) );
+check( 'build_icon_img has no figcaption', false === strpos( $iconimg, 'figcaption' ) );
+
+$si = $filler->sprinkle_icons( $svc, array( 'placement' => 'headings' ) );
+check( 'sprinkle inserts an icon per heading', isset( $si['inserted'] ) && $si['inserted'] >= 2 );
+$html = get_post( $svc )->post_content;
+check( 'sprinkle added inline icons', false !== strpos( $html, 'spr-auto-icon' ) );
+// Context match: the chimney icon lands in the chimney section (before the fireplace heading).
+$p_chim = strpos( $html, 'wp-image-' . $ic_chim );
+$p_fire = strpos( $html, 'Fireplace Cleaning' );
+check( 'chimney icon matched to its section', false !== $p_chim && false !== $p_fire && $p_chim < $p_fire );
+// Scatter: a different icon per heading.
+check( 'icons are scattered (no repeat)', count( array_unique( $si['used'] ) ) === count( $si['used'] ) );
+
+// Removal also strips sprinkled icons.
+$filler->remove_inserted( $svc );
+check( 'remove strips sprinkled icons', false === strpos( get_post( $svc )->post_content, 'spr-auto-icon' ) );
 
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

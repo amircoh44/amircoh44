@@ -18,11 +18,16 @@ $updated    = isset( $snapshot['updated'] ) ? (int) $snapshot['updated'] : 0;
 $has_saved  = ! empty( $saved_rows );
 ?>
 <div class="wrap spr-wrap spr-imgdist">
-	<h1><?php esc_html_e( 'Image Distribution', 'seo-sprinkler' ); ?></h1>
-	<p class="spr-intro"><?php esc_html_e( 'Find every article below your image minimum and fill it with related, randomised images from your media library — inserted straight into the content with alt text. Each fill is backed up and can be reverted from the post editor.', 'seo-sprinkler' ); ?></p>
+	<div class="spr-hero">
+		<div class="spr-hero__icon"><span class="dashicons dashicons-images-alt2"></span></div>
+		<div class="spr-hero__body">
+			<h1 class="spr-hero__title"><?php esc_html_e( 'Image Distribution', 'seo-sprinkler' ); ?></h1>
+			<p class="spr-hero__sub"><?php esc_html_e( 'Fill every article below your image minimum with related, randomised library images — scattered evenly, with alt text. Small images become section icons, matched to the heading they lead. Each change is backed up and revertable.', 'seo-sprinkler' ); ?></p>
+		</div>
+	</div>
 
 	<div class="spr-panel">
-		<h2 class="title"><?php esc_html_e( 'How to fill', 'seo-sprinkler' ); ?></h2>
+		<h2 class="spr-panel__h"><span class="dashicons dashicons-admin-settings"></span> <?php esc_html_e( 'How to fill', 'seo-sprinkler' ); ?></h2>
 
 		<table class="form-table" role="presentation">
 			<tr>
@@ -122,10 +127,17 @@ $has_saved  = ! empty( $saved_rows );
 				<span class="dashicons dashicons-list-view"></span>
 				<?php esc_html_e( 'Preview & edit all', 'seo-sprinkler' ); ?>
 			</button>
-			<button type="button" class="button" id="spr-imgdist-icons" title="<?php esc_attr_e( 'Place small icon images (≤150px) inline, left-aligned, at the start of a paragraph', 'seo-sprinkler' ); ?>">
-				<span class="dashicons dashicons-art"></span>
-				<?php esc_html_e( 'Sprinkle icons', 'seo-sprinkler' ); ?>
-			</button>
+			<span class="spr-icon-sprinkle">
+				<button type="button" class="button" id="spr-imgdist-icons" title="<?php esc_attr_e( 'Place small icon images (≤150px) next to the section they relate to', 'seo-sprinkler' ); ?>">
+					<span class="dashicons dashicons-art"></span>
+					<?php esc_html_e( 'Sprinkle icons', 'seo-sprinkler' ); ?>
+				</button>
+				<select id="spr-icon-placement" title="<?php esc_attr_e( 'Where to place the icons', 'seo-sprinkler' ); ?>">
+					<option value="headings"><?php esc_html_e( 'Before each heading', 'seo-sprinkler' ); ?></option>
+					<option value="paragraphs"><?php esc_html_e( 'Start of each paragraph', 'seo-sprinkler' ); ?></option>
+					<option value="top"><?php esc_html_e( 'Top of the article', 'seo-sprinkler' ); ?></option>
+				</select>
+			</span>
 			<button type="button" class="button button-link-delete" id="spr-imgdist-remove">
 				<span class="dashicons dashicons-trash"></span>
 				<?php esc_html_e( 'Remove inserted images', 'seo-sprinkler' ); ?>

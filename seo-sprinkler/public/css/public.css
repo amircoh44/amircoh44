@@ -70,13 +70,16 @@ figure.spr-auto-image img {
 }
 
 figure.spr-auto-image.aligncenter {
-	text-align: center;
+	display: block !important;
+	text-align: center !important;
+	float: none !important;
 	margin-left: auto !important;
 	margin-right: auto !important;
 }
 
 figure.spr-auto-image.aligncenter img {
-	display: block;
+	display: block !important;
+	float: none !important;
 	margin-left: auto !important;
 	margin-right: auto !important;
 }

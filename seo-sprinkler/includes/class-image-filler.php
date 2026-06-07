@@ -977,15 +977,17 @@ class SPR_Image_Filler {
 		}
 
 		if ( false !== strpos( $content, '<!-- wp:' ) ) {
-			$boundary = '/<!-- \/wp:(?:paragraph|heading|list|quote) -->/';
-		} elseif ( false !== stripos( $content, '</p>' ) ) {
-			$boundary = '#</p>#i';
+			$boundary = '/<!-- \/wp:(?:paragraph|heading|list|quote|table|image|gallery|columns|group|cover|embed) -->/';
 		} else {
-			$boundary = '/\n\s*\n/';
+			// Classic/HTML: after any top-level block close, or a blank line. Avoids
+			// </li>/</div> so we never break list/wrapper nesting.
+			$boundary = '#</(?:p|h[1-6]|ul|ol|blockquote|table|figure|pre)>|\n[ \t]*\n#i';
 		}
 
-		if ( ! preg_match_all( $boundary, $content, $m, PREG_OFFSET_CAPTURE ) ) {
-			return rtrim( $content ) . "\n\n" . implode( "\n\n", $blocks );
+		if ( ! preg_match_all( $boundary, $content, $m, PREG_OFFSET_CAPTURE ) || count( $m[0] ) < 2 ) {
+			// Too few seams to scatter — fall back to inserting every couple of
+			// paragraph/sentence breaks rather than dumping everything at the end.
+			return $this->insert_blocks( $content, $blocks, 2 );
 		}
 
 		// End offset of each boundary (where a block may be inserted after it).
@@ -1077,6 +1079,241 @@ class SPR_Image_Filler {
 			'',
 			$content
 		);
+		// Inline sprinkled icons (an <img> placed inside a heading/paragraph).
+		$content = preg_replace(
+			'#<img[^>]*\bspr-auto-icon\b[^>]*>\s*#i',
+			'',
+			$content
+		);
 		return $content;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Icon sprinkle — place small icons next to the section they relate to
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Sprinkle context-matched icons through a post. Icons are chosen so their
+	 * alt / title / file name relates to the heading or paragraph they lead, are
+	 * scattered (a different icon per spot) and float left at the start of the
+	 * text. Placement: 'headings' (before each H2-H4), 'paragraphs' (start of each
+	 * paragraph) or 'top' (one at the very top).
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param array $args    placement, max, exclude (icon IDs used earlier this run).
+	 * @return array{inserted:int,used:int[],skipped?:string}
+	 */
+	public function sprinkle_icons( $post_id, $args ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'missing' );
+		}
+		$args = wp_parse_args(
+			$args,
+			array(
+				'placement' => 'headings',
+				'max'       => 20,
+				'exclude'   => array(),
+			)
+		);
+		$content = $post->post_content;
+
+		$icons = $this->icon_pool();
+		if ( empty( $icons ) ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'no_icons' );
+		}
+		$points = $this->icon_points( $content, $args['placement'] );
+		if ( empty( $points ) ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'no_points' );
+		}
+		$points = array_slice( $points, 0, max( 1, (int) $args['max'] ) );
+
+		$exclude = array_flip( array_map( 'intval', (array) $args['exclude'] ) );
+		$used    = array();
+		$inserts = array();
+		foreach ( $points as $pt ) {
+			$icon = $this->best_icon_for( $pt['context'], $icons, $exclude, $used );
+			if ( ! $icon ) {
+				continue;
+			}
+			$inserts[ $pt['offset'] ] = $this->build_icon_img( $icon['id'], $this->icon_alt( $icon, $pt['context'] ) );
+			$used[]                   = (int) $icon['id'];
+		}
+		if ( empty( $inserts ) ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'no_match' );
+		}
+
+		// Insert back-to-front so earlier offsets stay valid.
+		krsort( $inserts );
+		foreach ( $inserts as $offset => $img ) {
+			$content = substr( $content, 0, $offset ) . $img . substr( $content, $offset );
+		}
+
+		if ( ! metadata_exists( 'post', $post_id, self::META_BACKUP ) ) {
+			update_post_meta( $post_id, self::META_BACKUP, $post->post_content );
+		}
+		wp_update_post( array( 'ID' => $post_id, 'post_content' => $content ) );
+		update_post_meta( $post_id, SPR_META_IMAGE_COUNT, $this->images->count_for_post( get_post( $post_id ) ) );
+
+		return array( 'inserted' => count( $inserts ), 'used' => $used );
+	}
+
+	/**
+	 * All icon-sized attachments, each with its keyword haystack (alt/title/file).
+	 *
+	 * @return array[] Each: id, kw[], alt, title.
+	 */
+	public function icon_pool() {
+		$ids = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image',
+				'post_status'    => 'inherit',
+				'posts_per_page' => 2000,
+				'fields'         => 'ids',
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+			)
+		);
+		$out = array();
+		foreach ( $ids as $id ) {
+			$id = (int) $id;
+			if ( ! $this->is_icon( $id ) ) {
+				continue;
+			}
+			$file  = get_attached_file( $id );
+			$alt   = (string) get_post_meta( $id, '_wp_attachment_image_alt', true );
+			$title = get_the_title( $id );
+			$hay   = strtolower( $title . ' ' . $alt . ' ' . ( $file ? basename( $file ) : '' ) );
+			$words = array();
+			foreach ( preg_split( '/[^a-z0-9]+/', $hay ) as $w ) {
+				if ( strlen( $w ) >= 3 ) {
+					$words[] = $w;
+				}
+			}
+			$out[] = array(
+				'id'    => $id,
+				'kw'    => array_values( array_unique( $words ) ),
+				'alt'   => $alt,
+				'title' => $title,
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Find icon insertion points + the text they should match.
+	 *
+	 * @param string $content   Content.
+	 * @param string $placement headings|paragraphs|top.
+	 * @return array[] Each: offset (int), context (string).
+	 */
+	protected function icon_points( $content, $placement ) {
+		if ( 'top' === $placement ) {
+			return array( array( 'offset' => 0, 'context' => wp_strip_all_tags( $content ) ) );
+		}
+		$pattern = ( 'paragraphs' === $placement ) ? '#<p\b[^>]*>#i' : '#<h[2-4]\b[^>]*>#i';
+		$points  = array();
+		if ( preg_match_all( $pattern, $content, $m, PREG_OFFSET_CAPTURE ) ) {
+			foreach ( $m[0] as $match ) {
+				$open_end = $match[1] + strlen( $match[0] );
+				$points[] = array(
+					'offset'  => $open_end,
+					'context' => wp_strip_all_tags( substr( $content, $open_end, 220 ) ),
+				);
+			}
+		}
+		return $points;
+	}
+
+	/**
+	 * Pick the icon whose keywords best match the surrounding text. Prefers an
+	 * unused icon (scatter/variety); falls back to a random unused, then reuse.
+	 *
+	 * @param string $context Nearby text.
+	 * @param array  $icons   Icon pool.
+	 * @param array  $exclude Flip-map of excluded IDs.
+	 * @param int[]  $used    IDs already placed this run.
+	 * @return array|null
+	 */
+	protected function best_icon_for( $context, $icons, $exclude, $used ) {
+		$ctx = array();
+		foreach ( preg_split( '/[^a-z0-9]+/', strtolower( wp_strip_all_tags( $context ) ) ) as $w ) {
+			if ( strlen( $w ) >= 4 ) {
+				$ctx[ $w ] = 1;
+			}
+		}
+		$used_flip  = array_flip( array_map( 'intval', $used ) );
+		$best       = null;
+		$best_score = 0;
+		$unused     = array();
+		foreach ( $icons as $ic ) {
+			if ( isset( $exclude[ $ic['id'] ] ) || isset( $used_flip[ $ic['id'] ] ) ) {
+				continue;
+			}
+			$unused[] = $ic;
+			$score    = 0;
+			foreach ( $ic['kw'] as $w ) {
+				if ( isset( $ctx[ $w ] ) ) {
+					$score++;
+				}
+			}
+			if ( $score > $best_score ) {
+				$best_score = $score;
+				$best       = $ic;
+			}
+		}
+		if ( $best && $best_score > 0 ) {
+			return $best; // Context match.
+		}
+		if ( ! empty( $unused ) ) {
+			return $unused[ array_rand( $unused ) ]; // Scatter / variety.
+		}
+		$reusable = array_values(
+			array_filter(
+				$icons,
+				static function ( $ic ) use ( $exclude ) {
+					return ! isset( $exclude[ $ic['id'] ] );
+				}
+			)
+		);
+		return $reusable ? $reusable[ array_rand( $reusable ) ] : null;
+	}
+
+	/**
+	 * Alt text for a sprinkled icon: its own alt, else derived from the context.
+	 *
+	 * @param array  $icon    Icon row.
+	 * @param string $context Nearby text.
+	 * @return string
+	 */
+	protected function icon_alt( $icon, $context ) {
+		if ( ! empty( $icon['alt'] ) ) {
+			return $icon['alt'];
+		}
+		$t = trim( wp_strip_all_tags( $context ) );
+		$t = wp_trim_words( $t, 6, '' );
+		if ( '' !== $t ) {
+			return trim( $t ) . ' icon';
+		}
+		return $icon['title'] ? $icon['title'] : 'icon';
+	}
+
+	/**
+	 * Build an inline icon <img> (left-aligned, no caption) to lead a heading or
+	 * paragraph — like a section icon. Carries spr-auto-image + spr-auto-icon so
+	 * "Remove inserted images" can take it back out.
+	 *
+	 * @param int    $id  Attachment ID.
+	 * @param string $alt Alt text.
+	 * @return string
+	 */
+	public function build_icon_img( $id, $alt = '' ) {
+		$attr = array( 'class' => 'alignleft size-full wp-image-' . (int) $id . ' ' . self::CSS_CLASS . ' spr-auto-icon' );
+		if ( '' !== $alt ) {
+			$attr['alt'] = $alt;
+		}
+		$img = wp_get_attachment_image( (int) $id, 'full', false, $attr );
+		return $img ? $img : '';
 	}
 }

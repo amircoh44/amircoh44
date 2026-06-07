@@ -58,6 +58,7 @@ class SPR_Image_Distribution_Admin {
 		add_action( 'wp_ajax_spr_imgdist_propose', array( $this, 'ajax_propose' ) );
 		add_action( 'wp_ajax_spr_imgdist_apply', array( $this, 'ajax_apply' ) );
 		add_action( 'wp_ajax_spr_imgdist_remove', array( $this, 'ajax_remove' ) );
+		add_action( 'wp_ajax_spr_imgdist_icons', array( $this, 'ajax_icons' ) );
 	}
 
 	/**
@@ -119,8 +120,10 @@ class SPR_Image_Distribution_Admin {
 					'removed'   => __( 'removed', 'seo-sprinkler' ),
 					'removeNone' => __( 'no inserted images', 'seo-sprinkler' ),
 					'removeConfirm' => __( 'Remove the images SEO Sprinkler inserted from the selected articles? This rewrites the saved content (your other content is untouched).', 'seo-sprinkler' ),
-					'iconsConfirm' => __( 'Sprinkle small icon images (≤150px) into the selected articles? Icons are placed left-aligned at the start of a paragraph, with no caption.', 'seo-sprinkler' ),
+					'iconsConfirm' => __( 'Sprinkle context-matched icons into the selected articles? Each icon is chosen to relate to the heading/paragraph it leads, scattered and left-aligned.', 'seo-sprinkler' ),
 					'noIcons'   => __( 'no icon-sized images in the library', 'seo-sprinkler' ),
+					'iconsNoPoints' => __( 'nowhere to place icons', 'seo-sprinkler' ),
+					'sprinkling' => __( 'Sprinkling icons', 'seo-sprinkler' ),
 					'reviewAllConfirm' => __( 'Build an editable preview of every proposed image for the selected articles?', 'seo-sprinkler' ),
 					'gathering' => __( 'Preparing images…', 'seo-sprinkler' ),
 					'insertingAll' => __( 'Inserting', 'seo-sprinkler' ),
@@ -312,6 +315,44 @@ class SPR_Image_Distribution_Admin {
 					/* translators: 1: count, 2: post title. */
 					_n( 'Removed %1$d inserted image from "%2$s".', 'Removed %1$d inserted images from "%2$s".', (int) $res['removed'], 'seo-sprinkler' ),
 					(int) $res['removed'],
+					get_the_title( $post_id )
+				)
+			);
+		}
+
+		wp_send_json_success( $res );
+	}
+
+	/**
+	 * Sprinkle context-matched icons into one post (placement chosen by the user).
+	 */
+	public function ajax_icons() {
+		$this->guard();
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'You cannot edit this post.', 'seo-sprinkler' ) ), 403 );
+		}
+		$placement = isset( $_POST['placement'] ) ? sanitize_key( wp_unslash( $_POST['placement'] ) ) : 'headings';
+		if ( ! in_array( $placement, array( 'headings', 'paragraphs', 'top' ), true ) ) {
+			$placement = 'headings';
+		}
+		$exclude = isset( $_POST['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['exclude'] ) ) : array();
+
+		$res = $this->filler->sprinkle_icons(
+			$post_id,
+			array(
+				'placement' => $placement,
+				'exclude'   => $exclude,
+			)
+		);
+
+		if ( class_exists( 'SPR_Activity' ) && ! empty( $res['inserted'] ) ) {
+			SPR_Activity::log(
+				'image_icons',
+				sprintf(
+					/* translators: 1: count, 2: post title. */
+					_n( 'Sprinkled %1$d icon into "%2$s".', 'Sprinkled %1$d icons into "%2$s".', (int) $res['inserted'], 'seo-sprinkler' ),
+					(int) $res['inserted'],
 					get_the_title( $post_id )
 				)
 			);

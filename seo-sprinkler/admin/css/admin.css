@@ -396,6 +396,18 @@
 	color: var(--spr-ink);
 }
 
+/* Icon-sprinkle button + placement selector. */
+.spr-icon-sprinkle {
+	display: inline-flex;
+	align-items: stretch;
+	gap: 0;
+}
+
+.spr-icon-sprinkle #spr-icon-placement {
+	margin-left: 4px;
+	vertical-align: middle;
+}
+
 /* Status badges (also used in post list columns) */
 .spr-badge {
 	display: inline-flex;

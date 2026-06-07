@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.18.0
+Stable tag: 1.19.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,12 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.19.0 =
+* Fix: bulk image fill no longer dumps all images at the bottom — it now finds paragraph/heading/list seams in classic content too and scatters images evenly through the article.
+* Fix: centred images render centred even on themes/page builders that don't load WordPress's block CSS (stronger, !important rules on our own image class). If a page is cached, clear your cache (e.g. WP Rocket) so the updated CSS takes effect.
+* New: Image Distribution uses the 2026 design (gradient header, panel icons).
+* New: "Sprinkle icons" now lets you choose placement (before each heading, start of each paragraph, or top of the article), scatters a different icon per spot, and matches each icon to the section by its alt text / title / file name.
 
 = 1.18.0 =
 * New: "Download content files (ZIP)" — the export is now split into many small, openable files (manifest.json + site.json + one JSON and clean .html per post + chunked media metadata + separate sections) instead of one giant manifest.json that editors and parsers choke on. The media ZIP uses the same split layout, with the actual files under media/files/.

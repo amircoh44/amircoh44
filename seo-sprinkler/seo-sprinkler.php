@@ -3,7 +3,7 @@
  * Plugin Name:       SEO Sprinkler
  * Plugin URI:        https://github.com/amircoh44/amircoh44
  * Description:        An ADDITIONAL on-page SEO toolkit that works alongside Yoast, Rank Math or AIOSEO (never a replacement) and does the things they don't: enforce an image minimum, fill articles with related images, audit & fix internal/external links, generate a complete JSON-LD schema graph from a business profile, distribute CTAs/shortcodes by tag, clean AI "generative junk", and export the whole site for migration. Distilled from 30 years of hands-on SEO and website building by Amir Khan.
- * Version:           1.18.0
+ * Version:           1.19.0
  * Requires at least: 5.6
  * Requires PHP:      7.2
  * Author:            Amir Khan
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * We centralise version, paths and the option/menu identifiers here so they
  * can be reused safely across every class without magic strings.
  */
-define( 'SPR_VERSION', '1.18.0' );
+define( 'SPR_VERSION', '1.19.0' );
 define( 'SPR_PLUGIN_FILE', __FILE__ );
 define( 'SPR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );   // .../seo-sprinkler/
 define( 'SPR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );    // https://.../seo-sprinkler/

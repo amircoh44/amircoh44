@@ -258,6 +258,68 @@
 		step();
 	}
 
+	/* ---- Sprinkle context-matched icons (placement chosen by the user) ---- */
+	function runIcons() {
+		var $rows = selectedRows();
+		if ( ! $rows.length ) {
+			window.alert( i18n.pickSome || 'Select at least one article.' );
+			return;
+		}
+		if ( ! window.confirm( i18n.iconsConfirm || 'Sprinkle icons into the selected articles?' ) ) {
+			return;
+		}
+		var placement = $( '#spr-icon-placement' ).val() || 'headings',
+			$all      = $( '#spr-imgdist-fill, #spr-imgdist-review, #spr-imgdist-review-all, #spr-imgdist-icons, #spr-imgdist-remove, #spr-imgdist-scan' ),
+			$prog     = $( '#spr-imgdist-progress' ),
+			used      = [],
+			list      = $rows.toArray(),
+			total     = list.length,
+			i         = 0;
+
+		$all.prop( 'disabled', true );
+		$prog.show();
+		$prog.find( '.spr-progress__bar > span' ).css( 'width', '0%' );
+
+		function step() {
+			if ( i >= total ) {
+				$prog.find( '.spr-progress__label' ).text( i18n.done || 'Done.' );
+				$all.prop( 'disabled', false );
+				return;
+			}
+			var $tr  = $( list[ i ] ),
+				id   = $tr.data( 'id' ),
+				$res = $tr.find( '.spr-imgdist-result' );
+			$res.text( ( i18n.sprinkling || 'Sprinkling icons' ) + '…' );
+
+			post( { action: 'spr_imgdist_icons', post_id: id, placement: placement, 'exclude[]': used } )
+				.done( function ( res ) {
+					if ( res && res.success ) {
+						var d = res.data || {};
+						if ( d.inserted > 0 ) {
+							$res.html( '<span class="spr-badge spr-badge--ok">+' + d.inserted + '</span>' );
+						} else if ( 'no_icons' === d.skipped ) {
+							$res.text( i18n.noIcons || 'no icons' );
+						} else if ( 'no_points' === d.skipped || 'no_match' === d.skipped ) {
+							$res.text( i18n.iconsNoPoints || 'nowhere to place' );
+						} else {
+							$res.text( '—' );
+						}
+						used = used.concat( d.used || [] );
+					} else {
+						$res.text( i18n.error || 'error' );
+					}
+				} )
+				.fail( function () { $res.text( i18n.error || 'error' ); } )
+				.always( function () {
+					i++;
+					$prog.find( '.spr-progress__bar > span' ).css( 'width', Math.round( ( i / total ) * 100 ) + '%' );
+					$prog.find( '.spr-progress__label' ).text( ( i18n.sprinkling || 'Sprinkling icons' ) + ' ' + i + ' / ' + total );
+					step();
+				} );
+		}
+		step();
+	}
+
 	/* ---- Preview & edit ALL proposed images, then insert them in one go ---- */
 	function disableBars( on ) {
 		$( '#spr-imgdist-fill, #spr-imgdist-review, #spr-imgdist-review-all, #spr-imgdist-remove, #spr-imgdist-scan' ).prop( 'disabled', on );
@@ -639,7 +701,7 @@
 	$( function () {
 		$( '#spr-imgdist-scan' ).on( 'click', runScan );
 		$( '#spr-imgdist-fill' ).on( 'click', function () { runFill( false ); } );
-		$( '#spr-imgdist-icons' ).on( 'click', function () { runFill( true ); } );
+		$( '#spr-imgdist-icons' ).on( 'click', runIcons );
 		$( '#spr-imgdist-review' ).on( 'click', startReview );
 		$( '#spr-imgdist-review-all' ).on( 'click', startReviewAll );
 		$( '#spr-imgdist-remove' ).on( 'click', runRemove );
