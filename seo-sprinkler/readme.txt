@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.17.0
+Stable tag: 1.18.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,9 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.18.0 =
+* New: "Download content files (ZIP)" — the export is now split into many small, openable files (manifest.json + site.json + one JSON and clean .html per post + chunked media metadata + separate sections) instead of one giant manifest.json that editors and parsers choke on. The media ZIP uses the same split layout, with the actual files under media/files/.
 
 = 1.17.0 =
 * New: Image Distribution scatters images evenly across each article (no more clumping).

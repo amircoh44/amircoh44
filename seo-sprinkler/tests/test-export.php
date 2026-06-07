@@ -116,5 +116,32 @@ $m3 = $exporter->build_manifest( array( 'include_users' => true, 'include_emails
 check( 'email included with include_emails', isset( $m3['users'][0]['email'] ) );
 check( 'admin_email included with include_emails', isset( $m3['site']['admin_email'] ) );
 
+// Split-file export: a tree of small files instead of one giant manifest.json.
+if ( class_exists( 'ZipArchive' ) ) {
+	$zpath = tempnam( sys_get_temp_dir(), 'sprzip' ) . '.zip';
+	$z     = new ZipArchive();
+	$z->open( $zpath, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+	$exporter->write_zip_tree( $z, array() );
+	$z->close();
+
+	$z2    = new ZipArchive();
+	$z2->open( $zpath );
+	$names = array();
+	for ( $k = 0; $k < $z2->numFiles; $k++ ) {
+		$names[] = $z2->statIndex( $k )['name'];
+	}
+	check( 'zip tree has manifest.json', in_array( 'manifest.json', $names, true ) );
+	check( 'zip tree has site.json', in_array( 'site.json', $names, true ) );
+	check( 'zip tree has posts index', in_array( 'posts/_index.json', $names, true ) );
+	check( 'zip tree has a per-post file', ! empty( preg_grep( '#^posts/\d+-.+\.json$#', $names ) ) );
+	$manifest = $z2->getFromName( 'manifest.json' );
+	check( 'split manifest stays small', strlen( $manifest ) < 4000 );
+	check( 'split manifest declares layout + counts', false !== strpos( $manifest, '"layout": "split"' ) && false !== strpos( $manifest, '"posts"' ) );
+	$z2->close();
+	@unlink( $zpath ); // phpcs:ignore
+} else {
+	check( 'ZipArchive unavailable — split-zip test skipped', true );
+}
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

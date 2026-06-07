@@ -104,6 +104,9 @@
 
 	$( function () {
 		$( '#spr-export-zip' ).on( 'click', buildZip );
+		// The two submit buttons share one form — set the action they post to.
+		$( '#spr-export-json-btn' ).on( 'click', function () { $( '#spr-export-action' ).val( 'spr_export_json' ); } );
+		$( '#spr-export-files-btn' ).on( 'click', function () { $( '#spr-export-action' ).val( 'spr_export_files' ); } );
 		$( 'input[name="include_users"], input[name="include_emails"], input[name="include_all_options"]' ).on( 'change', updateWarning );
 		updateWarning();
 	} );

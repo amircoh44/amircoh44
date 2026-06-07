@@ -56,6 +56,7 @@ class SPR_Export_Admin {
 		add_action( 'admin_menu', array( $this, 'register_menu' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'admin_post_spr_export_json', array( $this, 'download_json' ) );
+		add_action( 'admin_post_spr_export_files', array( $this, 'download_files' ) );
 		add_action( 'admin_post_spr_export_zip_download', array( $this, 'download_zip' ) );
 		add_action( 'wp_ajax_spr_export_zip_start', array( $this, 'ajax_zip_start' ) );
 		add_action( 'wp_ajax_spr_export_zip_batch', array( $this, 'ajax_zip_batch' ) );
@@ -231,6 +232,37 @@ class SPR_Export_Admin {
 		exit;
 	}
 
+	/**
+	 * Stream a ZIP of the split file tree (small per-post files, chunked media
+	 * metadata, separate sections) — but no media binaries. Best for opening the
+	 * content in an editor without one giant manifest.json.
+	 */
+	public function download_files() {
+		$src  = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification -- verified in guard.
+		$opts = $this->guard_request( $src, 'spr_export_nonce', self::NONCE );
+
+		if ( ! class_exists( 'ZipArchive' ) ) {
+			wp_die( esc_html__( 'ZipArchive (PHP zip extension) is not available on this server. Use Download JSON instead.', 'seo-sprinkler' ) );
+		}
+
+		$path = trailingslashit( get_temp_dir() ) . 'spr-files-' . md5( uniqid( (string) wp_rand(), true ) ) . '.zip';
+		$zip  = new ZipArchive();
+		if ( true !== $zip->open( $path, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
+			wp_die( esc_html__( 'Could not create the ZIP file.', 'seo-sprinkler' ) );
+		}
+		$this->exporter->write_zip_tree( $zip, $opts );
+		$zip->close();
+
+		nocache_headers();
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'Content-Type: application/zip' );
+		header( 'Content-Disposition: attachment; filename="' . $this->filename( 'files.zip' ) . '"' );
+		header( 'Content-Length: ' . filesize( $path ) );
+		readfile( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		wp_delete_file( $path );
+		exit;
+	}
+
 	/* ---------------------------------------------------------------------
 	 * Media ZIP (batched build + streamed download)
 	 * ------------------------------------------------------------------- */
@@ -272,9 +304,9 @@ class SPR_Export_Admin {
 		if ( true !== $zip->open( $path, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
 			wp_send_json_error( array( 'message' => __( 'Could not create the ZIP file.', 'seo-sprinkler' ) ) );
 		}
-		$json = wp_json_encode( $this->exporter->build_manifest( $opts ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-		$zip->addFromString( 'manifest.json', $json );
-		$zip->addFromString( 'SECURITY-README.txt', SPR_Exporter::security_notice() . "\n" );
+		// Write the export as a tree of small files (one per post, chunked media,
+		// separate sections) instead of one huge manifest.json.
+		$this->exporter->write_zip_tree( $zip, $opts );
 		$zip->close();
 
 		$ids = array_keys( $this->exporter->media_files() );
@@ -322,7 +354,7 @@ class SPR_Export_Admin {
 			$id   = (int) $ids[ $i ];
 			$file = get_attached_file( $id );
 			if ( $file && file_exists( $file ) ) {
-				$zip->addFile( $file, 'media/' . $id . '-' . basename( $file ) );
+				$zip->addFile( $file, 'media/files/' . $id . '-' . basename( $file ) );
 			}
 		}
 		$zip->close();

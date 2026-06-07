@@ -65,7 +65,7 @@ $check = function ( $name, $label, $checked = true, $class = '' ) {
 	<?php endif; ?>
 
 	<form id="spr-export-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post">
-		<input type="hidden" name="action" value="spr_export_json" />
+		<input type="hidden" name="action" id="spr-export-action" value="spr_export_json" />
 		<?php wp_nonce_field( SPR_Export_Admin::NONCE, 'spr_export_nonce' ); ?>
 
 		<div class="spr-panel">
@@ -121,14 +121,16 @@ $check = function ( $name, $label, $checked = true, $class = '' ) {
 			</div>
 
 			<p>
-				<button type="submit" class="button button-primary" <?php disabled( ! empty( $locked ) ); ?>><?php esc_html_e( 'Download JSON', 'seo-sprinkler' ); ?></button>
+				<button type="submit" class="button button-primary" id="spr-export-json-btn" <?php disabled( ! empty( $locked ) ); ?>><?php esc_html_e( 'Download JSON (single file)', 'seo-sprinkler' ); ?></button>
 				<label style="margin-left:10px"><input type="checkbox" name="compress" value="1" /> <?php esc_html_e( 'Compress (.gz)', 'seo-sprinkler' ); ?></label>
 				<?php if ( $zip_ready ) : ?>
+					<button type="submit" class="button button-primary" id="spr-export-files-btn" <?php disabled( ! empty( $locked ) ); ?>><?php esc_html_e( 'Download content files (ZIP)', 'seo-sprinkler' ); ?></button>
 					<button type="button" class="button" id="spr-export-zip" <?php disabled( ! empty( $locked ) ); ?>><?php esc_html_e( 'Build &amp; download media ZIP', 'seo-sprinkler' ); ?></button>
 				<?php else : ?>
 					<span class="description"><?php esc_html_e( 'Media ZIP unavailable — the server is missing the PHP zip extension. Use JSON; media URLs are included so a script can fetch the files.', 'seo-sprinkler' ); ?></span>
 				<?php endif; ?>
 			</p>
+			<p class="description"><?php esc_html_e( '“Download content files (ZIP)” splits the export into many small files — one JSON (plus a clean .html) per article, chunked media metadata and separate sections — so nothing is one huge file to open. “Download JSON” is the all-in-one document; the media ZIP adds the actual media files under media/files/.', 'seo-sprinkler' ); ?></p>
 			<p class="description"><?php esc_html_e( 'Antivirus blocking the download? The file is your own content — scanners can mis-flag the HTML/JavaScript inside your posts. Tick "Compress (.gz)" (extract it with 7-Zip/WinRAR), or choose "Keep" in your browser and allow the item under Windows Security → Virus &amp; threat protection → Protection history.', 'seo-sprinkler' ); ?></p>
 			<div id="spr-export-progress" class="spr-progress" style="display:none">
 				<div class="spr-progress__bar"><span></span></div>

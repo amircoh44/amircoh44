@@ -722,6 +722,151 @@ class SPR_Exporter {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * Split-file export (a tree of small, openable files)
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Pretty-print JSON the same way everywhere.
+	 *
+	 * @param mixed $data Data.
+	 * @return string
+	 */
+	protected function json( $data ) {
+		return (string) wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+	}
+
+	/**
+	 * README describing the split layout.
+	 *
+	 * @return string
+	 */
+	protected function readme_text() {
+		return "SEO Sprinkler export — split layout\n\n"
+			. "manifest.json       Entry point: site, counts, where things live.\n"
+			. "site.json           Site identity + general settings + detected SEO plugins.\n"
+			. "post-types.json     Registered post types.\n"
+			. "taxonomies.json     Taxonomies + terms.\n"
+			. "menus.json          Navigation menus.\n"
+			. "posts/              One JSON file per post (plus a clean .html mirror).\n"
+			. "posts/_index.json   Index of every post file (id, title, url, file).\n"
+			. "media/meta-*.json   Media library metadata, chunked.\n"
+			. "media/files/        The actual media files (full export only).\n"
+			. "users.json, comments.json   Present only when you opted in.\n\n"
+			. self::security_notice() . "\n";
+	}
+
+	/**
+	 * Write the whole export as a tree of small files into an open ZipArchive.
+	 * Media *binaries* are NOT added here (the admin adds those in batches under
+	 * media/files/); this keeps every JSON/HTML file small enough to open.
+	 *
+	 * @param ZipArchive $zip  Open archive.
+	 * @param array      $opts Options.
+	 * @return int Number of posts written.
+	 */
+	public function write_zip_tree( $zip, $opts = array() ) {
+		$opts = wp_parse_args( $opts, self::default_options() );
+
+		$site = $this->site_section( $opts );
+		$zip->addFromString(
+			'site.json',
+			$this->json(
+				array_filter(
+					array(
+						'site'     => $site,
+						'settings' => $opts['include_settings'] ? $this->settings_section( $opts ) : null,
+						'seo'      => $opts['include_seo'] ? $this->seo_section() : null,
+					),
+					static function ( $v ) {
+						return null !== $v;
+					}
+				)
+			)
+		);
+
+		$zip->addFromString( 'post-types.json', $this->json( $this->post_types_section( $opts ) ) );
+		if ( $opts['include_taxonomies'] ) {
+			$zip->addFromString( 'taxonomies.json', $this->json( $this->taxonomies_section() ) );
+		}
+		if ( ! empty( $opts['include_menus'] ) ) {
+			$zip->addFromString( 'menus.json', $this->json( $this->menus_section() ) );
+		}
+
+		// One file per post (+ a clean HTML mirror), and an index.
+		$index = array();
+		$query = new WP_Query(
+			array(
+				'post_type'           => $this->target_post_types( $opts ),
+				'post_status'         => 'any',
+				'posts_per_page'      => -1,
+				'orderby'             => 'ID',
+				'order'               => 'ASC',
+				'ignore_sticky_posts' => true,
+				'no_found_rows'       => true,
+				'suppress_filters'    => true,
+			)
+		);
+		foreach ( $query->posts as $post ) {
+			$rec  = $this->build_post_record( $post, $opts );
+			$slug = $post->post_name ? $post->post_name : sanitize_title( get_the_title( $post ) );
+			$slug = $slug ? $slug : 'post';
+			$base = 'posts/' . $post->ID . '-' . $slug;
+			$zip->addFromString( $base . '.json', $this->json( $rec ) );
+			if ( ! empty( $rec['content_clean'] ) ) {
+				$zip->addFromString( $base . '.html', (string) $rec['content_clean'] );
+			}
+			$index[] = array(
+				'id'    => $post->ID,
+				'type'  => $post->post_type,
+				'slug'  => $slug,
+				'title' => get_the_title( $post ),
+				'url'   => get_permalink( $post ),
+				'file'  => $base . '.json',
+			);
+		}
+		$zip->addFromString( 'posts/_index.json', $this->json( $index ) );
+
+		// Media metadata, chunked so no single file is large.
+		$media_count = 0;
+		if ( $opts['include_media'] ) {
+			$media       = $this->media_section();
+			$media_count = count( $media );
+			$chunks      = array_chunk( $media, 200 );
+			foreach ( $chunks as $i => $chunk ) {
+				$zip->addFromString( sprintf( 'media/meta-%03d.json', $i + 1 ), $this->json( $chunk ) );
+			}
+			$zip->addFromString( 'media/_index.json', $this->json( array( 'total' => $media_count, 'chunks' => count( $chunks ), 'files_dir' => 'media/files' ) ) );
+		}
+
+		if ( $opts['include_users'] ) {
+			$zip->addFromString( 'users.json', $this->json( $this->users_section( $opts ) ) );
+		}
+		if ( $opts['include_comments'] ) {
+			$zip->addFromString( 'comments.json', $this->json( $this->comments_section() ) );
+		}
+
+		$zip->addFromString(
+			'manifest.json',
+			$this->json(
+				array(
+					'_notice'      => self::security_notice(),
+					'generator'    => 'SEO Sprinkler',
+					'version'      => defined( 'SPR_VERSION' ) ? SPR_VERSION : '',
+					'generated_at' => gmdate( 'c' ),
+					'layout'       => 'split',
+					'site'         => array( 'name' => $site['name'], 'url' => $site['url'] ),
+					'counts'       => array( 'posts' => count( $index ), 'media' => $media_count ),
+					'posts_index'  => 'posts/_index.json',
+				)
+			)
+		);
+		$zip->addFromString( 'README.txt', $this->readme_text() );
+		$zip->addFromString( 'SECURITY-README.txt', self::security_notice() . "\n" );
+
+		return count( $index );
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Helpers
 	 * ------------------------------------------------------------------- */
 
