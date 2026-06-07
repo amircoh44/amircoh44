@@ -71,7 +71,7 @@ $textarea = function ( $key, $label, $rows, $placeholder = '' ) use ( $opt, $g )
 						<button type="button" class="button" id="spr-gmb-fill"><span class="dashicons dashicons-location" style="margin-top:4px"></span> <?php esc_html_e( 'Fill from Google', 'seo-sprinkler' ); ?></button>
 						<span id="spr-gmb-status" class="description" style="margin-left:8px"></span>
 					</p>
-					<p class="description"><?php esc_html_e( 'Paste the link to your Google Business Profile / Maps listing. The name, coordinates and street address are filled for free (address via OpenStreetMap from the map pin). Add a Google Places API key below to also pull the phone number. Opening hours are entered below.', 'seo-sprinkler' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Paste the link to your Google Business Profile / Maps listing. The name, coordinates and street address are filled for free (address via OpenStreetMap from the map pin). Add a Google Places API key below to also pull the phone number and opening hours.', 'seo-sprinkler' ); ?></p>
 				</td>
 			</tr>
 			<?php $field( 'places_api_key', __( 'Google Places API key (optional)', 'seo-sprinkler' ), 'text', 'AIza…' ); ?>

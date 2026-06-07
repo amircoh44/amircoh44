@@ -174,7 +174,7 @@ class SPR_Business_Admin {
 			$url = $this->resolve_url( $url );
 		}
 
-		$data = $this->parse_google_url( $url );
+		$data = self::parse_google_url( $url );
 
 		if ( '' !== $key ) {
 			$details = $this->places_details( $data, $key );
@@ -236,7 +236,7 @@ class SPR_Business_Admin {
 	 * @param string $url Maps URL.
 	 * @return array { name?, lat?, lng? }
 	 */
-	protected function parse_google_url( $url ) {
+	public static function parse_google_url( $url ) {
 		$out = array();
 		// Prefer the actual place pin (!3d<lat>!4d<lng>); the @lat,lng in the URL is
 		// only the map viewport and is often miles from the business.
@@ -359,7 +359,7 @@ class SPR_Business_Admin {
 			add_query_arg(
 				array(
 					'place_id' => $pid,
-					'fields'   => 'name,formatted_phone_number,international_phone_number,website,address_components,geometry',
+					'fields'   => 'name,formatted_phone_number,international_phone_number,website,address_components,geometry,opening_hours',
 					'key'      => $key,
 				),
 				'https://maps.googleapis.com/maps/api/place/details/json'
@@ -425,7 +425,73 @@ class SPR_Business_Admin {
 				$out['country'] = $co['short_name'];
 			}
 		}
+		if ( ! empty( $r['opening_hours']['periods'] ) ) {
+			$hours = self::periods_to_hours( $r['opening_hours']['periods'] );
+			if ( '' !== $hours ) {
+				$out['opening_hours'] = $hours;
+			}
+		}
 		return $out;
+	}
+
+	/**
+	 * Convert a Google Places `opening_hours.periods` array into the plugin's
+	 * opening-hours format (one rule per line, e.g. "Mo 08:00-20:00"), which the
+	 * schema generator turns into OpeningHoursSpecification. Uses the structured
+	 * `periods` (24h, locale-free) rather than the localized weekday_text.
+	 *
+	 * @param array $periods Google periods.
+	 * @return string
+	 */
+	public static function periods_to_hours( $periods ) {
+		if ( ! is_array( $periods ) || empty( $periods ) ) {
+			return '';
+		}
+		$codes = array( 0 => 'Su', 1 => 'Mo', 2 => 'Tu', 3 => 'We', 4 => 'Th', 5 => 'Fr', 6 => 'Sa' );
+
+		// Open 24/7: a single period with open time 0000 and no close.
+		if ( 1 === count( $periods ) && empty( $periods[0]['close'] ) && isset( $periods[0]['open']['time'] ) && '0000' === (string) $periods[0]['open']['time'] ) {
+			return 'Mo-Su 00:00-23:59';
+		}
+
+		$by_day = array();
+		foreach ( $periods as $p ) {
+			if ( ! isset( $p['open']['day'], $p['open']['time'] ) ) {
+				continue;
+			}
+			$open  = self::hhmm( $p['open']['time'] );
+			$close = isset( $p['close']['time'] ) ? self::hhmm( $p['close']['time'] ) : '23:59';
+			if ( '' === $open ) {
+				continue;
+			}
+			$by_day[ (int) $p['open']['day'] ][] = $open . '-' . $close;
+		}
+
+		$lines = array();
+		foreach ( array( 1, 2, 3, 4, 5, 6, 0 ) as $d ) { // Monday-first for readability.
+			if ( empty( $by_day[ $d ] ) ) {
+				continue;
+			}
+			foreach ( $by_day[ $d ] as $range ) {
+				$lines[] = $codes[ $d ] . ' ' . $range;
+			}
+		}
+		return implode( "\n", $lines );
+	}
+
+	/**
+	 * Normalise a Google "HHMM" time to "HH:MM".
+	 *
+	 * @param string $t Time.
+	 * @return string
+	 */
+	public static function hhmm( $t ) {
+		$t = preg_replace( '/\D/', '', (string) $t );
+		if ( strlen( $t ) < 3 ) {
+			return '';
+		}
+		$t = str_pad( $t, 4, '0', STR_PAD_LEFT );
+		return substr( $t, 0, 2 ) . ':' . substr( $t, 2, 2 );
 	}
 
 	/**

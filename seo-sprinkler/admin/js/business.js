@@ -98,6 +98,7 @@
 					setIfEmpty( 'name', d.name );
 					setIfEmpty( 'url', d.website );
 					setIfEmpty( 'telephone', d.telephone );
+					setIfEmpty( 'opening_hours', d.opening_hours );
 					setIfEmpty( 'street', d.street );
 					setIfEmpty( 'locality', d.locality );
 					setIfEmpty( 'region', d.region );
