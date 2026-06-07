@@ -74,9 +74,10 @@ final class SAB_Plugin {
 		$cleaner  = new SAB_Content_Cleaner();
 		$heading  = new SAB_Heading_Checker();
 		$filler   = new SAB_Image_Filler( $scanner, $link_scan, $schema, $heading );
+		$exporter = new SAB_Exporter();
 		$ajax     = new SAB_Ajax( $scanner, $schema, $index, $applier, $sitemap );
 
-		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'ajax' );
+		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'exporter', 'ajax' );
 
 		// --- Register settings + i18n. ------------------------------------.
 		add_action( 'admin_init', array( 'SAB_Settings', 'register' ) );
@@ -130,6 +131,12 @@ final class SAB_Plugin {
 				$business_admin = new SAB_Business_Admin();
 				$business_admin->init();
 				$this->services['business_admin'] = $business_admin;
+			}
+
+			if ( class_exists( 'SAB_Export_Admin' ) ) {
+				$export_admin = new SAB_Export_Admin( $exporter );
+				$export_admin->init();
+				$this->services['export_admin'] = $export_admin;
 			}
 
 			// Convenience "Settings" link on the Plugins screen.

@@ -75,5 +75,8 @@ $ba = $plugin->service( 'business_admin' );
 $ba->register_setting();
 render( 'business profile', function () use ( $ba ) { $ba->render(); }, 'Business Profile' );
 
+$ea = $plugin->service( 'export_admin' );
+render( 'export / migrate', function () use ( $ea ) { $ea->render(); }, 'Export / Migrate' );
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

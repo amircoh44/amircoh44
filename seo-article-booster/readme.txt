@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,8 @@ Generate full JSON-LD schema from a business questionnaire, audit every sitemap 
 9. **Multiple sitemaps + sitemap-synced audit** – Add as many sitemaps as you like (each an index or a flat urlset); they're merged and de-duplicated. The Schema Audit can then scan **every URL in your sitemaps** for structured data, keeping your schema coverage in sync with what you actually publish.
 
 10. **SEO Booster meta box (fill with images)** – On every post, page and custom-post editor: a one-click button that fills the content with **related, randomised** images from your media library — choose alignment (middle/left/right) and size (thumbnail → full) — distributed through the article so it's full of visuals. The same box shows a live SEO checklist (images vs the minimum, internal/external link counts, schema status, H1). Every fill is backed up and can be undone.
+
+11. **Export / Migrate** – Download your whole site as structured JSON for import into Python or another platform: all post types and custom post types, every taxonomy/term, the full media library with alt/caption/description/sizes/URLs, general settings, and SEO metadata (Yoast, Rank Math, AIOSEO, SEOPress, The SEO Framework are auto-detected). Optionally bundle the actual media files as a ZIP. Anything containing personal data (user logins/emails) requires an explicit authorisation checkbox before it is exported.
 
 = New post awareness =
 
@@ -68,6 +70,9 @@ Because SEO plugins output JSON-LD in the page head at render time, the plugin r
 No. The linker never links inside existing links, code, scripts or (optionally) headings, matches whole words only, and caps links per phrase and per article. Re-applying links first strips any it previously added, so it is safe to run repeatedly.
 
 == Changelog ==
+
+= 1.5.0 =
+* New: Export / Migrate — download the whole site as structured JSON (all post types/CPTs, taxonomies, full media library with alt/caption/description, settings, and SEO metadata from auto-detected SEO plugins) for import into Python or another platform; optional media-files ZIP. Personal data (logins/emails) requires explicit authorisation.
 
 = 1.4.0 =
 * New: "SEO Booster" meta box on every post/page/custom-post editor — a one-click "fill with images" tool that inserts related, randomised library images (choose middle/left/right alignment and thumbnail→full size) distributed through the content, plus a live SEO checklist (images, internal/external links, schema, H1). Fills are backed up and reversible.

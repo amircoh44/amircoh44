@@ -33,7 +33,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: sqlite3, pdo_sqlite, dom, mbstring, libxml, json
+          extensions: sqlite3, pdo_sqlite, dom, mbstring, libxml, json, zip
           coverage: none
 
       - name: Lint all PHP files
@@ -55,6 +55,9 @@ jobs:
 
       - name: Image filler tests
         run: php seo-article-booster/tests/test-filler.php
+
+      - name: Export / migration tests
+        run: php seo-article-booster/tests/test-export.php
 
       - name: Admin render tests
         run: php seo-article-booster/tests/test-admin.php
