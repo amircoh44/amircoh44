@@ -1,11 +1,12 @@
 """Public storefront: landing, features, pricing, FAQ, account lookup,
 (sandbox) checkout and download."""
+import os
 from datetime import datetime, timedelta
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from .models import db, Customer, License, Coupon
-from . import licensing
+from . import licensing, payments
 
 bp = Blueprint("store", __name__)
 
@@ -90,7 +91,13 @@ def checkout():
         name = request.form.get("name", "").strip()
         if not email:
             flash("Please enter your email address.", "error")
+        elif payments.stripe_enabled():
+            # Hand off to Stripe; the webhook issues the license on completion.
+            base = os.environ.get("PUBLIC_BASE_URL") or request.url_root
+            return redirect(payments.create_session(edition, term, tier, email,
+                                                     code if coupon else "", final, base))
         else:
+            # Sandbox: issue a working key immediately.
             cust = Customer.query.filter_by(email=email).first()
             if not cust:
                 cust = Customer(email=email, name=name)
@@ -116,3 +123,9 @@ def checkout():
 def success(key):
     lic = License.query.filter_by(key=key).first_or_404()
     return render_template("store/success.html", lic=lic)
+
+
+@bp.route("/checkout/thanks")
+def thanks():
+    """Stripe success landing — the license arrives via webhook moments later."""
+    return render_template("store/thanks.html")

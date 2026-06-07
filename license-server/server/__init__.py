@@ -16,10 +16,12 @@ def create_app(config=Config):
     from .store import bp as store_bp
     from .admin import bp as admin_bp
     from .api import bp as api_bp
+    from .webhooks import bp as webhooks_bp
 
     app.register_blueprint(store_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(api_bp, url_prefix="/api/v1")
+    app.register_blueprint(webhooks_bp, url_prefix="/webhook")
 
     from . import licensing
 

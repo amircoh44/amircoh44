@@ -1,0 +1,20 @@
+services:
+  license:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-please-change-me}
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASS=${ADMIN_PASS:-changeme}
+      - DATABASE_URL=sqlite:////data/license.db
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-}
+      - CURRENCY=${CURRENCY:-usd}
+    volumes:
+      - license-data:/data
+    restart: unless-stopped
+
+volumes:
+  license-data:

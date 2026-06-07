@@ -91,6 +91,34 @@ add_action( 'spr_daily_refresh_event', function () {
 } );
 ```
 
+## Stripe checkout
+
+Set these env vars and the storefront hands off to Stripe (otherwise it uses the
+sandbox flow that issues a key instantly):
+
+- `STRIPE_SECRET_KEY` — your secret key.
+- `STRIPE_WEBHOOK_SECRET` — from `stripe listen` or the dashboard webhook.
+- `PUBLIC_BASE_URL` — your public URL (used for success/cancel redirects).
+
+Point a Stripe webhook at `POST /webhook/stripe` for `checkout.session.completed`.
+The license is created from the session metadata and shows up in **My account**.
+Locally:
+
+```bash
+stripe listen --forward-to localhost:5001/webhook/stripe
+```
+
+## Deploy with Docker
+
+```bash
+cd license-server
+docker compose up --build        # http://localhost:8000
+```
+
+The SQLite DB persists in the `license-data` volume. Provide `SECRET_KEY`,
+`ADMIN_PASS` and the Stripe vars via an `.env` file or your host's secrets.
+Without Docker: `gunicorn --bind 0.0.0.0:8000 wsgi:app`.
+
 ## Going to production
 
 - Put it behind a real WSGI server (gunicorn/uwsgi) + HTTPS; set a strong `SECRET_KEY`.
