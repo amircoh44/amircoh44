@@ -94,14 +94,18 @@ class SAB_Admin {
 	 * Register the top-level menu and sub-pages.
 	 */
 	public function register_menu() {
+		// A custom "boost" (rocket) SVG icon, coloured to match the admin menu.
+		$svg  = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="#a7aaad" d="M14.6 1.6c-2.6.3-4.8 1.6-6.6 3.6L6.7 6.8 4 6.3c-.4-.1-.8 0-1.1.3L1 8.6c-.4.4-.3 1 .2 1.2l2.4 1.1c-.1.4-.1.8 0 1.2l-.6.6c-.3.3-.3.9 0 1.2l1.5 1.5c.3.3.9.3 1.2 0l.6-.6c.4.1.8.1 1.2 0l1.1 2.4c.2.5.8.6 1.2.2l2-1.9c.3-.3.4-.7.3-1.1l-.5-2.7 1.6-1.3c2-1.8 3.3-4 3.6-6.6.1-.9.1-1.8 0-2.6-.9-.2-1.8-.2-2.6-.1zM13 7.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM3.3 15.1c-.8.3-1.5 1.1-1.7 3.3 2.2-.2 3-.9 3.3-1.7.3-.8-.8-2-1.6-1.6z"/></svg>';
+		$icon = 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- inline SVG icon.
+
 		$this->screens[] = add_menu_page(
 			__( 'SEO Article Booster', 'seo-article-booster' ),
 			__( 'SEO Booster', 'seo-article-booster' ),
 			self::CAP,
 			'sab-dashboard',
 			array( $this, 'render_dashboard' ),
-			'dashicons-admin-links',
-			58
+			$icon,
+			22 // Just below Pages, in the content area of the admin menu.
 		);
 
 		$this->screens[] = add_submenu_page(

@@ -8,11 +8,15 @@ Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Generate full JSON-LD schema from a business questionnaire, audit every sitemap URL, enforce image minimums, audit/clean content, and auto-interlink.
+The SEO toolkit that works ALONGSIDE Yoast/Rank Math (not instead of them) and does what they can't — images, internal links, schema, cleanup, migration.
 
 == Description ==
 
-**SEO Article Booster** helps you ship better-optimised articles by combining several on-page SEO tools in one place:
+**SEO Article Booster is not a replacement for your SEO plugin — it's the layer on top of it.** Keep Yoast, Rank Math or All in One SEO for your titles, meta and sitemaps. SEO Article Booster sits alongside them and does the hands-on, page-by-page work no other SEO plugin does for you: making sure every article is full of images, properly interlinked, schema-complete, free of AI "junk" markup, and ready to migrate.
+
+It's built from **30 years of real SEO and website-building work by Amir Khan** — every check and fix he has done for clients by hand, packed into one plugin so you can do it in a click.
+
+It combines several on-page SEO tools in one place:
 
 1. **Image minimum** – Counts the images inside each article (inline images, gallery blocks/shortcodes and, optionally, the featured image) and flags any article that falls below a minimum you choose. The count appears in the post list and in the editor's Publish box.
 

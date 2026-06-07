@@ -2,6 +2,8 @@
 
 [![Smoke test](https://github.com/amircoh44/amircoh44/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/amircoh44/amircoh44/actions/workflows/smoke-test.yml)
 
+> **Not a replacement for your SEO plugin — the layer on top of it.** Keep Yoast / Rank Math / AIOSEO for titles, meta and sitemaps; SEO Article Booster does the hands‑on, page‑by‑page work they don't. Built from **30 years of SEO & website building by Amir Khan**, packed into one plugin.
+
 A WordPress plugin that boosts on-page SEO for your articles in several ways:
 
 1. **Image minimum** — counts images inside each article and flags posts below a configurable minimum.

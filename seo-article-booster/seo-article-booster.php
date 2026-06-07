@@ -2,11 +2,11 @@
 /**
  * Plugin Name:       SEO Article Booster
  * Plugin URI:        https://github.com/amircoh44/amircoh44
- * Description:        Boost your SEO: a business-profile questionnaire that generates full JSON-LD schema across all pages; multi-sitemap support with a sitemap-synced schema audit; internal linking from the sitemap; image-minimum and link audits with inline editing; an in-editor "fill with related images" booster; rule-based content distribution; reversible "generative junk" cleanup; a duplicate-H1 warning; and a full site export/migration tool (JSON + media ZIP) with SEO-plugin detection.
+ * Description:        An ADDITIONAL on-page SEO toolkit that works alongside Yoast, Rank Math or AIOSEO (never a replacement) and does the things they don't: enforce an image minimum, fill articles with related images, audit & fix internal/external links, generate a complete JSON-LD schema graph from a business profile, distribute CTAs/shortcodes by tag, clean AI "generative junk", and export the whole site for migration. Distilled from 30 years of hands-on SEO and website building by Amir Khan.
  * Version:           1.6.0
  * Requires at least: 5.6
  * Requires PHP:      7.2
- * Author:            amircoh44
+ * Author:            Amir Khan
  * Author URI:        https://github.com/amircoh44
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
