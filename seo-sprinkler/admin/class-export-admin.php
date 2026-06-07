@@ -205,11 +205,24 @@ class SPR_Export_Admin {
 
 		$json = wp_json_encode( $this->exporter->build_manifest( $opts ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 
+		// Optional gzip: compressed bytes don't match the script/HTML text
+		// heuristics that make some antivirus tools quarantine a content export.
+		$compress = ! empty( $src['compress'] ) && function_exists( 'gzencode' );
+
 		nocache_headers();
-		header( 'Content-Type: application/json; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename="' . $this->filename( 'json' ) . '"' );
-		header( 'Content-Length: ' . strlen( $json ) );
-		echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON download body.
+		header( 'X-Content-Type-Options: nosniff' );
+		if ( $compress ) {
+			$body = gzencode( $json, 6 );
+			header( 'Content-Type: application/gzip' );
+			header( 'Content-Disposition: attachment; filename="' . $this->filename( 'json.gz' ) . '"' );
+			header( 'Content-Length: ' . strlen( $body ) );
+			echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- gzip download body.
+		} else {
+			header( 'Content-Type: application/json; charset=utf-8' );
+			header( 'Content-Disposition: attachment; filename="' . $this->filename( 'json' ) . '"' );
+			header( 'Content-Length: ' . strlen( $json ) );
+			echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON download body.
+		}
 		exit;
 	}
 
@@ -342,6 +355,7 @@ class SPR_Export_Admin {
 
 		$path = $state['path'];
 		nocache_headers();
+		header( 'X-Content-Type-Options: nosniff' );
 		header( 'Content-Type: application/zip' );
 		header( 'Content-Disposition: attachment; filename="' . $this->filename( 'zip' ) . '"' );
 		header( 'Content-Length: ' . filesize( $path ) );

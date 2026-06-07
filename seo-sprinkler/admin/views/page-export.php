@@ -110,12 +110,14 @@ $check = function ( $name, $label, $checked = true, $class = '' ) {
 
 			<p>
 				<button type="submit" class="button button-primary" <?php disabled( ! empty( $locked ) ); ?>><?php esc_html_e( 'Download JSON', 'seo-sprinkler' ); ?></button>
+				<label style="margin-left:10px"><input type="checkbox" name="compress" value="1" /> <?php esc_html_e( 'Compress (.gz)', 'seo-sprinkler' ); ?></label>
 				<?php if ( $zip_ready ) : ?>
 					<button type="button" class="button" id="spr-export-zip" <?php disabled( ! empty( $locked ) ); ?>><?php esc_html_e( 'Build &amp; download media ZIP', 'seo-sprinkler' ); ?></button>
 				<?php else : ?>
 					<span class="description"><?php esc_html_e( 'Media ZIP unavailable — the server is missing the PHP zip extension. Use JSON; media URLs are included so a script can fetch the files.', 'seo-sprinkler' ); ?></span>
 				<?php endif; ?>
 			</p>
+			<p class="description"><?php esc_html_e( 'Antivirus blocking the download? The file is your own content — scanners can mis-flag the HTML/JavaScript inside your posts. Tick "Compress (.gz)" (extract it with 7-Zip/WinRAR), or choose "Keep" in your browser and allow the item under Windows Security → Virus &amp; threat protection → Protection history.', 'seo-sprinkler' ); ?></p>
 			<div id="spr-export-progress" class="spr-progress" style="display:none">
 				<div class="spr-progress__bar"><span></span></div>
 				<p class="spr-progress__label"></p>
