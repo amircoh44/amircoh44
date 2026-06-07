@@ -98,7 +98,13 @@
 		$btn.prop( 'disabled', false );
 	}
 
+	function updateWarning() {
+		$( '#sab-export-warning' ).toggle( piiSelected() );
+	}
+
 	$( function () {
 		$( '#sab-export-zip' ).on( 'click', buildZip );
+		$( 'input[name="include_users"], input[name="include_emails"], input[name="include_all_options"]' ).on( 'change', updateWarning );
+		updateWarning();
 	} );
 } )( jQuery );

@@ -42,6 +42,15 @@ class SAB_Exporter {
 	}
 
 	/**
+	 * The security warning embedded in every export.
+	 *
+	 * @return string
+	 */
+	public static function security_notice() {
+		return 'This export may contain sensitive and personal data (e.g. user names, email addresses, settings). Keep it in a safe place. Do NOT upload it to an unsecured or public server, and never commit it to a public repository such as GitHub.';
+	}
+
+	/**
 	 * Build the full export manifest.
 	 *
 	 * @param array $opts Options (see default_options()).
@@ -51,6 +60,7 @@ class SAB_Exporter {
 		$opts = wp_parse_args( $opts, self::default_options() );
 
 		$manifest = array(
+			'_notice'      => self::security_notice(),
 			'generator'    => 'SEO Article Booster',
 			'version'      => defined( 'SAB_VERSION' ) ? SAB_VERSION : '',
 			'generated_at' => gmdate( 'c' ),

@@ -249,6 +249,7 @@ class SAB_Export_Admin {
 		}
 		$json = wp_json_encode( $this->exporter->build_manifest( $opts ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 		$zip->addFromString( 'manifest.json', $json );
+		$zip->addFromString( 'SECURITY-README.txt', SAB_Exporter::security_notice() . "\n" );
 		$zip->close();
 
 		$ids = array_keys( $this->exporter->media_files() );

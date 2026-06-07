@@ -69,7 +69,7 @@ $check = function ( $name, $label, $checked = true, $class = '' ) {
 
 		<div class="sab-panel">
 			<h2><?php esc_html_e( 'Personal data', 'seo-article-booster' ); ?></h2>
-			<div class="notice notice-warning inline"><p><?php esc_html_e( 'The options below include personal data. Only export data you are authorised to handle, and store the file securely.', 'seo-article-booster' ); ?></p></div>
+			<div class="notice notice-warning inline"><p><?php esc_html_e( 'The options below include personal data. Only export data you are authorised to handle. Keep the downloaded file in a safe place — do not upload it to an unsecured or public server, and never commit it to a public repository such as GitHub.', 'seo-article-booster' ); ?></p></div>
 			<?php
 			$check( 'include_users', __( 'Users (names, roles, registration date)', 'seo-article-booster' ), false );
 			$check( 'include_emails', __( 'Include user logins &amp; <strong>email addresses</strong> + admin email', 'seo-article-booster' ), false );
@@ -82,6 +82,15 @@ $check = function ( $name, $label, $checked = true, $class = '' ) {
 
 		<div class="sab-panel">
 			<h2><?php esc_html_e( 'Download', 'seo-article-booster' ); ?></h2>
+
+			<div class="notice notice-error inline" id="sab-export-warning" style="display:none">
+				<p>
+					<span class="dashicons dashicons-shield-alt"></span>
+					<strong><?php esc_html_e( 'This export will contain sensitive / personal data.', 'seo-article-booster' ); ?></strong>
+					<?php esc_html_e( 'Store the file somewhere private. Do NOT upload it to an unsecured or public server, and never commit it to a public repository such as GitHub.', 'seo-article-booster' ); ?>
+				</p>
+			</div>
+
 			<p>
 				<button type="submit" class="button button-primary"><?php esc_html_e( 'Download JSON', 'seo-article-booster' ); ?></button>
 				<?php if ( $zip_ready ) : ?>
