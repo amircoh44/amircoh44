@@ -54,6 +54,21 @@ render( 'schema audit', function () use ( $admin ) { $admin->render_schema(); },
 render( 'internal links', function () use ( $admin ) { $admin->render_links(); }, 'Internal Links' );
 render( 'settings', function () use ( $admin ) { $admin->render_settings(); }, 'Content cleaner' );
 
+// Regression: a field title containing tag names (e.g. the cleaner's
+// "Stray <script> and <style> blocks") must be HTML-escaped, not echoed as live
+// markup — otherwise the injected <script> eats the rest of the page, including
+// the Save Changes button.
+ob_start();
+$admin->render_settings();
+$settings_html = ob_get_clean();
+foreach ( array(
+	'cleaner label is HTML-escaped'              => false !== strpos( $settings_html, 'Stray &lt;script&gt;' ),
+	'no raw <script> injected by a field title'  => false === strpos( $settings_html, 'Stray <script>' ),
+	'Save button renders after all sections'     => false !== strpos( $settings_html, 'Save Changes' ),
+) as $check_name => $cond ) {
+	if ( $cond ) { $pass++; echo "PASS  $check_name\n"; } else { $fail++; echo "FAIL  $check_name\n"; }
+}
+
 $da = $plugin->service( 'dist_admin' );
 $_GET = array();
 render( 'distribution list', function () use ( $da ) { $da->render(); }, 'Content Distribution' );

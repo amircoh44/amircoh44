@@ -354,7 +354,7 @@ class SPR_Admin {
 	protected function add_number_field( $key, $label, $section, $help = '' ) {
 		add_settings_field(
 			$key,
-			$label,
+			esc_html( $label ),
 			function () use ( $key, $help ) {
 				printf(
 					'<input type="number" min="0" name="%1$s[%2$s]" id="%2$s" value="%3$s" class="small-text" />',
@@ -382,7 +382,7 @@ class SPR_Admin {
 	protected function add_checkbox_field( $key, $label, $section ) {
 		add_settings_field(
 			$key,
-			$label,
+			esc_html( $label ),
 			function () use ( $key, $label ) {
 				printf(
 					'<label><input type="checkbox" name="%1$s[%2$s]" value="1" %3$s /> %4$s</label>',
@@ -410,7 +410,7 @@ class SPR_Admin {
 	protected function add_textarea_field( $key, $label, $section, $help = '' ) {
 		add_settings_field(
 			$key,
-			$label,
+			esc_html( $label ),
 			function () use ( $key, $help ) {
 				printf(
 					'<textarea name="%1$s[%2$s]" id="%2$s" rows="4" class="large-text code">%3$s</textarea>',
@@ -441,7 +441,7 @@ class SPR_Admin {
 	protected function add_text_field( $key, $label, $section, $help = '', $type = 'text', $placeholder = '' ) {
 		add_settings_field(
 			$key,
-			$label,
+			esc_html( $label ),
 			function () use ( $key, $help, $type, $placeholder ) {
 				printf(
 					'<input type="%1$s" name="%2$s[%3$s]" id="%3$s" value="%4$s" class="regular-text" placeholder="%5$s" />',
@@ -471,7 +471,7 @@ class SPR_Admin {
 	protected function add_post_types_field( $key, $label, $section ) {
 		add_settings_field(
 			$key,
-			$label,
+			esc_html( $label ),
 			function () use ( $key ) {
 				$selected = (array) SPR_Settings::get( $key, array() );
 				$types    = get_post_types( array( 'public' => true ), 'objects' );

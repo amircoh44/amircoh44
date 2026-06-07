@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,9 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.7.1 =
+* Fix: Settings page — field titles that contain tag names (e.g. the content cleaner's "Stray <script> and <style> blocks", Word/Office cruft, and the schema "<head>" option) are now HTML-escaped. Previously the raw `<script>` in a label was parsed as live markup and swallowed the rest of the page, hiding later options and the **Save Changes** button.
 
 = 1.7.0 =
 * New: Per-post SEO score (free) in the SEO Sprinkler meta box.
