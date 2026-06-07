@@ -143,6 +143,12 @@ final class SPR_Plugin {
 				$this->services['export_admin'] = $export_admin;
 			}
 
+			if ( class_exists( 'SPR_Image_Distribution_Admin' ) ) {
+				$imgdist_admin = new SPR_Image_Distribution_Admin( $scanner, $filler );
+				$imgdist_admin->init();
+				$this->services['imgdist_admin'] = $imgdist_admin;
+			}
+
 			// Convenience "Settings" link on the Plugins screen.
 			add_filter( 'plugin_action_links_' . SPR_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
 		}

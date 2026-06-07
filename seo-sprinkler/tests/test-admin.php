@@ -132,5 +132,10 @@ foreach ( array(
 $ea = $plugin->service( 'export_admin' );
 render( 'export / migrate', function () use ( $ea ) { $ea->render(); }, 'Export / Migrate' );
 
+$ida = $plugin->service( 'imgdist_admin' );
+if ( $ida ) {
+	render( 'image distribution', function () use ( $ida ) { $ida->render(); }, 'Image Distribution' );
+}
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

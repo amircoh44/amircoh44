@@ -430,6 +430,143 @@ class SPR_Image_Filler {
 		return true;
 	}
 
+	/* ---------------------------------------------------------------------
+	 * Bulk image distribution
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Fill one post for the bulk "Image Distribution" tool.
+	 *
+	 * Density modes:
+	 *  - per_article : ensure the post has at least `target` images (default: the
+	 *                  image minimum); inserts the deficit only.
+	 *  - per_words   : one image per `per_words` words; inserts the deficit.
+	 *
+	 * Alt text: 'ai' uses the configured AI (when available) to write contextual,
+	 * SEO-friendly alt for each image; otherwise a clean fallback alt is built from
+	 * the image and the post title. Pass `exclude` (IDs used earlier in the run) to
+	 * spread across the whole library.
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param array $args    align, size, mode, target, per_words, every, alt_mode, exclude.
+	 * @return array { inserted:int, used:int[], skipped?:string }
+	 */
+	public function bulk_fill( $post_id, $args ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'missing' );
+		}
+		$args = wp_parse_args(
+			$args,
+			array(
+				'align'     => 'center',
+				'size'      => 'large',
+				'mode'      => 'per_article',
+				'target'    => 0,
+				'per_words' => 200,
+				'every'     => 2,
+				'alt_mode'  => 'auto',
+				'exclude'   => array(),
+			)
+		);
+		$align = in_array( $args['align'], array( 'left', 'center', 'right' ), true ) ? $args['align'] : 'center';
+		$size  = in_array( $args['size'], array( 'thumbnail', 'medium', 'large', 'full' ), true ) ? $args['size'] : 'large';
+
+		$current = (int) $this->images->count_for_post( $post );
+
+		if ( 'per_words' === $args['mode'] ) {
+			$per    = max( 25, (int) $args['per_words'] );
+			$words  = str_word_count( wp_strip_all_tags( $post->post_content ) );
+			$target = (int) ceil( $words / $per );
+		} else {
+			$target = (int) $args['target'];
+			if ( $target < 1 ) {
+				$target = max( 1, (int) $this->images->get_minimum() );
+			}
+		}
+
+		$need = min( 30, max( 0, $target - $current ) );
+		if ( $need <= 0 ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'enough' );
+		}
+
+		$ids = $this->related_image_ids( $post_id, $need, (array) $args['exclude'] );
+		if ( empty( $ids ) ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'no_images' );
+		}
+
+		$use_ai = ( 'ai' === $args['alt_mode'] ) && SPR_Edition::can( 'ai' ) && SPR_AI::is_configured();
+
+		$blocks = array();
+		$used   = array();
+		foreach ( $ids as $id ) {
+			$alt   = $use_ai ? $this->ai_alt( $post, $id ) : $this->auto_alt( $post, $id );
+			$block = $this->build_image_block( $id, $align, $size, $alt );
+			if ( '' !== $block ) {
+				$blocks[] = $block;
+				$used[]   = (int) $id;
+			}
+		}
+		if ( empty( $blocks ) ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'no_images' );
+		}
+
+		update_post_meta( $post_id, self::META_BACKUP, $post->post_content );
+		$new = $this->insert_blocks( $post->post_content, $blocks, (int) $args['every'] );
+		wp_update_post( array( 'ID' => $post_id, 'post_content' => $new ) );
+		update_post_meta( $post_id, SPR_META_IMAGE_COUNT, $this->images->count_for_post( get_post( $post_id ) ) );
+
+		return array( 'inserted' => count( $blocks ), 'used' => $used );
+	}
+
+	/**
+	 * Fallback alt text: the attachment's stored alt, else built from the image
+	 * file name and the post title.
+	 *
+	 * @param WP_Post $post          Post.
+	 * @param int     $attachment_id Attachment ID.
+	 * @return string
+	 */
+	public function auto_alt( $post, $attachment_id ) {
+		$existing = trim( (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) );
+		if ( '' !== $existing ) {
+			return $existing;
+		}
+		$file = get_attached_file( $attachment_id );
+		$name = $file ? preg_replace( '/[-_]+/', ' ', pathinfo( $file, PATHINFO_FILENAME ) ) : '';
+		$name = trim( preg_replace( '/\b\d{3,}\b/', '', (string) $name ) );
+		$title = get_the_title( $post );
+		$alt   = $name ? trim( $title . ' — ' . $name ) : $title;
+		return trim( wp_strip_all_tags( $alt ) );
+	}
+
+	/**
+	 * AI-written, context-aware alt text (falls back to auto_alt on any failure).
+	 *
+	 * @param WP_Post $post          Post.
+	 * @param int     $attachment_id Attachment ID.
+	 * @return string
+	 */
+	public function ai_alt( $post, $attachment_id ) {
+		$file  = get_attached_file( $attachment_id );
+		$fname = $file ? pathinfo( $file, PATHINFO_FILENAME ) : '';
+
+		$system = 'You write concise, descriptive, SEO-friendly alt text for an image placed inside a web article. Reply with ONLY the alt text — no quotes, no prefix, maximum 125 characters.';
+		$user   = sprintf(
+			"Article title: %s\nArticle excerpt: %s\nImage file name: %s\nWrite alt text for what this image most likely shows in the article's context.",
+			get_the_title( $post ),
+			wp_trim_words( wp_strip_all_tags( $post->post_content ), 60, '' ),
+			$fname
+		);
+
+		$out = SPR_AI::generate( $system, $user, 60 );
+		if ( is_wp_error( $out ) || '' === trim( (string) $out ) ) {
+			return $this->auto_alt( $post, $attachment_id );
+		}
+		$out = trim( wp_strip_all_tags( $out ) );
+		return function_exists( 'mb_substr' ) ? mb_substr( $out, 0, 125 ) : substr( $out, 0, 125 );
+	}
+
 	/**
 	 * Choose image attachment IDs related to the post, then randomised.
 	 *
@@ -437,11 +574,16 @@ class SPR_Image_Filler {
 	 * the remainder is filled with random library images. The order is shuffled
 	 * so repeated fills vary.
 	 *
-	 * @param int $post_id Post ID.
-	 * @param int $count   How many IDs to return.
+	 * Selection order: keyword-matched (unused) → other unused → already-used.
+	 * Passing $exclude (IDs used earlier in a bulk run) pushes those images to the
+	 * back, so a run spreads across the whole library before any image repeats.
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param int   $count   How many IDs to return.
+	 * @param int[] $exclude Attachment IDs to de-prioritise (used earlier this run).
 	 * @return int[]
 	 */
-	public function related_image_ids( $post_id, $count ) {
+	public function related_image_ids( $post_id, $count, $exclude = array() ) {
 		$count = max( 0, (int) $count );
 		if ( 0 === $count ) {
 			return array();
@@ -449,12 +591,13 @@ class SPR_Image_Filler {
 
 		$keywords = $this->post_keywords( $post_id );
 
+		// Pull a wide, randomised slice of the library so variety is maximised.
 		$pool = get_posts(
 			array(
 				'post_type'      => 'attachment',
 				'post_mime_type' => 'image',
 				'post_status'    => 'inherit',
-				'posts_per_page' => 300,
+				'posts_per_page' => 1000,
 				'fields'         => 'ids',
 				'orderby'        => 'rand',
 			)
@@ -463,9 +606,13 @@ class SPR_Image_Filler {
 			return array();
 		}
 
-		$related = array();
-		$rest    = array();
+		$exclude = array_flip( array_map( 'intval', (array) $exclude ) );
+
+		$related = array(); // keyword-matched, unused
+		$rest    = array(); // other, unused
+		$reuse   = array(); // already used this run (last resort)
 		foreach ( $pool as $id ) {
+			$id   = (int) $id;
 			$file = get_attached_file( $id );
 			$hay  = strtolower(
 				get_the_title( $id ) . ' '
@@ -479,7 +626,10 @@ class SPR_Image_Filler {
 					break;
 				}
 			}
-			if ( $matched ) {
+
+			if ( isset( $exclude[ $id ] ) ) {
+				$reuse[] = $id;
+			} elseif ( $matched ) {
 				$related[] = $id;
 			} else {
 				$rest[] = $id;
@@ -488,8 +638,10 @@ class SPR_Image_Filler {
 
 		shuffle( $related );
 		shuffle( $rest );
+		shuffle( $reuse );
 
-		$ordered = array_merge( $related, $rest );
+		// Unused images first (matched, then any), repeats only if the library runs out.
+		$ordered = array_merge( $related, $rest, $reuse );
 		return array_slice( $ordered, 0, $count );
 	}
 
@@ -523,10 +675,15 @@ class SPR_Image_Filler {
 	 * @param int    $id    Attachment ID.
 	 * @param string $align left|center|right.
 	 * @param string $size  thumbnail|medium|large|full.
+	 * @param string $alt   Optional alt text to set on the <img> (overrides the stored alt).
 	 * @return string
 	 */
-	public function build_image_block( $id, $align, $size ) {
-		$img = wp_get_attachment_image( $id, $size, false, array( 'class' => 'wp-image-' . (int) $id ) );
+	public function build_image_block( $id, $align, $size, $alt = '' ) {
+		$attr = array( 'class' => 'wp-image-' . (int) $id );
+		if ( '' !== $alt ) {
+			$attr['alt'] = $alt;
+		}
+		$img = wp_get_attachment_image( $id, $size, false, $attr );
 		if ( ! $img ) {
 			return '';
 		}

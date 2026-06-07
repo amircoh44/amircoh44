@@ -94,5 +94,36 @@ update_option( 'spr_settings', $s );
 SPR_Settings::flush_cache();
 check( 'AI configured after endpoint+key set', SPR_AI::is_configured() );
 
+/* --- Bulk image distribution ------------------------------------------- */
+
+// Custom alt is written onto the <img>.
+$alt_block = $filler->build_image_block( $plumb, 'center', 'large', 'My custom alt' );
+check( 'block honours custom alt', false !== strpos( $alt_block, 'alt="My custom alt"' ) );
+
+// auto_alt: stored alt wins; otherwise it is built from the post title + file name.
+$noalt = mkimg( 'no-alt-image', '' );
+check( 'auto_alt uses stored alt', 'plumbing leak repair' === $filler->auto_alt( get_post( $post ), $plumb ) );
+check( 'auto_alt falls back to title', false !== stripos( $filler->auto_alt( get_post( $post ), $noalt ), 'Plumbing tips' ) );
+
+// Variety: an already-used image is pushed to the back so others are picked.
+$one = $filler->related_image_ids( $post, 1, array( $plumb ) );
+check( 'related skips an excluded image when alternatives exist', 1 === count( $one ) && $plumb !== $one[0] );
+
+// bulk_fill brings a 0-image post up to the target and reports the IDs used.
+$bp  = wp_insert_post( array( 'post_title' => 'Needs images', 'post_content' => '<p>a</p><p>b</p><p>c</p><p>d</p>', 'post_status' => 'publish' ) );
+$res = $filler->bulk_fill( $bp, array( 'mode' => 'per_article', 'target' => 2, 'every' => 2, 'alt_mode' => 'auto' ) );
+check( 'bulk_fill inserts up to the target', isset( $res['inserted'] ) && 2 === $res['inserted'] );
+check( 'bulk_fill returns the used image ids', ! empty( $res['used'] ) );
+check( 'bulk_fill wrote image blocks', false !== strpos( get_post( $bp )->post_content, 'spr-auto-image' ) );
+
+// And skips a post that already meets the target.
+$res2 = $filler->bulk_fill( $bp, array( 'mode' => 'per_article', 'target' => 2 ) );
+check( 'bulk_fill skips when already enough', 0 === $res2['inserted'] && 'enough' === $res2['skipped'] );
+
+// per_words mode derives the target from the word count (400 words / 200 = 2).
+$lp   = wp_insert_post( array( 'post_title' => 'Long one', 'post_content' => '<p>' . str_repeat( 'word ', 400 ) . '</p>', 'post_status' => 'publish' ) );
+$res3 = $filler->bulk_fill( $lp, array( 'mode' => 'per_words', 'per_words' => 200, 'alt_mode' => 'auto' ) );
+check( 'per_words inserts ceil(words / N)', isset( $res3['inserted'] ) && $res3['inserted'] >= 2 );
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );
