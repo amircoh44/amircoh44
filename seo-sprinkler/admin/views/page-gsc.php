@@ -129,32 +129,63 @@ $state    = $gsc->state();
 				<hr />
 			<?php endif; ?>
 
-			<p class="description"><?php esc_html_e( 'One-time setup — about two minutes. After this, connecting is a single click. (A literal zero-setup connect would require a Google-verified hosted app, which a self-hosted plugin can’t bundle.)', 'seo-sprinkler' ); ?></p>
+			<p class="description"><?php esc_html_e( 'One-time setup — about three minutes. After this, connecting is a single click. (A literal zero-setup connect would require a Google-verified hosted app, which a self-hosted plugin can’t bundle.)', 'seo-sprinkler' ); ?></p>
+
+			<p class="description">
+				<span class="dashicons dashicons-info-outline" style="color:#2271b1"></span>
+				<?php esc_html_e( 'Before you start: you need a free Google account, and that account must be an owner of your site in Search Console.', 'seo-sprinkler' ); ?>
+			</p>
 
 			<ol class="spr-steps">
 				<li>
 					<strong><?php esc_html_e( 'Turn on the two Google APIs', 'seo-sprinkler' ); ?></strong>
+					<p class="description"><?php esc_html_e( 'Open each link and click “Enable” (pick or create a Google Cloud project if asked — any name is fine).', 'seo-sprinkler' ); ?></p>
 					<p>
 						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/searchconsole.googleapis.com"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Enable Search Console API', 'seo-sprinkler' ); ?></a>
 						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/library/indexing.googleapis.com"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Enable Indexing API', 'seo-sprinkler' ); ?></a>
 					</p>
 				</li>
 				<li>
-					<strong><?php esc_html_e( 'Create an OAuth client (type: Web application)', 'seo-sprinkler' ); ?></strong>
+					<strong><?php esc_html_e( 'Set up the consent screen + add yourself as a test user', 'seo-sprinkler' ); ?></strong>
+					<p class="description"><?php esc_html_e( 'User type: External. Fill in an app name and your email. Then open “Audience” and add your own Google address under “Test users”. Skipping this is the #1 cause of an “access blocked / app not verified” error when you connect.', 'seo-sprinkler' ); ?></p>
 					<p>
-						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/clients/create"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Open “Create OAuth client”', 'seo-sprinkler' ); ?></a>
+						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/overview"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Open consent screen', 'seo-sprinkler' ); ?></a>
+						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/audience"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Add a test user', 'seo-sprinkler' ); ?></a>
 					</p>
-					<p class="description"><?php esc_html_e( 'Under “Authorised redirect URIs”, add this exact URI:', 'seo-sprinkler' ); ?></p>
+				</li>
+				<li>
+					<strong><?php esc_html_e( 'Create the OAuth client', 'seo-sprinkler' ); ?></strong>
+					<p class="description">
+						<?php esc_html_e( 'In the “Create credentials” wizard, choose:', 'seo-sprinkler' ); ?>
+					</p>
+					<ul class="spr-substeps">
+						<li><?php echo wp_kses_post( __( 'Which API are you using? → <strong>Google Search Console API</strong>', 'seo-sprinkler' ) ); ?></li>
+						<li><?php echo wp_kses_post( __( 'What data will you be accessing? → <strong>User data</strong> (not “Application data”), then <strong>Next</strong>', 'seo-sprinkler' ) ); ?></li>
+						<li><?php echo wp_kses_post( __( 'Application type → <strong>Web application</strong>', 'seo-sprinkler' ) ); ?></li>
+						<li><?php echo wp_kses_post( __( 'Under <strong>Authorised redirect URIs</strong>, add the URI below, then <strong>Create</strong>', 'seo-sprinkler' ) ); ?></li>
+					</ul>
 					<p class="spr-copy-row">
 						<code class="spr-copy-uri"><?php echo esc_html( $gsc->redirect_uri() ); ?></code>
 						<button type="button" class="button button-small spr-copy-btn" data-copy="<?php echo esc_attr( $gsc->redirect_uri() ); ?>"><?php esc_html_e( 'Copy', 'seo-sprinkler' ); ?></button>
 						<span class="spr-copied" style="display:none"><?php esc_html_e( 'Copied!', 'seo-sprinkler' ); ?></span>
 					</p>
+					<p>
+						<a class="button" target="_blank" rel="noopener" href="https://console.cloud.google.com/auth/clients/create"><span class="dashicons dashicons-external" style="margin-top:4px"></span> <?php esc_html_e( 'Open “Create OAuth client”', 'seo-sprinkler' ); ?></a>
+					</p>
 				</li>
 				<li>
-					<strong><?php esc_html_e( 'Paste the Client ID and Client secret below, Save, then click Connect.', 'seo-sprinkler' ); ?></strong>
+					<strong><?php esc_html_e( 'Copy the Client ID + secret into the fields below, Save, then click Connect.', 'seo-sprinkler' ); ?></strong>
 				</li>
 			</ol>
+
+			<details class="spr-help">
+				<summary><?php esc_html_e( 'Connect not working? Common fixes', 'seo-sprinkler' ); ?></summary>
+				<ul class="spr-substeps">
+					<li><?php esc_html_e( '“Access blocked / app isn’t verified” → add your Google address as a Test user (Step 2), or click “Continue (unsafe)” on your own app.', 'seo-sprinkler' ); ?></li>
+					<li><?php esc_html_e( '“redirect_uri_mismatch” → the redirect URI in Google must match the one above exactly (including https and the trailing path).', 'seo-sprinkler' ); ?></li>
+					<li><?php esc_html_e( 'No data after connecting → the Google account you used must be an owner of the Search Console property below.', 'seo-sprinkler' ); ?></li>
+				</ul>
+			</details>
 
 			<form method="post" action="<?php echo esc_url( $post_url ); ?>">
 				<input type="hidden" name="action" value="spr_gsc_save" />

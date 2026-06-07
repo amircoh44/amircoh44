@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.20.0
+Stable tag: 1.20.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,9 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.20.1 =
+* Improved: the Search Console connect screen now walks you through Google Cloud step by step — enable the APIs, set up the consent screen and add yourself as a test user, then create the OAuth client choosing "User data" → "Web application" with the exact redirect URI — plus a "Common fixes" panel for access-blocked/redirect-mismatch errors.
 
 = 1.20.0 =
 * New: Link Audit table is sortable — click any column header; by default the weakest articles (fewest internal links) sit at the top so you fix them first.
