@@ -183,6 +183,15 @@ class SPR_Business_Admin {
 			}
 		}
 
+		// No address yet (e.g. no Places key)? Derive it from the coordinates for
+		// free via OpenStreetMap, so the address still transfers.
+		if ( empty( $data['street'] ) && empty( $data['locality'] ) && isset( $data['lat'], $data['lng'] ) ) {
+			$rev = $this->reverse_geocode( $data['lat'], $data['lng'] );
+			if ( is_array( $rev ) ) {
+				$data = array_merge( $rev, $data ); // Keep name/coords/Places values; add the address.
+			}
+		}
+
 		if ( empty( $data ) || ( empty( $data['lat'] ) && empty( $data['name'] ) ) ) {
 			wp_send_json_error( array( 'message' => __( 'Could not read that link. Make sure it is a Google Maps place link.', 'seo-sprinkler' ) ) );
 		}
@@ -229,10 +238,12 @@ class SPR_Business_Admin {
 	 */
 	protected function parse_google_url( $url ) {
 		$out = array();
-		if ( preg_match( '/@(-?\d+\.\d+),(-?\d+\.\d+)/', $url, $m ) ) {
+		// Prefer the actual place pin (!3d<lat>!4d<lng>); the @lat,lng in the URL is
+		// only the map viewport and is often miles from the business.
+		if ( preg_match( '/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', $url, $m ) ) {
 			$out['lat'] = round( (float) $m[1], 6 );
 			$out['lng'] = round( (float) $m[2], 6 );
-		} elseif ( preg_match( '/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', $url, $m ) ) {
+		} elseif ( preg_match( '/@(-?\d+\.\d+),(-?\d+\.\d+)/', $url, $m ) ) {
 			$out['lat'] = round( (float) $m[1], 6 );
 			$out['lng'] = round( (float) $m[2], 6 );
 		}
@@ -241,6 +252,70 @@ class SPR_Business_Admin {
 			if ( '' !== $name ) {
 				$out['name'] = $name;
 			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Reverse-geocode coordinates to a street address via OpenStreetMap (free,
+	 * no API key). Lets the Google-link lookup fill the address even without a
+	 * Places API key.
+	 *
+	 * @param float $lat Latitude.
+	 * @param float $lng Longitude.
+	 * @return array|null { street, locality, region, postal_code, country }.
+	 */
+	protected function reverse_geocode( $lat, $lng ) {
+		$resp = wp_remote_get(
+			add_query_arg(
+				array(
+					'lat'            => $lat,
+					'lon'            => $lng,
+					'format'         => 'jsonv2',
+					'addressdetails' => 1,
+					'email'          => (string) get_option( 'admin_email' ),
+				),
+				'https://nominatim.openstreetmap.org/reverse'
+			),
+			array(
+				'timeout' => 15,
+				'headers' => array(
+					'User-Agent' => 'SEO Sprinkler/' . SPR_VERSION . ' (' . home_url( '/' ) . ')',
+					'Accept'     => 'application/json',
+				),
+			)
+		);
+		if ( is_wp_error( $resp ) || 200 !== (int) wp_remote_retrieve_response_code( $resp ) ) {
+			return null;
+		}
+		$d = json_decode( wp_remote_retrieve_body( $resp ), true );
+		$a = isset( $d['address'] ) && is_array( $d['address'] ) ? $d['address'] : null;
+		if ( ! $a ) {
+			return null;
+		}
+		$street = trim( ( isset( $a['house_number'] ) ? $a['house_number'] . ' ' : '' ) . ( isset( $a['road'] ) ? $a['road'] : '' ) );
+		$loc    = '';
+		foreach ( array( 'city', 'town', 'village', 'hamlet', 'suburb' ) as $k ) {
+			if ( ! empty( $a[ $k ] ) ) {
+				$loc = $a[ $k ];
+				break;
+			}
+		}
+		$out = array();
+		if ( '' !== $street ) {
+			$out['street'] = $street;
+		}
+		if ( '' !== $loc ) {
+			$out['locality'] = $loc;
+		}
+		if ( ! empty( $a['state'] ) ) {
+			$out['region'] = $a['state'];
+		}
+		if ( ! empty( $a['postcode'] ) ) {
+			$out['postal_code'] = $a['postcode'];
+		}
+		if ( ! empty( $a['country_code'] ) ) {
+			$out['country'] = strtoupper( $a['country_code'] );
 		}
 		return $out;
 	}

@@ -103,8 +103,9 @@
 					setIfEmpty( 'region', d.region );
 					setIfEmpty( 'postal_code', d.postal_code );
 					setIfEmpty( 'country', d.country );
-					setIfEmpty( 'latitude', d.lat );
-					setIfEmpty( 'longitude', d.lng );
+					// Coordinates come straight from the listing — authoritative, so overwrite.
+					if ( d.lat ) { $( '#spr-latitude' ).val( d.lat ); }
+					if ( d.lng ) { $( '#spr-longitude' ).val( d.lng ); }
 					$status.css( 'color', '#0a7c3f' ).text( i18n.gmbOk || 'Filled from Google — review and Save.' );
 				} else {
 					$status.css( 'color', '#b3261e' ).text(

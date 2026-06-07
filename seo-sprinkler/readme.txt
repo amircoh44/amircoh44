@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.14.0
+Stable tag: 1.15.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,10 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.15.0 =
+* New: Search Console & Indexing (Expert) — one-click connect to Google Search Console (OAuth), check which articles are indexed, queue every unindexed URL, and submit a safe number to Google's Indexing API each day (with a daily schedule). You're told which URLs were newly indexed, dropped, or still not indexed (on-screen, by email and in the activity log).
+* Fix: "Fill from Google" on the Business Profile now reads the actual place pin (not the map's viewport, which could be miles off) and fills the street address for free by reverse-geocoding the coordinates via OpenStreetMap. Coordinates now overwrite stale values. Phone still needs the optional Google Places API key.
 
 = 1.14.0 =
 * New: "Run all scans" on the Dashboard — runs the image, internal-link (and optionally schema) audits in one pass and shows a summary with one-click links to fix each issue.

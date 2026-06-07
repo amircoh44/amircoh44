@@ -77,9 +77,10 @@ final class SPR_Plugin {
 		$syndication = new SPR_Syndication();
 		$license  = new SPR_License_Client();
 		$exporter = new SPR_Exporter();
+		$gsc      = new SPR_GSC();
 		$ajax     = new SPR_Ajax( $scanner, $schema, $index, $applier, $sitemap );
 
-		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'syndication', 'license', 'exporter', 'ajax' );
+		$this->services = compact( 'sitemap', 'replacer', 'index', 'scanner', 'schema', 'schema_gen', 'injector', 'applier', 'new_post', 'rules', 'distrib', 'link_scan', 'cleaner', 'heading', 'filler', 'syndication', 'license', 'exporter', 'gsc', 'ajax' );
 
 		// --- Register settings + i18n. ------------------------------------.
 		add_action( 'admin_init', array( 'SPR_Settings', 'register' ) );
@@ -97,6 +98,7 @@ final class SPR_Plugin {
 		$link_scan->init();
 		$cleaner->init();
 		$heading->init();
+		$gsc->init();
 
 		// --- Scheduled maintenance (see activation hook). -----------------.
 		add_action( 'spr_rebuild_index_event', array( $index, 'rebuild' ) );
@@ -147,6 +149,12 @@ final class SPR_Plugin {
 				$imgdist_admin = new SPR_Image_Distribution_Admin( $scanner, $filler );
 				$imgdist_admin->init();
 				$this->services['imgdist_admin'] = $imgdist_admin;
+			}
+
+			if ( class_exists( 'SPR_GSC_Admin' ) ) {
+				$gsc_admin = new SPR_GSC_Admin( $gsc );
+				$gsc_admin->init();
+				$this->services['gsc_admin'] = $gsc_admin;
 			}
 
 			// Convenience "Settings" link on the Plugins screen.

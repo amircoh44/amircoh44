@@ -3,7 +3,7 @@
  * Plugin Name:       SEO Sprinkler
  * Plugin URI:        https://github.com/amircoh44/amircoh44
  * Description:        An ADDITIONAL on-page SEO toolkit that works alongside Yoast, Rank Math or AIOSEO (never a replacement) and does the things they don't: enforce an image minimum, fill articles with related images, audit & fix internal/external links, generate a complete JSON-LD schema graph from a business profile, distribute CTAs/shortcodes by tag, clean AI "generative junk", and export the whole site for migration. Distilled from 30 years of hands-on SEO and website building by Amir Khan.
- * Version:           1.14.0
+ * Version:           1.15.0
  * Requires at least: 5.6
  * Requires PHP:      7.2
  * Author:            Amir Khan
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * We centralise version, paths and the option/menu identifiers here so they
  * can be reused safely across every class without magic strings.
  */
-define( 'SPR_VERSION', '1.14.0' );
+define( 'SPR_VERSION', '1.15.0' );
 define( 'SPR_PLUGIN_FILE', __FILE__ );
 define( 'SPR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );   // .../seo-sprinkler/
 define( 'SPR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );    // https://.../seo-sprinkler/
@@ -56,6 +56,7 @@ define( 'SPR_TRANSIENT_SITEMAP', 'spr_sitemap_urls' );
 require_once SPR_PLUGIN_DIR . 'includes/class-settings.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-edition.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-activity.php';
+require_once SPR_PLUGIN_DIR . 'includes/class-gsc.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-license-client.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-ai.php';
 require_once SPR_PLUGIN_DIR . 'includes/class-business-profile.php';
@@ -88,6 +89,7 @@ if ( is_admin() ) {
 	require_once SPR_PLUGIN_DIR . 'admin/class-business-admin.php';
 	require_once SPR_PLUGIN_DIR . 'admin/class-export-admin.php';
 	require_once SPR_PLUGIN_DIR . 'admin/class-image-distribution-admin.php';
+	require_once SPR_PLUGIN_DIR . 'admin/class-gsc-admin.php';
 }
 
 /**
@@ -138,6 +140,7 @@ register_activation_hook( __FILE__, 'spr_activate' );
 function spr_deactivate() {
 	wp_clear_scheduled_hook( 'spr_rebuild_index_event' );
 	wp_clear_scheduled_hook( 'spr_daily_refresh_event' );
+	wp_clear_scheduled_hook( 'spr_gsc_daily_event' );
 
 	delete_transient( SPR_TRANSIENT_INDEX );
 	delete_transient( SPR_TRANSIENT_SITEMAP );

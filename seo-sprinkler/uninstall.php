@@ -26,6 +26,8 @@ delete_option( 'spr_edition' );
 delete_option( 'spr_link_audit_snapshot' );
 delete_option( 'spr_imgdist_snapshot' );
 delete_option( 'spr_activity_log' );
+delete_option( 'spr_gsc' );
+delete_option( 'spr_gsc_state' );
 
 // 2. Cached transients.
 delete_transient( 'spr_link_index' );
@@ -52,3 +54,4 @@ foreach ( $meta_keys as $meta_key ) {
 // 4. Scheduled events.
 wp_clear_scheduled_hook( 'spr_rebuild_index_event' );
 wp_clear_scheduled_hook( 'spr_daily_refresh_event' );
+wp_clear_scheduled_hook( 'spr_gsc_daily_event' );

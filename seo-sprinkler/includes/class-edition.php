@@ -67,6 +67,7 @@ class SPR_Edition {
 		'export'         => self::EXPERT,
 		'syndication'    => self::EXPERT,
 		'multisite'      => self::EXPERT,
+		'indexing'       => self::EXPERT,
 	);
 
 	/**
