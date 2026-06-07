@@ -65,7 +65,8 @@ class SPR_Cleaner_Admin {
 			__( 'Content Cleaner', 'seo-sprinkler' ),
 			self::CAP,
 			self::PAGE,
-			array( $this, 'render' )
+			array( $this, 'render' ),
+			50
 		);
 	}
 

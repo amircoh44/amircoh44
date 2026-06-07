@@ -114,7 +114,8 @@ class SPR_Admin {
 			__( 'Dashboard', 'seo-sprinkler' ),
 			self::CAP,
 			'spr-dashboard',
-			array( $this, 'render_dashboard' )
+			array( $this, 'render_dashboard' ),
+			0
 		);
 
 		$this->screens[] = add_submenu_page(
@@ -123,7 +124,8 @@ class SPR_Admin {
 			__( 'Image Audit', 'seo-sprinkler' ),
 			self::CAP,
 			'spr-images',
-			array( $this, 'render_images' )
+			array( $this, 'render_images' ),
+			10
 		);
 
 		$this->screens[] = add_submenu_page(
@@ -132,7 +134,8 @@ class SPR_Admin {
 			__( 'Schema Audit', 'seo-sprinkler' ),
 			self::CAP,
 			'spr-schema',
-			array( $this, 'render_schema' )
+			array( $this, 'render_schema' ),
+			30
 		);
 
 		$this->screens[] = add_submenu_page(
@@ -141,7 +144,8 @@ class SPR_Admin {
 			__( 'Internal Links', 'seo-sprinkler' ),
 			self::CAP,
 			'spr-links',
-			array( $this, 'render_links' )
+			array( $this, 'render_links' ),
+			21
 		);
 
 		$this->screens[] = add_submenu_page(
@@ -150,7 +154,8 @@ class SPR_Admin {
 			__( 'Settings', 'seo-sprinkler' ),
 			self::CAP,
 			'spr-settings',
-			array( $this, 'render_settings' )
+			array( $this, 'render_settings' ),
+			80
 		);
 	}
 
@@ -209,6 +214,7 @@ class SPR_Admin {
 					'noSitemapUrls'  => __( 'No URLs were found in the sitemap(s).', 'seo-sprinkler' ),
 					'edit'           => __( 'Edit', 'seo-sprinkler' ),
 					'view'           => __( 'View', 'seo-sprinkler' ),
+					'testGoogle'     => __( 'Test on Google', 'seo-sprinkler' ),
 				),
 			)
 		);
@@ -228,17 +234,17 @@ class SPR_Admin {
 		$this->add_text_field( 'license_key', __( 'License key', 'seo-sprinkler' ), 'spr_license', __( 'Paste your Pro/Expert license key to unlock premium features.', 'seo-sprinkler' ) );
 		$this->add_text_field( 'license_server_url', __( 'License server URL', 'seo-sprinkler' ), 'spr_license', __( 'Base URL of your SEO Sprinkler license server, e.g. https://license.example.com (or define SPR_LICENSE_SERVER). Leave blank if you activate keys another way.', 'seo-sprinkler' ) );
 
-		add_settings_section( 'spr_ai', __( 'AI (bring your own API)', 'seo-sprinkler' ), array( $this, 'section_ai' ), $this->page_for( 'spr_ai' ) );
+		add_settings_section( 'spr_ai', __( 'AI (bring your own API)', 'seo-sprinkler' ) . ' ' . SPR_Edition::pill( 'pro' ), array( $this, 'section_ai' ), $this->page_for( 'spr_ai' ) );
 		$this->add_text_field( 'ai_endpoint', __( 'API endpoint', 'seo-sprinkler' ), 'spr_ai', __( 'Any OpenAI-compatible /chat/completions URL (OpenAI, OpenRouter, Azure, local LLM…).', 'seo-sprinkler' ), 'url', 'https://api.openai.com/v1/chat/completions' );
 		$this->add_text_field( 'ai_key', __( 'API key', 'seo-sprinkler' ), 'spr_ai', __( 'Stored on your site only — never sent anywhere except your chosen endpoint.', 'seo-sprinkler' ) );
 		$this->add_text_field( 'ai_model', __( 'Model', 'seo-sprinkler' ), 'spr_ai', '', 'text', 'gpt-4o-mini' );
 
 		add_settings_section( 'spr_images', __( 'Image minimum', 'seo-sprinkler' ), array( $this, 'section_images' ), $this->page_for( 'spr_images' ) );
 		add_settings_section( 'spr_schema', __( 'Schema (structured data)', 'seo-sprinkler' ), array( $this, 'section_schema' ), $this->page_for( 'spr_schema' ) );
-		add_settings_section( 'spr_distribution', __( 'Content distribution (Sprinkler)', 'seo-sprinkler' ), array( $this, 'section_distribution' ), $this->page_for( 'spr_distribution' ) );
-		add_settings_section( 'spr_cleaner', __( 'Content cleaner (generative junk)', 'seo-sprinkler' ), array( $this, 'section_cleaner' ), $this->page_for( 'spr_cleaner' ) );
-		add_settings_section( 'spr_syndication', __( 'Syndication (Expert)', 'seo-sprinkler' ), array( $this, 'section_syndication' ), $this->page_for( 'spr_syndication' ) );
-		add_settings_section( 'spr_linking', __( 'Internal linking', 'seo-sprinkler' ), array( $this, 'section_linking' ), $this->page_for( 'spr_linking' ) );
+		add_settings_section( 'spr_distribution', __( 'Content distribution (Sprinkler)', 'seo-sprinkler' ) . ' ' . SPR_Edition::pill( 'pro' ), array( $this, 'section_distribution' ), $this->page_for( 'spr_distribution' ) );
+		add_settings_section( 'spr_cleaner', __( 'Content cleaner (generative junk)', 'seo-sprinkler' ) . ' ' . SPR_Edition::pill( 'pro' ), array( $this, 'section_cleaner' ), $this->page_for( 'spr_cleaner' ) );
+		add_settings_section( 'spr_syndication', __( 'Syndication', 'seo-sprinkler' ) . ' ' . SPR_Edition::pill( 'expert' ), array( $this, 'section_syndication' ), $this->page_for( 'spr_syndication' ) );
+		add_settings_section( 'spr_linking', __( 'Internal linking', 'seo-sprinkler' ) . ' ' . SPR_Edition::pill( 'pro' ), array( $this, 'section_linking' ), $this->page_for( 'spr_linking' ) );
 		add_settings_section( 'spr_sitemap', __( 'Yoast sitemap', 'seo-sprinkler' ), array( $this, 'section_sitemap' ), $this->page_for( 'spr_sitemap' ) );
 		add_settings_section( 'spr_newposts', __( 'New post awareness', 'seo-sprinkler' ), array( $this, 'section_newposts' ), $this->page_for( 'spr_newposts' ) );
 
@@ -360,6 +366,22 @@ class SPR_Admin {
 	}
 	public function section_schema() {
 		echo '<p>' . esc_html__( 'Structured data (Schema.org) is how Google understands what each page is — an Article, a LocalBusiness, a Service, and so on. This audit fetches each published article and reports exactly which schema types it finds in the rendered HTML (JSON-LD or microdata), so you can spot pages that are missing it. The plugin can also output its own complete JSON-LD graph built from your Business Profile.', 'seo-sprinkler' ) . '</p>';
+
+		// Warn about a schema clash if another SEO plugin is active and we also output schema.
+		$others = class_exists( 'SPR_SEO_Detector' ) ? SPR_SEO_Detector::active() : array();
+		if ( ! empty( $others ) && (int) SPR_Settings::get( 'enable_schema_output' ) ) {
+			$names = array();
+			foreach ( $others as $o ) {
+				$names[] = $o['name'];
+			}
+			echo '<div class="notice notice-warning inline" style="margin:8px 0 0"><p>' . wp_kses_post(
+				sprintf(
+					/* translators: %s: detected SEO plugin name(s). */
+					__( '<strong>Possible schema clash:</strong> %s is active and most likely outputs its own JSON-LD too. Two schema generators on one page can confuse search engines. Either turn off the other plugin\'s schema — <em>Rank Math → Titles &amp; Meta → (each type) → Schema</em>, <em>Yoast → Settings → Site features → Schema</em>, or <em>AIOSEO → Search Appearance</em> — or untick "Output this plugin\'s JSON-LD schema in &lt;head&gt;" below.', 'seo-sprinkler' ),
+					esc_html( implode( ', ', $names ) )
+				)
+			) . '</p></div>';
+		}
 	}
 	public function section_distribution() {
 		printf(

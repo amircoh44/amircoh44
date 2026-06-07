@@ -64,7 +64,8 @@ class SPR_Image_Distribution_Admin {
 			__( 'Image Distribution', 'seo-sprinkler' ),
 			self::CAP,
 			self::PAGE,
-			array( $this, 'render' )
+			array( $this, 'render' ),
+			11
 		);
 	}
 

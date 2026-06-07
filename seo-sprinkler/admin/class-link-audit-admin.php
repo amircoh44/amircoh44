@@ -68,7 +68,8 @@ class SPR_Link_Audit_Admin {
 			__( 'Link Audit', 'seo-sprinkler' ),
 			self::CAP,
 			self::PAGE,
-			array( $this, 'render' )
+			array( $this, 'render' ),
+			20
 		);
 	}
 

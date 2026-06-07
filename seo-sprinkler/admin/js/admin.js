@@ -132,7 +132,7 @@
 	 * @param {Object} post Post payload with edit_link/view_link.
 	 * @return {jQuery}
 	 */
-	function buildActions( post ) {
+	function buildActions( post, withTest ) {
 		var $actions = $( '<td/>' );
 		if ( post.edit_link ) {
 			$( '<a class="button button-small"/>' ).attr( 'href', post.edit_link ).text( i18n.edit || 'Edit' ).appendTo( $actions );
@@ -140,6 +140,13 @@
 		if ( post.view_link ) {
 			$actions.append( ' ' );
 			$( '<a class="button button-small" target="_blank" rel="noopener"/>' ).attr( 'href', post.view_link ).text( i18n.view || 'View' ).appendTo( $actions );
+		}
+		if ( withTest && post.view_link ) {
+			$actions.append( ' ' );
+			$( '<a class="button button-small" target="_blank" rel="noopener" title="Google Rich Results Test"/>' )
+				.attr( 'href', 'https://search.google.com/test/rich-results?url=' + encodeURIComponent( post.view_link ) )
+				.text( i18n.testGoogle || 'Test on Google' )
+				.appendTo( $actions );
 		}
 		return $actions;
 	}
@@ -232,7 +239,7 @@
 
 		$( '<td/>' ).html( '<span class="spr-badge ' + cls + '"></span>' ).find( 'span' ).text( label ).end().appendTo( $tr );
 
-		buildActions( post ).appendTo( $tr );
+		buildActions( post, true ).appendTo( $tr );
 
 		return $tr;
 	}

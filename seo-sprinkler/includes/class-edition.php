@@ -217,6 +217,24 @@ class SPR_Edition {
 	}
 
 	/**
+	 * A small "Pro" / "Expert" pill (HTML) marking which tier a feature needs.
+	 * Returns '' for free/unknown. Echo it next to an option or section heading.
+	 *
+	 * @param string $edition pro|expert.
+	 * @return string
+	 */
+	public static function pill( $edition ) {
+		$labels = array(
+			self::PRO    => __( 'Pro', 'seo-sprinkler' ),
+			self::EXPERT => __( 'Expert', 'seo-sprinkler' ),
+		);
+		if ( ! isset( $labels[ $edition ] ) ) {
+			return '';
+		}
+		return '<span class="spr-pill spr-pill--' . esc_attr( $edition ) . '">' . esc_html( $labels[ $edition ] ) . '</span>';
+	}
+
+	/**
 	 * Upgrade URL (filterable — point this at your store / Freemius checkout).
 	 *
 	 * @return string

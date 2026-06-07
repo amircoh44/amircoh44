@@ -48,7 +48,8 @@ class SPR_Business_Admin {
 			__( 'Business Profile', 'seo-sprinkler' ),
 			self::CAP,
 			self::PAGE,
-			array( $this, 'render' )
+			array( $this, 'render' ),
+			70
 		);
 	}
 

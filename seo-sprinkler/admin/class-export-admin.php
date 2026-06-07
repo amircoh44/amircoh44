@@ -71,7 +71,8 @@ class SPR_Export_Admin {
 			__( 'Export / Migrate', 'seo-sprinkler' ),
 			self::CAP,
 			self::PAGE,
-			array( $this, 'render' )
+			array( $this, 'render' ),
+			60
 		);
 	}
 

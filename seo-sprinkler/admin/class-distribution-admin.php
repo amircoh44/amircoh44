@@ -64,7 +64,8 @@ class SPR_Distribution_Admin {
 			__( 'Content Distribution', 'seo-sprinkler' ),
 			self::CAP,
 			self::PAGE,
-			array( $this, 'render' )
+			array( $this, 'render' ),
+			40
 		);
 	}
 

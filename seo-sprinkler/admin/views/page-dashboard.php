@@ -26,7 +26,7 @@ $rule_count  = class_exists( 'SPR_Injection_Rules' ) ? count( ( new SPR_Injectio
 <div class="wrap spr-wrap">
 	<h1><?php esc_html_e( 'SEO Sprinkler', 'seo-sprinkler' ); ?></h1>
 	<p class="spr-intro">
-		<?php esc_html_e( 'Boost your articles: enforce a minimum number of images, verify structured-data (schema) output, and automatically interlink related content using your Yoast SEO sitemap.', 'seo-sprinkler' ); ?>
+		<?php esc_html_e( "Boost your articles: enforce a minimum number of images, verify structured-data (schema) output, and automatically interlink related content using your SEO plugin's sitemap (Yoast, Rank Math, AIOSEO and more).", 'seo-sprinkler' ); ?>
 	</p>
 
 	<?php
@@ -160,16 +160,23 @@ $rule_count  = class_exists( 'SPR_Injection_Rules' ) ? count( ( new SPR_Injectio
 					</td>
 				</tr>
 				<tr>
-					<td><?php esc_html_e( 'Yoast sitemap', 'seo-sprinkler' ); ?></td>
+					<td><?php esc_html_e( 'SEO sitemap', 'seo-sprinkler' ); ?></td>
 					<td><a href="<?php echo esc_url( $sitemap_url ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $sitemap_url ); ?></a></td>
 				</tr>
 				<tr>
-					<td><?php esc_html_e( 'Yoast SEO active', 'seo-sprinkler' ); ?></td>
+					<td><?php esc_html_e( 'SEO plugin detected', 'seo-sprinkler' ); ?></td>
 					<td>
-						<?php if ( defined( 'WPSEO_VERSION' ) ) : ?>
-							<span class="spr-badge spr-badge--ok"><span class="dashicons dashicons-yes"></span> <?php echo esc_html( WPSEO_VERSION ); ?></span>
+						<?php
+						$spr_seo = class_exists( 'SPR_SEO_Detector' ) ? SPR_SEO_Detector::active() : array();
+						if ( ! empty( $spr_seo ) ) :
+							$spr_names = array();
+							foreach ( $spr_seo as $spr_p ) {
+								$spr_names[] = $spr_p['name'] . ( ! empty( $spr_p['version'] ) ? ' ' . $spr_p['version'] : '' );
+							}
+							?>
+							<span class="spr-badge spr-badge--ok"><span class="dashicons dashicons-yes"></span> <?php echo esc_html( implode( ', ', $spr_names ) ); ?></span>
 						<?php else : ?>
-							<span class="spr-badge spr-badge--warn"><?php esc_html_e( 'Not detected — the plugin falls back to all published posts.', 'seo-sprinkler' ); ?></span>
+							<span class="spr-badge spr-badge--warn"><?php esc_html_e( 'None detected — falling back to all published posts and post titles.', 'seo-sprinkler' ); ?></span>
 						<?php endif; ?>
 					</td>
 				</tr>

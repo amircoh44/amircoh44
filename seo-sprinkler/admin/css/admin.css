@@ -140,6 +140,22 @@
 	.spr-progress__bar > span { animation: none; }
 }
 
+/* Edition pills (Pro / Expert) shown next to gated options. */
+.spr-pill {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.7;
+	vertical-align: middle;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+.spr-pill--pro { background: #e6f4f5; color: #0a5a61; }
+.spr-pill--expert { background: #efe7fb; color: #5b2da8; }
+
 .spr-inline-status {
 	margin-left: 8px;
 	color: #50575e;

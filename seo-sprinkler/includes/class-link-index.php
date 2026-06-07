@@ -202,6 +202,17 @@ class SPR_Link_Index {
 				$phrases[] = $focus;
 			}
 
+			// Rank Math focus keyword(s) — comma-separated; take them all.
+			$rm_focus = get_post_meta( $post_id, 'rank_math_focus_keyword', true );
+			if ( $rm_focus ) {
+				foreach ( explode( ',', (string) $rm_focus ) as $rm_kw ) {
+					$rm_kw = trim( $rm_kw );
+					if ( '' !== $rm_kw ) {
+						$phrases[] = $rm_kw;
+					}
+				}
+			}
+
 			// Additional keywords (Yoast Premium) are stored as JSON.
 			$extra_json = get_post_meta( $post_id, '_yoast_wpseo_focuskeywords', true );
 			if ( $extra_json ) {

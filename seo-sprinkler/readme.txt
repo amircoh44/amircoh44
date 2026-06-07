@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,12 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.9.0 =
+* New: detects any active SEO plugin (Rank Math, AIOSEO, SEOPress, The SEO Framework, Yoast), not just Yoast — shown on the Dashboard; internal linking now also reads Rank Math focus keywords.
+* New: Schema Audit shows a "Test on Google" (Rich Results Test) link for each page; plus a warning when another SEO plugin is active and could clash with the plugin's own JSON-LD output (with how to disable it).
+* New: Pro / Expert pills next to the options that need them in Settings.
+* Tweak: menu reorganised into pipelines — Image Audit by Image Distribution, Link Audit by Internal Links, Schema Audit; Settings moved to the end.
 
 = 1.8.0 =
 * New: Image Distribution screen — find every article below your image minimum, select them, and bulk-insert related media-library images into the content with alt text (AI-written when AI is connected; a clean fallback otherwise). Choose "images per article" or "one image per N words"; each run spreads across the whole library so images vary; every change is backed up and revertable.
