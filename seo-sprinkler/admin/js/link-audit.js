@@ -48,6 +48,7 @@
 
 					if ( d.done ) {
 						$prog.find( '.spr-progress__label' ).text( i18n.done || 'Done.' );
+						$( '#spr-links-updated' ).text( i18n.justScanned || '' );
 						$btn.prop( 'disabled', false );
 						return;
 					}

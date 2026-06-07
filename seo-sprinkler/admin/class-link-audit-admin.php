@@ -22,6 +22,9 @@ class SPR_Link_Audit_Admin {
 	const PAGE  = 'spr-link-audit';
 	const NONCE = 'spr_link_audit';
 
+	/** Option that stores the last scan so the list survives reloads. */
+	const SNAPSHOT = 'spr_link_audit_snapshot';
+
 	/**
 	 * Link scanner.
 	 *
@@ -88,8 +91,9 @@ class SPR_Link_Audit_Admin {
 				'nonce'    => wp_create_nonce( self::NONCE ),
 				'maxChars' => SPR_Link_Scanner::MAX_ANCHOR_CHARS,
 				'i18n'     => array(
-					'scanning' => __( 'Scanning…', 'seo-sprinkler' ),
-					'done'     => __( 'Done.', 'seo-sprinkler' ),
+					'scanning'    => __( 'Scanning…', 'seo-sprinkler' ),
+					'done'        => __( 'Done.', 'seo-sprinkler' ),
+					'justScanned' => __( 'Last scanned just now.', 'seo-sprinkler' ),
 					'saving'   => __( 'Saving…', 'seo-sprinkler' ),
 					'saved'    => __( 'Saved.', 'seo-sprinkler' ),
 					'error'    => __( 'Something went wrong.', 'seo-sprinkler' ),
@@ -116,6 +120,8 @@ class SPR_Link_Audit_Admin {
 		$action  = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : 'list'; // phpcs:ignore WordPress.Security.NonceVerification
 		$post_id = isset( $_GET['post'] ) ? absint( wp_unslash( $_GET['post'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
 
+		$snapshot = $this->snapshot();
+
 		require SPR_PLUGIN_DIR . 'admin/views/page-link-audit.php';
 	}
 
@@ -136,12 +142,39 @@ class SPR_Link_Audit_Admin {
 	}
 
 	/**
-	 * Batch-scan posts for link counts.
+	 * The stored snapshot of the last scan: { rows: array, updated: int }.
+	 *
+	 * @return array
+	 */
+	public function snapshot() {
+		$snap = get_option( self::SNAPSHOT, array() );
+		if ( ! is_array( $snap ) ) {
+			$snap = array();
+		}
+		return array(
+			'rows'    => ( isset( $snap['rows'] ) && is_array( $snap['rows'] ) ) ? $snap['rows'] : array(),
+			'updated' => isset( $snap['updated'] ) ? (int) $snap['updated'] : 0,
+		);
+	}
+
+	/**
+	 * Batch-scan posts for link counts, persisting the results so the list
+	 * survives page reloads until the next scan. Page 1 starts a fresh snapshot;
+	 * each batch appends to it; the final batch stamps the scan time.
 	 */
 	public function ajax_scan() {
 		$this->guard();
 		$paged = isset( $_POST['paged'] ) ? max( 1, absint( wp_unslash( $_POST['paged'] ) ) ) : 1;
-		wp_send_json_success( $this->scanner->scan_batch( $paged, 50 ) );
+		$batch = $this->scanner->scan_batch( $paged, 50 );
+
+		$snap = ( 1 === $paged ) ? array( 'rows' => array(), 'updated' => 0 ) : $this->snapshot();
+		$snap['rows'] = array_merge( $snap['rows'], $batch['rows'] );
+		if ( ! empty( $batch['done'] ) ) {
+			$snap['updated'] = time();
+		}
+		update_option( self::SNAPSHOT, $snap, false );
+
+		wp_send_json_success( $batch );
 	}
 
 	/**

@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,9 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.7.4 =
+* New: Link Audit remembers the last scan — results are stored and shown on every visit (with a "Last scanned …" time), and only refresh when you click "Re-scan all posts".
 
 = 1.7.3 =
 * New: Settings page is now organised into tabs (License, Internal links, Images & schema, Content tools, AI, Syndication) with expanded, plain-language explanations for every section. One "Save Changes" button still saves every tab at once.

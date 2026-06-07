@@ -85,6 +85,22 @@ render( 'link audit list', function () use ( $la ) { $la->render(); }, 'Link Aud
 $_GET = array( 'action' => 'view', 'post' => $src ? $src[0] : 0 );
 render( 'link audit detail', function () use ( $la ) { $la->render(); }, 'Links in' );
 
+// Link Audit results persist between visits (stored snapshot, rendered on load).
+$la_batch = $plugin->service( 'link_scan' )->scan_batch( 1, 50 );
+update_option( 'spr_link_audit_snapshot', array( 'rows' => $la_batch['rows'], 'updated' => time() ), false );
+$_GET = array();
+ob_start();
+$la->render();
+$la_html = ob_get_clean();
+foreach ( array(
+	'link audit renders the stored snapshot' => ( empty( $la_batch['rows'] ) || false !== strpos( $la_html, (string) $la_batch['rows'][0]['title'] ) ),
+	'link audit shows a last-scanned time'   => ( false !== strpos( $la_html, 'Last scanned' ) ),
+	'stored table is visible (not hidden)'   => ( empty( $la_batch['rows'] ) || false === strpos( $la_html, 'id="spr-links-results" style="display:none"' ) ),
+) as $check_name => $cond ) {
+	if ( $cond ) { $pass++; echo "PASS  $check_name\n"; } else { $fail++; echo "FAIL  $check_name\n"; }
+}
+delete_option( 'spr_link_audit_snapshot' );
+
 $ca = $plugin->service( 'cleaner_admin' );
 $_GET = array();
 render( 'content cleaner', function () use ( $ca ) { $ca->render(); }, 'Change log' );

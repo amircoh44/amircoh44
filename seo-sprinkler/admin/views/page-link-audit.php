@@ -117,11 +117,27 @@ $list_url = admin_url( 'admin.php?page=' . SPR_Link_Audit_Admin::PAGE );
 	<h1><?php esc_html_e( 'Link Audit', 'seo-sprinkler' ); ?></h1>
 	<p class="spr-intro"><?php esc_html_e( 'See how many internal and external links each article has, so you can spot posts that need more (or fewer) links. Open any post to see and edit its links.', 'seo-sprinkler' ); ?></p>
 
+	<?php
+	$rows     = isset( $snapshot['rows'] ) ? $snapshot['rows'] : array();
+	$updated  = isset( $snapshot['updated'] ) ? (int) $snapshot['updated'] : 0;
+	$has_rows = ! empty( $rows );
+	?>
 	<p>
 		<button type="button" class="button button-primary" id="spr-links-scan">
 			<span class="dashicons dashicons-search" style="margin-top:4px"></span>
-			<?php esc_html_e( 'Scan all posts', 'seo-sprinkler' ); ?>
+			<?php echo $has_rows ? esc_html__( 'Re-scan all posts', 'seo-sprinkler' ) : esc_html__( 'Scan all posts', 'seo-sprinkler' ); ?>
 		</button>
+		<span class="description" id="spr-links-updated" style="margin-left:8px">
+			<?php
+			if ( $updated ) {
+				printf(
+					/* translators: %s: human-readable time difference, e.g. "2 hours". */
+					esc_html__( 'Last scanned %s ago.', 'seo-sprinkler' ),
+					esc_html( human_time_diff( $updated, time() ) )
+				);
+			}
+			?>
+		</span>
 	</p>
 
 	<div id="spr-links-progress" class="spr-progress" style="display:none">
@@ -129,7 +145,7 @@ $list_url = admin_url( 'admin.php?page=' . SPR_Link_Audit_Admin::PAGE );
 		<p class="spr-progress__label"></p>
 	</div>
 
-	<table class="widefat striped" id="spr-links-results" style="display:none">
+	<table class="widefat striped" id="spr-links-results"<?php echo $has_rows ? '' : ' style="display:none"'; ?>>
 		<thead>
 			<tr>
 				<th><?php esc_html_e( 'Article', 'seo-sprinkler' ); ?></th>
@@ -138,7 +154,22 @@ $list_url = admin_url( 'admin.php?page=' . SPR_Link_Audit_Admin::PAGE );
 				<th style="width:120px"><?php esc_html_e( 'Links', 'seo-sprinkler' ); ?></th>
 			</tr>
 		</thead>
-		<tbody></tbody>
+		<tbody>
+			<?php
+			foreach ( $rows as $row ) :
+				$r_internal = isset( $row['internal'] ) ? (int) $row['internal'] : 0;
+				$r_external = isset( $row['external'] ) ? (int) $row['external'] : 0;
+				$r_view     = isset( $row['view_link'] ) ? $row['view_link'] : '';
+				$r_title    = isset( $row['title'] ) ? $row['title'] : '';
+				?>
+				<tr>
+					<td><a href="<?php echo esc_url( $r_view ); ?>"><?php echo esc_html( $r_title ); ?></a></td>
+					<td><span class="spr-badge <?php echo $r_internal > 0 ? 'spr-badge--ok' : 'spr-badge--warn'; ?>"><?php echo (int) $r_internal; ?></span></td>
+					<td><span class="spr-badge spr-badge--neutral"><?php echo (int) $r_external; ?></span></td>
+					<td><a class="button button-small" href="<?php echo esc_url( $r_view ); ?>"><?php esc_html_e( 'View', 'seo-sprinkler' ); ?></a></td>
+				</tr>
+			<?php endforeach; ?>
+		</tbody>
 	</table>
 
 <?php endif; ?>
