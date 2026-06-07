@@ -48,8 +48,8 @@ class SPR_Content_Cleaner {
 			'clean_multiple_br'     => __( 'Runs of three or more <br>', 'seo-sprinkler' ),
 			'clean_empty_tags'      => __( 'Empty inline tags (<span></span>, …)', 'seo-sprinkler' ),
 			'clean_html_comments'   => __( 'HTML comments (Gutenberg blocks preserved)', 'seo-sprinkler' ),
-			'clean_inline_styles'   => __( 'Inline style="" attributes (CSS)', 'seo-sprinkler' ),
-			'clean_classes'         => __( 'class="" attributes (CSS hooks — may affect layout/blocks)', 'seo-sprinkler' ),
+			'clean_inline_styles'   => __( 'Inline style="…" attributes (CSS)', 'seo-sprinkler' ),
+			'clean_classes'         => __( 'class="…" attributes (CSS hooks — may affect layout/blocks)', 'seo-sprinkler' ),
 		);
 	}
 
