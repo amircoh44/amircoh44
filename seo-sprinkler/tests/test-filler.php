@@ -125,5 +125,38 @@ $lp   = wp_insert_post( array( 'post_title' => 'Long one', 'post_content' => '<p
 $res3 = $filler->bulk_fill( $lp, array( 'mode' => 'per_words', 'per_words' => 200, 'alt_mode' => 'auto' ) );
 check( 'per_words inserts ceil(words / N)', isset( $res3['inserted'] ) && $res3['inserted'] >= 2 );
 
+/* --- Per-image reviewer (approve alt / caption / title / description) ---- */
+
+// build_image_block renders an editable caption when one is supplied.
+$cap_block = $filler->build_image_block( $plumb, 'center', 'large', 'Alt here', 'A nice caption' );
+check( 'block renders a figcaption', false !== strpos( $cap_block, '<figcaption' ) );
+check( 'block shows the caption text', false !== strpos( $cap_block, 'A nice caption' ) );
+
+// needed_for mirrors the bulk deficit logic.
+$rp = wp_insert_post( array( 'post_title' => 'Review me', 'post_content' => '<p>x</p><p>y</p><p>z</p>', 'post_status' => 'publish' ) );
+check( 'needed_for per_article = target', 3 === $filler->needed_for( get_post( $rp ), 'per_article', 3, 200 ) );
+check( 'needed_for falls back to the minimum', $filler->needed_for( get_post( $rp ), 'per_article', 0, 200 ) >= 1 );
+
+// propose_for_post returns editable metadata rows (auto, no AI).
+$props = $filler->propose_for_post( $rp, 2, array(), false );
+check( 'propose returns the requested count', 2 === count( $props ) );
+check( 'proposal exposes editable fields', isset( $props[0]['id'], $props[0]['alt'], $props[0]['caption'], $props[0]['title'], $props[0]['description'] ) );
+
+// apply_single inserts ONE reviewed image and writes the attachment fields.
+$rimg = (int) $props[0]['id'];
+$ap   = $filler->apply_single(
+	$rp,
+	$rimg,
+	array( 'align' => 'center', 'size' => 'large', 'alt' => 'Reviewed alt', 'caption' => 'Reviewed caption', 'title' => 'Reviewed title', 'description' => 'Reviewed description', 'every' => 2 )
+);
+check( 'apply_single inserts one image', isset( $ap['inserted'] ) && 1 === $ap['inserted'] );
+check( 'apply_single backed up the post', metadata_exists( 'post', $rp, '_spr_imagefill_backup' ) );
+$rp_html = get_post( $rp )->post_content;
+check( 'applied block carries reviewed alt', false !== strpos( $rp_html, 'Reviewed alt' ) );
+check( 'applied block carries reviewed caption', false !== strpos( $rp_html, 'Reviewed caption' ) );
+check( 'apply_single wrote the attachment title', 'Reviewed title' === get_the_title( $rimg ) );
+check( 'apply_single wrote the attachment alt', 'Reviewed alt' === get_post_meta( $rimg, '_wp_attachment_image_alt', true ) );
+check( 'apply_single reports the new count', isset( $ap['count'] ) && $ap['count'] >= 1 );
+
 echo "\n===== $pass passed, $fail failed =====\n";
 exit( $fail > 0 ? 1 : 0 );

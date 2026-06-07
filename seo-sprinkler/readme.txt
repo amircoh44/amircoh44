@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.9.0
+Stable tag: 1.10.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,14 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.10.0 =
+* New: "Review each image first" in Image Distribution — step through every proposed image and edit its alt text, caption, image title and description before it is inserted. Approve one by one, skip, or "approve all remaining"; each run spreads across your whole media library.
+* New: Image Distribution remembers your last "below the minimum" scan, so the list survives reloads until you re-scan.
+* New: after an Image Audit scan, jump straight into Image Distribution to fill the flagged articles; Link Audit and Schema Audit now link on to Internal Links and the Business Profile.
+* New: Business Profile is now also reachable as a tab inside Settings.
+* New: lightweight activity log on the Dashboard (recent scans, fills, cleans and link audits).
+* Fix: the Content Cleaner's "inline styles" cleanup now keeps functional table-layout styles (borders, padding, widths), so cleaning a page with styled tables no longer breaks them. It still scans only your article content (post_content), never the surrounding theme/page.
 
 = 1.9.0 =
 * New: detects any active SEO plugin (Rank Math, AIOSEO, SEOPress, The SEO Framework, Yoast), not just Yoast — shown on the Dashboard; internal linking now also reads Rank Math focus keywords.

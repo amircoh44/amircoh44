@@ -48,7 +48,7 @@ class SPR_Content_Cleaner {
 			'clean_multiple_br'     => __( 'Runs of three or more <br>', 'seo-sprinkler' ),
 			'clean_empty_tags'      => __( 'Empty inline tags (<span></span>, …)', 'seo-sprinkler' ),
 			'clean_html_comments'   => __( 'HTML comments (Gutenberg blocks preserved)', 'seo-sprinkler' ),
-			'clean_inline_styles'   => __( 'Inline style="…" attributes (CSS)', 'seo-sprinkler' ),
+			'clean_inline_styles'   => __( 'Inline style="…" attributes (CSS) — keeps table layout styles', 'seo-sprinkler' ),
 			'clean_classes'         => __( 'class="…" attributes (CSS hooks — may affect layout/blocks)', 'seo-sprinkler' ),
 		);
 	}
@@ -218,15 +218,46 @@ class SPR_Content_Cleaner {
 	}
 
 	/**
-	 * Strip inline style attributes.
+	 * Table-layout elements whose inline `style` is almost always functional
+	 * (borders, padding, widths, header background) rather than "generative junk".
+	 * The inline-style cleanup leaves these alone so cleaning never breaks a table.
+	 *
+	 * @return string[]
+	 */
+	protected function style_keep_tags() {
+		return array( 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'col', 'colgroup' );
+	}
+
+	/**
+	 * Strip inline style attributes — but preserve them on table-layout elements,
+	 * because those styles draw the table (borders/padding/widths) and removing
+	 * them would visibly break the content. Inline styles on every other element
+	 * (the usual AI/Word junk on <span>, <p>, <div>, headings, …) are removed.
 	 *
 	 * @param string $html  HTML.
 	 * @param array  $stats Stats.
 	 * @return string
 	 */
 	protected function strip_inline_styles( $html, &$stats ) {
-		$html = preg_replace( '/\s*style\s*=\s*("[^"]*"|\'[^\']*\')/i', '', $html, -1, $c );
-		$stats['clean_inline_styles'] = (int) $c;
+		$count = 0;
+		$keep  = $this->style_keep_tags();
+
+		// Walk opening tags only (`<tag ...>`), so we know which element each
+		// style attribute belongs to. Closing tags and comments never match.
+		$html = preg_replace_callback(
+			'/<([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/',
+			function ( $m ) use ( &$count, $keep ) {
+				if ( in_array( strtolower( $m[1] ), $keep, true ) ) {
+					return $m[0]; // Keep functional table-layout styles.
+				}
+				$out    = preg_replace( '/\s*style\s*=\s*("[^"]*"|\'[^\']*\')/i', '', $m[0], -1, $c );
+				$count += (int) $c;
+				return $out;
+			},
+			$html
+		);
+
+		$stats['clean_inline_styles'] = $count;
 		return $html;
 	}
 

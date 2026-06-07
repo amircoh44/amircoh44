@@ -195,4 +195,23 @@ $rule_count  = class_exists( 'SPR_Injection_Rules' ) ? count( ( new SPR_Injectio
 			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=spr-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'seo-sprinkler' ); ?></a>
 		</p>
 	</div>
+
+	<div class="spr-panel">
+		<h2 class="title"><?php esc_html_e( 'Recent activity', 'seo-sprinkler' ); ?></h2>
+		<?php $spr_acts = class_exists( 'SPR_Activity' ) ? SPR_Activity::recent( 12 ) : array(); ?>
+		<?php if ( empty( $spr_acts ) ) : ?>
+			<p class="description"><?php esc_html_e( 'No activity yet — run an audit or fill images and it will appear here.', 'seo-sprinkler' ); ?></p>
+		<?php else : ?>
+			<table class="widefat striped">
+				<tbody>
+				<?php foreach ( $spr_acts as $spr_a ) : ?>
+					<tr>
+						<td style="width:150px" class="spr-muted"><?php echo esc_html( sprintf( /* translators: %s: human time diff */ __( '%s ago', 'seo-sprinkler' ), human_time_diff( (int) $spr_a['time'], time() ) ) ); ?></td>
+						<td><?php echo esc_html( $spr_a['message'] ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+	</div>
 </div>

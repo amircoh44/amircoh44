@@ -163,7 +163,32 @@ class SPR_Cleaner_Admin {
 				402
 			);
 		}
-		wp_send_json_success( $this->cleaner->clean_batch( $this->paged(), 20 ) );
+
+		$paged = $this->paged();
+		$batch = $this->cleaner->clean_batch( $paged, 20 );
+
+		// Accumulate across the batched run and log one summary entry when finished.
+		$acc            = ( 1 === $paged ) ? array() : (array) get_transient( 'spr_clean_run' );
+		$acc['cleaned'] = (int) ( isset( $acc['cleaned'] ) ? $acc['cleaned'] : 0 ) + (int) $batch['cleaned'];
+		$acc['removed'] = (int) ( isset( $acc['removed'] ) ? $acc['removed'] : 0 ) + (int) $batch['removed'];
+		if ( ! empty( $batch['done'] ) ) {
+			delete_transient( 'spr_clean_run' );
+			if ( class_exists( 'SPR_Activity' ) && $acc['cleaned'] > 0 ) {
+				SPR_Activity::log(
+					'content_clean',
+					sprintf(
+						/* translators: 1: article count, 2: removed item count. */
+						__( 'Content Cleaner: cleaned %1$d article(s), removed %2$d junk item(s).', 'seo-sprinkler' ),
+						$acc['cleaned'],
+						$acc['removed']
+					)
+				);
+			}
+		} else {
+			set_transient( 'spr_clean_run', $acc, HOUR_IN_SECONDS );
+		}
+
+		wp_send_json_success( $batch );
 	}
 
 	/**

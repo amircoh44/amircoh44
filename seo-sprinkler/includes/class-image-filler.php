@@ -567,6 +567,200 @@ class SPR_Image_Filler {
 		return function_exists( 'mb_substr' ) ? mb_substr( $out, 0, 125 ) : substr( $out, 0, 125 );
 	}
 
+	/* ---------------------------------------------------------------------
+	 * Per-image review (approve alt / caption / title / description)
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * How many images a post still needs for the given mode.
+	 *
+	 * @param WP_Post $post      Post.
+	 * @param string  $mode      per_article|per_words.
+	 * @param int     $target    Target images (per_article).
+	 * @param int     $per_words One image per N words (per_words).
+	 * @return int Deficit (0-30).
+	 */
+	public function needed_for( $post, $mode, $target, $per_words ) {
+		$current = (int) $this->images->count_for_post( $post );
+		if ( 'per_words' === $mode ) {
+			$per   = max( 25, (int) $per_words );
+			$words = str_word_count( wp_strip_all_tags( $post->post_content ) );
+			$t     = (int) ceil( $words / $per );
+		} else {
+			$t = (int) $target;
+			if ( $t < 1 ) {
+				$t = max( 1, (int) $this->images->get_minimum() );
+			}
+		}
+		return min( 30, max( 0, $t - $current ) );
+	}
+
+	/**
+	 * Propose images for a post, each with suggested metadata the user can edit.
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param int   $count   How many to propose.
+	 * @param int[] $exclude Attachment IDs already used this run.
+	 * @param bool  $use_ai  Generate metadata with AI when available.
+	 * @return array[] Each: id, thumb, alt, caption, title, description.
+	 */
+	public function propose_for_post( $post_id, $count, $exclude = array(), $use_ai = false ) {
+		$post = get_post( $post_id );
+		if ( ! $post || $count < 1 ) {
+			return array();
+		}
+		$use_ai = $use_ai && SPR_Edition::can( 'ai' ) && SPR_AI::is_configured();
+		$out    = array();
+		foreach ( $this->related_image_ids( $post_id, $count, $exclude ) as $id ) {
+			$meta  = $use_ai ? $this->ai_image_meta( $post, $id ) : $this->auto_image_meta( $post, $id );
+			$out[] = array(
+				'id'          => (int) $id,
+				'thumb'       => wp_get_attachment_image_url( $id, 'thumbnail' ),
+				'alt'         => $meta['alt'],
+				'caption'     => $meta['caption'],
+				'title'       => $meta['title'],
+				'description' => $meta['description'],
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Insert ONE approved image into a post (used by the reviewer). Updates the
+	 * attachment's title/description/alt in the library, backs up the post once,
+	 * and distributes the new block.
+	 *
+	 * @param int   $post_id       Post ID.
+	 * @param int   $attachment_id Attachment ID.
+	 * @param array $args          align, size, alt, caption, title, description, every.
+	 * @return array { inserted:int, count:int }
+	 */
+	public function apply_single( $post_id, $attachment_id, $args ) {
+		$post = get_post( $post_id );
+		if ( ! $post || ! $attachment_id ) {
+			return array( 'inserted' => 0, 'count' => 0 );
+		}
+		$args  = wp_parse_args(
+			$args,
+			array( 'align' => 'center', 'size' => 'large', 'alt' => '', 'caption' => '', 'title' => '', 'description' => '', 'every' => 2 )
+		);
+		$align = in_array( $args['align'], array( 'left', 'center', 'right' ), true ) ? $args['align'] : 'center';
+		$size  = in_array( $args['size'], array( 'thumbnail', 'medium', 'large', 'full' ), true ) ? $args['size'] : 'large';
+
+		$this->update_attachment_fields( $attachment_id, $args['title'], $args['description'], $args['alt'] );
+
+		$block = $this->build_image_block( $attachment_id, $align, $size, $args['alt'], $args['caption'] );
+		if ( '' === $block ) {
+			return array( 'inserted' => 0, 'count' => (int) $this->images->count_for_post( $post ) );
+		}
+
+		// Back up only once per post, so a multi-image review still reverts fully.
+		if ( ! metadata_exists( 'post', $post_id, self::META_BACKUP ) ) {
+			update_post_meta( $post_id, self::META_BACKUP, $post->post_content );
+		}
+		$new = $this->insert_blocks( $post->post_content, array( $block ), (int) $args['every'] );
+		wp_update_post( array( 'ID' => $post_id, 'post_content' => $new ) );
+
+		$count = (int) $this->images->count_for_post( get_post( $post_id ) );
+		update_post_meta( $post_id, SPR_META_IMAGE_COUNT, $count );
+		return array( 'inserted' => 1, 'count' => $count );
+	}
+
+	/**
+	 * Update an attachment's library fields (only non-empty values are written).
+	 *
+	 * @param int    $id          Attachment ID.
+	 * @param string $title       Title.
+	 * @param string $description Description (post_content).
+	 * @param string $alt         Alt text.
+	 */
+	public function update_attachment_fields( $id, $title, $description, $alt ) {
+		$update = array();
+		if ( '' !== trim( (string) $title ) ) {
+			$update['post_title'] = sanitize_text_field( $title );
+		}
+		if ( '' !== trim( (string) $description ) ) {
+			$update['post_content'] = wp_kses_post( $description );
+		}
+		if ( ! empty( $update ) ) {
+			$update['ID'] = (int) $id;
+			wp_update_post( $update );
+		}
+		if ( '' !== trim( (string) $alt ) ) {
+			update_post_meta( $id, '_wp_attachment_image_alt', sanitize_text_field( $alt ) );
+		}
+	}
+
+	/**
+	 * Suggested metadata without AI: existing alt/title, a caption from the title,
+	 * description from the attachment, all derived from image + post.
+	 *
+	 * @param WP_Post $post Post.
+	 * @param int     $id   Attachment ID.
+	 * @return array{alt:string,caption:string,title:string,description:string}
+	 */
+	protected function auto_image_meta( $post, $id ) {
+		$file  = get_attached_file( $id );
+		$name  = $file ? trim( preg_replace( '/\b\d{3,}\b/', '', preg_replace( '/[-_]+/', ' ', pathinfo( $file, PATHINFO_FILENAME ) ) ) ) : '';
+		$title = get_the_title( $id );
+		return array(
+			'alt'         => $this->auto_alt( $post, $id ),
+			'caption'     => '',
+			'title'       => $title ? $title : ( $name ? ucwords( $name ) : get_the_title( $post ) ),
+			'description' => (string) get_post_field( 'post_content', $id ),
+		);
+	}
+
+	/**
+	 * Suggested metadata via AI (one call, four labelled lines). Falls back to
+	 * auto_image_meta for any field the model leaves blank or on error.
+	 *
+	 * @param WP_Post $post Post.
+	 * @param int     $id   Attachment ID.
+	 * @return array{alt:string,caption:string,title:string,description:string}
+	 */
+	public function ai_image_meta( $post, $id ) {
+		$auto  = $this->auto_image_meta( $post, $id );
+		$file  = get_attached_file( $id );
+		$fname = $file ? pathinfo( $file, PATHINFO_FILENAME ) : '';
+
+		$system = 'You write image metadata for an image placed inside a web article. Reply with EXACTLY four lines, each prefixed "ALT:", "CAPTION:", "TITLE:", "DESCRIPTION:". ALT <= 125 chars; CAPTION one short sentence; TITLE a few words; DESCRIPTION one or two sentences. No other text.';
+		$user   = sprintf(
+			"Article title: %s\nArticle excerpt: %s\nImage file name: %s",
+			get_the_title( $post ),
+			wp_trim_words( wp_strip_all_tags( $post->post_content ), 50, '' ),
+			$fname
+		);
+
+		$out = SPR_AI::generate( $system, $user, 200 );
+		if ( is_wp_error( $out ) ) {
+			return $auto;
+		}
+		$p = $this->parse_labeled( (string) $out );
+		return array(
+			'alt'         => '' !== $p['alt'] ? $p['alt'] : $auto['alt'],
+			'caption'     => '' !== $p['caption'] ? $p['caption'] : $auto['caption'],
+			'title'       => '' !== $p['title'] ? $p['title'] : $auto['title'],
+			'description' => '' !== $p['description'] ? $p['description'] : $auto['description'],
+		);
+	}
+
+	/**
+	 * Parse "LABEL: value" lines into alt/caption/title/description.
+	 *
+	 * @param string $text AI output.
+	 * @return array{alt:string,caption:string,title:string,description:string}
+	 */
+	protected function parse_labeled( $text ) {
+		$res = array( 'alt' => '', 'caption' => '', 'title' => '', 'description' => '' );
+		foreach ( array_keys( $res ) as $key ) {
+			if ( preg_match( '/^\s*' . $key . '\s*:\s*(.+)$/im', $text, $m ) ) {
+				$res[ $key ] = trim( wp_strip_all_tags( $m[1] ) );
+			}
+		}
+		return $res;
+	}
+
 	/**
 	 * Choose image attachment IDs related to the post, then randomised.
 	 *
@@ -678,7 +872,7 @@ class SPR_Image_Filler {
 	 * @param string $alt   Optional alt text to set on the <img> (overrides the stored alt).
 	 * @return string
 	 */
-	public function build_image_block( $id, $align, $size, $alt = '' ) {
+	public function build_image_block( $id, $align, $size, $alt = '', $caption = '' ) {
 		$attr = array( 'class' => 'wp-image-' . (int) $id );
 		if ( '' !== $alt ) {
 			$attr['alt'] = $alt;
@@ -688,8 +882,12 @@ class SPR_Image_Filler {
 			return '';
 		}
 
+		$inner = $img;
+		if ( '' !== trim( (string) $caption ) ) {
+			$inner .= '<figcaption class="wp-element-caption">' . esc_html( $caption ) . '</figcaption>';
+		}
 		$figure_class = 'wp-block-image align' . $align . ' size-' . $size . ' ' . self::CSS_CLASS;
-		$figure       = '<figure class="' . esc_attr( $figure_class ) . '">' . $img . '</figure>';
+		$figure       = '<figure class="' . esc_attr( $figure_class ) . '">' . $inner . '</figure>';
 
 		$attrs = wp_json_encode(
 			array(

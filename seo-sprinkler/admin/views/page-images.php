@@ -55,4 +55,10 @@ $types = (array) SPR_Settings::get( 'audit_post_types', array( 'post' ) );
 	</table>
 
 	<p id="spr-scan-empty" class="spr-empty" style="display:none"></p>
+
+	<div id="spr-scan-cta" class="spr-next-step" style="display:none">
+		<span class="dashicons dashicons-format-image"></span>
+		<span><?php esc_html_e( 'Fix these in bulk: Image Distribution fills every flagged article with related, randomised images from your media library — with alt text, reviewable one by one.', 'seo-sprinkler' ); ?></span>
+		<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=spr-image-distribution' ) ); ?>"><?php esc_html_e( 'Go to Image Distribution', 'seo-sprinkler' ); ?></a>
+	</div>
 </div>

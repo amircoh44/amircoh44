@@ -205,6 +205,8 @@ class SPR_Admin {
 					'confirmApply'   => __( 'This will permanently write internal links into your post content. You can revert later. Continue?', 'seo-sprinkler' ),
 					'confirmRevert'  => __( 'This will remove every link this plugin previously added to your content. Continue?', 'seo-sprinkler' ),
 					'noDeficient'    => __( 'Great — every scanned article meets the image minimum.', 'seo-sprinkler' ),
+					/* translators: %d: number of flagged articles. */
+					'jumpDistribute' => __( 'Found %d article(s) below the image minimum. Jump to Image Distribution to fill them with library images now?', 'seo-sprinkler' ),
 					'noMissingSchema' => __( 'Great — every scanned article exposes the required structured data.', 'seo-sprinkler' ),
 					'flagged'        => __( 'flagged', 'seo-sprinkler' ),
 					'statusNone'     => __( 'No structured data', 'seo-sprinkler' ),
@@ -309,6 +311,7 @@ class SPR_Admin {
 			'license'     => __( 'License', 'seo-sprinkler' ),
 			'linking'     => __( 'Internal links', 'seo-sprinkler' ),
 			'content'     => __( 'Images &amp; schema', 'seo-sprinkler' ),
+			'business'    => __( 'Business profile', 'seo-sprinkler' ),
 			'tools'       => __( 'Content tools', 'seo-sprinkler' ),
 			'ai'          => __( 'AI', 'seo-sprinkler' ),
 			'syndication' => __( 'Syndication', 'seo-sprinkler' ),

@@ -74,6 +74,19 @@ check( 'Gutenberg block comment preserved', false !== strpos( $clean, 'wp:paragr
 check( 'plain comment removed', false === strpos( $clean, 'remove this comment' ) );
 check( 'cleaner never touches links', false !== strpos( $clean, 'href="/about"' ) );
 
+// Inline-style cleanup must keep functional table-layout styles (so cleaning a
+// page like the chimney "Pricing" tables never strips borders/padding), while
+// still removing inline styles on ordinary elements.
+$tbl = '<p style="color:red">x</p>'
+	. '<table style="width:100%"><thead><tr style="background:#eee">'
+	. '<th style="padding:8px">A</th></tr></thead>'
+	. '<tbody><tr><td style="padding:8px;border:1px solid #ddd">1</td></tr></tbody></table>';
+list( $tclean, , $tstats ) = $cleaner->clean( $tbl, array( 'clean_inline_styles' => 1 ) );
+check( 'table style= kept', false !== strpos( $tclean, '<table style="width:100%"' ) );
+check( 'th/td style= kept', false !== strpos( $tclean, '<td style="padding:8px;border:1px solid #ddd"' ) );
+check( 'non-table <p> style= removed', false === strpos( $tclean, 'color:red' ) );
+check( 'only the <p> style counted', 1 === (int) $tstats['clean_inline_styles'] );
+
 // Cleaner backup + log + revert.
 $pid2   = wp_insert_post( array( 'post_title' => 'Clean Target', 'post_content' => $junk, 'post_status' => 'publish' ) );
 $before = get_post( $pid2 )->post_content;

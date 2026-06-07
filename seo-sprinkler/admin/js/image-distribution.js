@@ -1,7 +1,9 @@
 /**
- * Image Distribution: find below-minimum articles, then bulk-fill with images.
- * The fill loop accumulates the attachment IDs used so each article pulls a
- * different image — spreading across the whole library.
+ * Image Distribution: find below-minimum articles, then either bulk-fill with
+ * images automatically, or review each image one by one (editing alt / caption /
+ * title / description before it goes in). Both loops accumulate the attachment
+ * IDs used so each article pulls a different image — spreading across the whole
+ * media library.
  *
  * @package SeoSprinkler
  */
@@ -33,9 +35,20 @@
 		} );
 	}
 
+	function rowById( id ) {
+		return $( '#spr-imgdist-table tbody tr[data-id="' + id + '"]' );
+	}
+
 	function updateSelCount() {
 		var n = selectedRows().length;
 		$( '#spr-imgdist-selcount' ).text( n + ' ' + ( n === 1 ? 'article selected' : 'articles selected' ) );
+	}
+
+	function updateRowCount( id, count ) {
+		if ( typeof count === 'undefined' || count === null ) {
+			return;
+		}
+		rowById( id ).find( 'td' ).eq( 2 ).find( '.spr-badge' ).text( count );
 	}
 
 	/* ---- Scan for below-minimum articles ---- */
@@ -44,13 +57,16 @@
 			$prog  = $( '#spr-imgdist-progress' ),
 			$wrap  = $( '#spr-imgdist-wrap' ),
 			$empty = $( '#spr-imgdist-empty' ),
+			$saved = $( '#spr-imgdist-saved' ),
 			$tbody = $( '#spr-imgdist-table tbody' );
 
 		$btn.prop( 'disabled', true );
 		$tbody.empty();
+		$saved.remove();
 		$wrap.hide();
 		$empty.hide();
 		$prog.show();
+		$prog.find( '.spr-progress__bar > span' ).css( 'width', '0%' );
 		$prog.find( '.spr-progress__label' ).text( i18n.scanning || 'Scanning…' );
 
 		function next( paged ) {
@@ -104,7 +120,7 @@
 		return $tr;
 	}
 
-	/* ---- Fill the selected articles (sequential; spreads images) ---- */
+	/* ---- Fill the selected articles automatically (sequential; spreads images) ---- */
 	function runFill() {
 		var $rows = selectedRows();
 		if ( ! $rows.length ) {
@@ -115,16 +131,18 @@
 			return;
 		}
 
-		var $btn  = $( '#spr-imgdist-fill' ),
-			$scan = $( '#spr-imgdist-scan' ),
-			$prog = $( '#spr-imgdist-progress' ),
-			opts  = options(),
-			used  = [],
-			list  = $rows.toArray(),
-			total = list.length,
-			i     = 0;
+		var $btn    = $( '#spr-imgdist-fill' ),
+			$review = $( '#spr-imgdist-review' ),
+			$scan   = $( '#spr-imgdist-scan' ),
+			$prog   = $( '#spr-imgdist-progress' ),
+			opts    = options(),
+			used    = [],
+			list    = $rows.toArray(),
+			total   = list.length,
+			i       = 0;
 
 		$btn.prop( 'disabled', true );
+		$review.prop( 'disabled', true );
 		$scan.prop( 'disabled', true );
 		$prog.show();
 		$prog.find( '.spr-progress__bar > span' ).css( 'width', '0%' );
@@ -133,11 +151,12 @@
 			if ( i >= total ) {
 				$prog.find( '.spr-progress__label' ).text( i18n.done || 'Done.' );
 				$btn.prop( 'disabled', false );
+				$review.prop( 'disabled', false );
 				$scan.prop( 'disabled', false );
 				return;
 			}
-			var $tr = $( list[ i ] ),
-				id  = $tr.data( 'id' ),
+			var $tr  = $( list[ i ] ),
+				id   = $tr.data( 'id' ),
 				$res = $tr.find( '.spr-imgdist-result' );
 			$res.text( ( i18n.filling || 'Filling' ) + '…' );
 
@@ -175,13 +194,229 @@
 		step();
 	}
 
+	/* ---- Review each image one by one (edit alt/caption/title/description) ---- */
+	var review = {
+		queue: [],   // <tr> elements to review
+		used: [],    // attachment IDs seen this run (applied or skipped) — keeps it spreading
+		pi: 0,       // post index
+		post: null,  // { id, title, edit_link, need, proposals }
+		qi: 0,       // proposal index within the current post
+		inserted: 0, // images inserted into the current post
+		all: false,  // approve-all mode
+		busy: false
+	};
+
+	function setReviewProgress( text ) {
+		$( '#spr-review-progress' ).text( text );
+	}
+
+	function openReviewModal() {
+		$( '.spr-review-lbl-alt' ).text( i18n.altLabel || 'Alt text' );
+		$( '.spr-review-lbl-cap' ).text( i18n.capLabel || 'Caption' );
+		$( '.spr-review-lbl-ttl' ).text( i18n.ttlLabel || 'Image title' );
+		$( '.spr-review-lbl-desc' ).text( i18n.descLabel || 'Image description' );
+		$( '#spr-review-approve' ).text( i18n.approve || 'Approve & insert' );
+		$( '#spr-review-skip' ).text( i18n.skip || 'Skip' );
+		$( '#spr-review-approve-all' ).text( i18n.approveAll || 'Approve all remaining' );
+		$( '#spr-review-finish' ).text( i18n.finish || 'Finish' );
+		$( 'body' ).addClass( 'spr-modal-open' );
+		$( '#spr-review' ).show().attr( 'aria-hidden', 'false' );
+	}
+
+	function closeReviewModal() {
+		$( 'body' ).removeClass( 'spr-modal-open' );
+		$( '#spr-review' ).hide().attr( 'aria-hidden', 'true' );
+	}
+
+	function reviewButtons( enabled ) {
+		$( '#spr-review-approve, #spr-review-skip, #spr-review-approve-all' ).prop( 'disabled', ! enabled );
+		$( '#spr-review .spr-review__spin' ).toggleClass( 'is-active', ! enabled );
+	}
+
+	function startReview() {
+		var $rows = selectedRows();
+		if ( ! $rows.length ) {
+			window.alert( i18n.pickSome || 'Select at least one article.' );
+			return;
+		}
+		if ( ! window.confirm( i18n.reviewConfirm || 'Review images one by one?' ) ) {
+			return;
+		}
+		review.queue = $rows.toArray();
+		review.used  = [];
+		review.pi    = 0;
+		review.all   = false;
+		review.busy  = false;
+		openReviewModal();
+		loadReviewPost();
+	}
+
+	function loadReviewPost() {
+		if ( review.pi >= review.queue.length ) {
+			finishReview();
+			return;
+		}
+		var $tr  = $( review.queue[ review.pi ] ),
+			id   = $tr.data( 'id' ),
+			$res = $tr.find( '.spr-imgdist-result' );
+		review.inserted = 0;
+		$res.text( ( i18n.reviewing || 'Reviewing' ) + '…' );
+		setReviewProgress( ( i18n.reviewing || 'Reviewing' ) + ' ' + ( review.pi + 1 ) + ' / ' + review.queue.length );
+		reviewButtons( false );
+
+		post( $.extend( {
+			action: 'spr_imgdist_propose',
+			post_id: id,
+			'exclude[]': review.used
+		}, options() ) )
+			.done( function ( res ) {
+				if ( ! res || ! res.success ) {
+					$res.text( i18n.error || 'error' );
+					advancePost();
+					return;
+				}
+				var d = res.data || {};
+				review.post = {
+					id: id,
+					title: d.title,
+					edit_link: d.edit_link,
+					need: d.need,
+					proposals: d.proposals || []
+				};
+				review.qi = 0;
+				$( '#spr-review-heading' ).text( d.title || '' );
+				if ( ! review.post.proposals.length ) {
+					$res.text( review.post.need > 0 ? ( i18n.skipNone || 'no images' ) : ( i18n.skipEnough || 'already had enough' ) );
+					advancePost();
+					return;
+				}
+				showProposal();
+			} )
+			.fail( function () {
+				$res.text( i18n.error || 'error' );
+				advancePost();
+			} );
+	}
+
+	function advancePost() {
+		review.pi++;
+		loadReviewPost();
+	}
+
+	function finalizePostRow() {
+		if ( ! review.post ) {
+			return;
+		}
+		var $tr  = rowById( review.post.id ),
+			$res = $tr.find( '.spr-imgdist-result' );
+		if ( review.inserted > 0 ) {
+			$res.html( '<span class="spr-badge spr-badge--ok">+' + review.inserted + '</span>' );
+			$tr.find( '.spr-badge--warn' ).removeClass( 'spr-badge--warn' ).addClass( 'spr-badge--ok' );
+		} else {
+			$res.text( i18n.skipped || 'Skipped' );
+		}
+	}
+
+	function showProposal() {
+		if ( ! review.post || review.qi >= review.post.proposals.length ) {
+			finalizePostRow();
+			advancePost();
+			return;
+		}
+		var p = review.post.proposals[ review.qi ];
+		$( '#spr-review-thumb' ).attr( 'src', p.thumb || '' ).attr( 'alt', p.alt || '' );
+		$( '#spr-review-alt' ).val( p.alt || '' );
+		$( '#spr-review-caption' ).val( p.caption || '' );
+		$( '#spr-review-title' ).val( p.title || '' );
+		$( '#spr-review-desc' ).val( p.description || '' );
+		setReviewProgress(
+			( review.post.title || '' ) + ' — ' + ( review.qi + 1 ) + ' / ' + review.post.proposals.length
+		);
+		reviewButtons( true );
+		if ( review.all ) {
+			applyProposal();
+		}
+	}
+
+	function applyProposal() {
+		if ( review.busy ) {
+			return;
+		}
+		var p = review.post && review.post.proposals[ review.qi ];
+		if ( ! p ) {
+			showProposal();
+			return;
+		}
+		review.busy = true;
+		reviewButtons( false );
+
+		post( $.extend( {
+			action: 'spr_imgdist_apply',
+			post_id: review.post.id,
+			attachment_id: p.id,
+			alt: $( '#spr-review-alt' ).val(),
+			caption: $( '#spr-review-caption' ).val(),
+			title: $( '#spr-review-title' ).val(),
+			description: $( '#spr-review-desc' ).val()
+		}, options() ) )
+			.done( function ( res ) {
+				review.used.push( p.id );
+				if ( res && res.success ) {
+					var d = res.data || {};
+					review.inserted += ( d.inserted || 0 );
+					updateRowCount( review.post.id, d.count );
+				}
+			} )
+			.always( function () {
+				review.busy = false;
+				review.qi++;
+				showProposal();
+			} );
+	}
+
+	function skipProposal() {
+		if ( review.busy ) {
+			return;
+		}
+		var p = review.post && review.post.proposals[ review.qi ];
+		if ( p ) {
+			review.used.push( p.id ); // don't re-show a skipped image this run
+		}
+		review.qi++;
+		showProposal();
+	}
+
+	function approveAll() {
+		review.all = true;
+		applyProposal();
+	}
+
+	function finishReview() {
+		closeReviewModal();
+		$( '#spr-imgdist-progress' ).hide();
+		updateSelCount();
+	}
+
 	$( function () {
 		$( '#spr-imgdist-scan' ).on( 'click', runScan );
 		$( '#spr-imgdist-fill' ).on( 'click', runFill );
+		$( '#spr-imgdist-review' ).on( 'click', startReview );
 		$( '#spr-imgdist-all' ).on( 'change', function () {
 			$( '.spr-imgdist-cb' ).prop( 'checked', $( this ).is( ':checked' ) );
 			updateSelCount();
 		} );
 		$( '#spr-imgdist-table' ).on( 'change', '.spr-imgdist-cb', updateSelCount );
+
+		// Reviewer modal controls.
+		$( '#spr-review-approve' ).on( 'click', applyProposal );
+		$( '#spr-review-skip' ).on( 'click', skipProposal );
+		$( '#spr-review-approve-all' ).on( 'click', approveAll );
+		$( '#spr-review-finish, #spr-review-close' ).on( 'click', finishReview );
+		$( '#spr-review .spr-modal__backdrop' ).on( 'click', finishReview );
+
+		// Saved scan rendered server-side: reflect the current selection count.
+		if ( $( '#spr-imgdist-table tbody tr' ).length ) {
+			updateSelCount();
+		}
 	} );
 } )( jQuery );

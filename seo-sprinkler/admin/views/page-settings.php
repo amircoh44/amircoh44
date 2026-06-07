@@ -31,7 +31,18 @@ $spr_first = (string) key( $spr_tabs );
 		<?php settings_fields( SPR_Settings::GROUP ); ?>
 		<?php foreach ( $spr_tabs as $spr_slug => $spr_label ) : ?>
 			<div class="spr-tab-panel<?php echo ( $spr_slug === $spr_first ) ? ' is-active' : ''; ?>" data-tab="<?php echo esc_attr( $spr_slug ); ?>">
-				<?php do_settings_sections( 'spr-settings-' . $spr_slug ); ?>
+				<?php if ( 'business' === $spr_slug ) : ?>
+					<h2><?php esc_html_e( 'Business profile', 'seo-sprinkler' ); ?></h2>
+					<p><?php esc_html_e( 'Your business profile (name, address, phone, hours, geo-coordinates, social links) is the single source of truth SEO Sprinkler uses to build your JSON-LD schema graph. It has its own editor with an address auto-fill and a latitude/longitude lookup.', 'seo-sprinkler' ); ?></p>
+					<p>
+						<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=spr-business' ) ); ?>">
+							<span class="dashicons dashicons-id" style="margin-top:4px"></span>
+							<?php esc_html_e( 'Open the Business Profile editor', 'seo-sprinkler' ); ?>
+						</a>
+					</p>
+				<?php else : ?>
+					<?php do_settings_sections( 'spr-settings-' . $spr_slug ); ?>
+				<?php endif; ?>
 			</div>
 		<?php endforeach; ?>
 		<?php submit_button(); ?>

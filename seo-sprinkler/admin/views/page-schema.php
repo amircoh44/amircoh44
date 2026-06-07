@@ -105,4 +105,10 @@ $types    = (array) SPR_Settings::get( 'audit_post_types', array( 'post' ) );
 		<tbody></tbody>
 	</table>
 	<p id="spr-sitemap-schema-empty" class="spr-empty" style="display:none"></p>
+
+	<div class="spr-next-step">
+		<span class="dashicons dashicons-id"></span>
+		<span><?php esc_html_e( 'Missing structured data? Fill in your Business Profile and SEO Sprinkler generates a complete JSON-LD schema graph for your whole site.', 'seo-sprinkler' ); ?></span>
+		<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=spr-business' ) ); ?>"><?php esc_html_e( 'Go to Business Profile', 'seo-sprinkler' ); ?></a>
+	</div>
 </div>

@@ -172,6 +172,16 @@ class SPR_Link_Audit_Admin {
 		$snap['rows'] = array_merge( $snap['rows'], $batch['rows'] );
 		if ( ! empty( $batch['done'] ) ) {
 			$snap['updated'] = time();
+			if ( class_exists( 'SPR_Activity' ) ) {
+				SPR_Activity::log(
+					'link_scan',
+					sprintf(
+						/* translators: %d: article count. */
+						__( 'Link audit: scanned %d article(s).', 'seo-sprinkler' ),
+						count( $snap['rows'] )
+					)
+				);
+			}
 		}
 		update_option( self::SNAPSHOT, $snap, false );
 

@@ -88,6 +88,12 @@
 						$btn.prop( 'disabled', false );
 						if ( 0 === deficient ) {
 							$empty.text( i18n.noDeficient || 'All articles meet the minimum.' ).show();
+						} else {
+							var $cta = $( '#spr-scan-cta' ).show();
+							var prompt = ( i18n.jumpDistribute || 'Found %d article(s) below the image minimum. Jump to Image Distribution to fill them now?' ).replace( '%d', deficient );
+							if ( window.confirm( prompt ) ) {
+								window.location.href = $cta.find( 'a' ).attr( 'href' );
+							}
 						}
 						return;
 					}

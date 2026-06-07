@@ -172,5 +172,11 @@ $list_url = admin_url( 'admin.php?page=' . SPR_Link_Audit_Admin::PAGE );
 		</tbody>
 	</table>
 
+	<div class="spr-next-step">
+		<span class="dashicons dashicons-admin-links"></span>
+		<span><?php esc_html_e( 'Thin on internal links? Internal Links auto-builds relevant links between your articles, in bulk.', 'seo-sprinkler' ); ?></span>
+		<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=spr-links' ) ); ?>"><?php esc_html_e( 'Go to Internal Links', 'seo-sprinkler' ); ?></a>
+	</div>
+
 <?php endif; ?>
 </div>

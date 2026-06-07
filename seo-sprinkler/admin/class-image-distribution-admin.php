@@ -25,6 +25,9 @@ class SPR_Image_Distribution_Admin {
 	const PAGE  = 'spr-image-distribution';
 	const NONCE = 'spr_imgdist';
 
+	/** Option that saves the last "below minimum" scan so it survives reloads. */
+	const SNAPSHOT = 'spr_imgdist_snapshot';
+
 	/** @var SPR_Image_Scanner */
 	protected $images;
 	/** @var SPR_Image_Filler */
@@ -52,6 +55,8 @@ class SPR_Image_Distribution_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'wp_ajax_spr_imgdist_scan', array( $this, 'ajax_scan' ) );
 		add_action( 'wp_ajax_spr_imgdist_fill', array( $this, 'ajax_fill' ) );
+		add_action( 'wp_ajax_spr_imgdist_propose', array( $this, 'ajax_propose' ) );
+		add_action( 'wp_ajax_spr_imgdist_apply', array( $this, 'ajax_apply' ) );
 	}
 
 	/**
@@ -97,6 +102,18 @@ class SPR_Image_Distribution_Admin {
 					'error'     => __( 'Something went wrong.', 'seo-sprinkler' ),
 					'pickSome'  => __( 'Select at least one article first.', 'seo-sprinkler' ),
 					'confirm'   => __( 'Insert images into the selected articles? This updates the saved content (each change is backed up and can be reverted from the post editor).', 'seo-sprinkler' ),
+					'reviewing' => __( 'Reviewing', 'seo-sprinkler' ),
+					'approve'   => __( 'Approve &amp; insert', 'seo-sprinkler' ),
+					'skip'      => __( 'Skip', 'seo-sprinkler' ),
+					'approveAll' => __( 'Approve all remaining', 'seo-sprinkler' ),
+					'finish'    => __( 'Finish', 'seo-sprinkler' ),
+					'inserted'  => __( 'Inserted', 'seo-sprinkler' ),
+					'skipped'   => __( 'Skipped', 'seo-sprinkler' ),
+					'altLabel'  => __( 'Alt text', 'seo-sprinkler' ),
+					'capLabel'  => __( 'Caption', 'seo-sprinkler' ),
+					'ttlLabel'  => __( 'Image title', 'seo-sprinkler' ),
+					'descLabel' => __( 'Image description', 'seo-sprinkler' ),
+					'reviewConfirm' => __( 'Review images one by one for the selected articles? Each insert updates the saved content (backed up, revertable).', 'seo-sprinkler' ),
 				),
 			)
 		);
@@ -111,6 +128,7 @@ class SPR_Image_Distribution_Admin {
 		}
 		$min       = (int) $this->images->get_minimum();
 		$ai_ready  = SPR_Edition::can( 'ai' ) && SPR_AI::is_configured();
+		$snapshot  = $this->snapshot();
 		require SPR_PLUGIN_DIR . 'admin/views/page-image-distribution.php';
 	}
 
@@ -136,7 +154,36 @@ class SPR_Image_Distribution_Admin {
 	public function ajax_scan() {
 		$this->guard();
 		$paged = isset( $_POST['paged'] ) ? max( 1, absint( wp_unslash( $_POST['paged'] ) ) ) : 1;
-		wp_send_json_success( $this->images->scan_batch( $paged, 50 ) );
+		$batch = $this->images->scan_batch( $paged, 50 );
+
+		// Save the below-minimum list so it survives reloads (page 1 resets it).
+		$snap         = ( 1 === $paged ) ? array( 'rows' => array(), 'updated' => 0 ) : $this->snapshot();
+		$snap['rows'] = array_merge( $snap['rows'], $batch['deficient'] );
+		if ( ! empty( $batch['done'] ) ) {
+			$snap['updated'] = time();
+			if ( class_exists( 'SPR_Activity' ) ) {
+				SPR_Activity::log( 'image_scan', sprintf( /* translators: %d: count */ __( 'Image scan: %d article(s) below the minimum.', 'seo-sprinkler' ), count( $snap['rows'] ) ) );
+			}
+		}
+		update_option( self::SNAPSHOT, $snap, false );
+
+		wp_send_json_success( $batch );
+	}
+
+	/**
+	 * Stored snapshot of the last below-minimum scan: { rows, updated }.
+	 *
+	 * @return array
+	 */
+	public function snapshot() {
+		$snap = get_option( self::SNAPSHOT, array() );
+		if ( ! is_array( $snap ) ) {
+			$snap = array();
+		}
+		return array(
+			'rows'    => ( isset( $snap['rows'] ) && is_array( $snap['rows'] ) ) ? $snap['rows'] : array(),
+			'updated' => isset( $snap['updated'] ) ? (int) $snap['updated'] : 0,
+		);
 	}
 
 	/**
@@ -166,6 +213,70 @@ class SPR_Image_Distribution_Admin {
 			)
 		);
 
+		if ( class_exists( 'SPR_Activity' ) && ! empty( $result['inserted'] ) ) {
+			SPR_Activity::log( 'image_fill', sprintf( /* translators: 1: count, 2: post title */ _n( 'Added %1$d image to "%2$s".', 'Added %1$d images to "%2$s".', (int) $result['inserted'], 'seo-sprinkler' ), (int) $result['inserted'], get_the_title( $post_id ) ) );
+		}
+
 		wp_send_json_success( $result );
+	}
+
+	/**
+	 * Propose images (with editable metadata) for one post in the reviewer.
+	 */
+	public function ajax_propose() {
+		$this->guard();
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'You cannot edit this post.', 'seo-sprinkler' ) ), 403 );
+		}
+		$post    = get_post( $post_id );
+		$mode    = isset( $_POST['mode'] ) ? sanitize_key( wp_unslash( $_POST['mode'] ) ) : 'per_article';
+		$target  = isset( $_POST['target'] ) ? absint( wp_unslash( $_POST['target'] ) ) : 0;
+		$perw    = isset( $_POST['per_words'] ) ? absint( wp_unslash( $_POST['per_words'] ) ) : 200;
+		$use_ai  = isset( $_POST['alt_mode'] ) && 'ai' === $_POST['alt_mode'];
+		$exclude = isset( $_POST['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['exclude'] ) ) : array();
+
+		$need      = $this->filler->needed_for( $post, $mode, $target, $perw );
+		$proposals = ( $need > 0 ) ? $this->filler->propose_for_post( $post_id, $need, $exclude, $use_ai ) : array();
+
+		wp_send_json_success(
+			array(
+				'title'     => get_the_title( $post ),
+				'edit_link' => get_edit_post_link( $post_id, 'raw' ),
+				'need'      => $need,
+				'proposals' => $proposals,
+			)
+		);
+	}
+
+	/**
+	 * Insert one approved image (with edited alt / caption / title / description).
+	 */
+	public function ajax_apply() {
+		$this->guard();
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
+		$att     = isset( $_POST['attachment_id'] ) ? absint( wp_unslash( $_POST['attachment_id'] ) ) : 0;
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'You cannot edit this post.', 'seo-sprinkler' ) ), 403 );
+		}
+
+		$res = $this->filler->apply_single(
+			$post_id,
+			$att,
+			array(
+				'align'       => isset( $_POST['align'] ) ? sanitize_key( wp_unslash( $_POST['align'] ) ) : 'center',
+				'size'        => isset( $_POST['size'] ) ? sanitize_key( wp_unslash( $_POST['size'] ) ) : 'large',
+				'alt'         => isset( $_POST['alt'] ) ? sanitize_text_field( wp_unslash( $_POST['alt'] ) ) : '',
+				'caption'     => isset( $_POST['caption'] ) ? sanitize_text_field( wp_unslash( $_POST['caption'] ) ) : '',
+				'title'       => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
+				'description' => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
+			)
+		);
+
+		if ( class_exists( 'SPR_Activity' ) && ! empty( $res['inserted'] ) ) {
+			SPR_Activity::log( 'image_apply', sprintf( /* translators: %s: post title */ __( 'Approved 1 image into "%s".', 'seo-sprinkler' ), get_the_title( $post_id ) ) );
+		}
+
+		wp_send_json_success( $res );
 	}
 }
