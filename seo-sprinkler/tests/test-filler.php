@@ -74,6 +74,9 @@ $block = $filler->build_image_block( $plumb, 'center', 'large' );
 check( 'block is a wp:image block', false !== strpos( $block, '<!-- wp:image' ) );
 check( 'block carries our class', false !== strpos( $block, 'spr-auto-image' ) );
 check( 'block honours alignment', false !== strpos( $block, 'aligncenter' ) );
+check( 'img itself carries the align class', (bool) preg_match( '/<img[^>]*\bclass="[^"]*\baligncenter\b/', $block ) );
+$left_block = $filler->build_image_block( $plumb, 'left', 'large' );
+check( 'left img carries alignleft', (bool) preg_match( '/<img[^>]*\bclass="[^"]*\balignleft\b/', $left_block ) );
 
 // Distribution: after every 2nd paragraph.
 $out = $filler->insert_blocks( '<p>a</p><p>b</p><p>c</p><p>d</p>', array( '[IMG1]', '[IMG2]' ), 2 );

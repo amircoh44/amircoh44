@@ -916,7 +916,11 @@ class SPR_Image_Filler {
 			$size    = 'full';
 		}
 
-		$attr = array( 'class' => 'wp-image-' . (int) $id );
+		// Put the alignment class on the <img> itself (classic WP markup:
+		// "aligncenter size-large wp-image-123"). Themes universally style
+		// img.aligncenter/alignleft/alignright, so the image is aligned even when
+		// the block-editor CSS for figure.aligncenter isn't loaded.
+		$attr = array( 'class' => 'align' . $align . ' size-' . $size . ' wp-image-' . (int) $id );
 		if ( '' !== $alt ) {
 			$attr['alt'] = $alt;
 		}

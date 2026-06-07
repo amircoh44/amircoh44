@@ -84,6 +84,24 @@ figure.spr-auto-image.aligncenter img {
 	margin-right: auto !important;
 }
 
+/* Also honour the classic alignment class when it sits on the <img> itself. */
+.spr-auto-image img.aligncenter {
+	display: block !important;
+	float: none !important;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+.spr-auto-image img.alignleft {
+	float: left !important;
+	margin: 0.25em 1.25em 0.75em 0;
+}
+
+.spr-auto-image img.alignright {
+	float: right !important;
+	margin: 0.25em 0 0.75em 1.25em;
+}
+
 figure.spr-auto-image.alignleft {
 	float: left !important;
 	margin: 0.25em 1.5em 1em 0;
