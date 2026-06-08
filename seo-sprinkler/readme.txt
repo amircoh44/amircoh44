@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.20.3
+Stable tag: 1.21.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,11 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.21.0 =
+* Fix: centred images no longer revert to left after saving in the Classic editor. On Classic-editor posts the plugin now inserts a classic image (which TinyMCE keeps aligned on save) instead of a Gutenberg block whose alignment was being rewritten.
+* New: "Image format" choice on Image Distribution — Auto (match the editor), force Gutenberg block, or force Classic image.
+* New: per-image alignment in "Preview & edit all" — set each image to Middle/Left/Right before inserting.
 
 = 1.20.3 =
 * Cleaner output: inserted images are now lean — a simple <img class="aligncenter size-large wp-image-ID"> with no giant srcset baked into your content (WordPress still adds responsive srcset automatically at render).

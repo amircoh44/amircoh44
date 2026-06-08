@@ -124,6 +124,9 @@ class SPR_Image_Distribution_Admin {
 					'noIcons'   => __( 'no icon-sized images in the library', 'seo-sprinkler' ),
 					'iconsNoPoints' => __( 'nowhere to place icons', 'seo-sprinkler' ),
 					'sprinkling' => __( 'Sprinkling icons', 'seo-sprinkler' ),
+					'alignCenter' => __( 'Middle', 'seo-sprinkler' ),
+					'alignLeft' => __( 'Left', 'seo-sprinkler' ),
+					'alignRight' => __( 'Right', 'seo-sprinkler' ),
 					'reviewAllConfirm' => __( 'Build an editable preview of every proposed image for the selected articles?', 'seo-sprinkler' ),
 					'gathering' => __( 'Preparing images…', 'seo-sprinkler' ),
 					'insertingAll' => __( 'Inserting', 'seo-sprinkler' ),
@@ -226,6 +229,7 @@ class SPR_Image_Distribution_Admin {
 				'alt_mode'  => ( isset( $_POST['alt_mode'] ) && 'ai' === $_POST['alt_mode'] ) ? 'ai' : 'auto',
 				'exclude'   => $exclude,
 				'icons_only' => ! empty( $_POST['icons'] ),
+				'format'    => isset( $_POST['format'] ) ? sanitize_key( wp_unslash( $_POST['format'] ) ) : 'auto',
 			)
 		);
 
@@ -286,6 +290,7 @@ class SPR_Image_Distribution_Admin {
 				'caption'     => isset( $_POST['caption'] ) ? sanitize_text_field( wp_unslash( $_POST['caption'] ) ) : '',
 				'title'       => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
 				'description' => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
+				'format'      => isset( $_POST['format'] ) ? sanitize_key( wp_unslash( $_POST['format'] ) ) : 'auto',
 			)
 		);
 

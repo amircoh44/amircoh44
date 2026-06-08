@@ -948,6 +948,15 @@ body.spr-modal-open {
 	white-space: nowrap;
 }
 
+.spr-ra-alignwrap {
+	margin-top: 6px;
+}
+
+.spr-ra-alignwrap select {
+	width: 100%;
+	max-width: 130px;
+}
+
 .spr-ra-card__fields {
 	flex: 1 1 auto;
 	min-width: 0;

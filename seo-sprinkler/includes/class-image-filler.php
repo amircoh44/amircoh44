@@ -375,9 +375,10 @@ class SPR_Image_Filler {
 			return 0;
 		}
 
-		$blocks = array();
+		$use_blocks = $this->wants_blocks( $post );
+		$blocks     = array();
 		foreach ( $ids as $id ) {
-			$block = $this->build_image_block( $id, $align, $size );
+			$block = $this->build_image_block( $id, $align, $size, '', '', $use_blocks );
 			if ( '' !== $block ) {
 				$blocks[] = $block;
 			}
@@ -492,10 +493,12 @@ class SPR_Image_Filler {
 				'alt_mode'  => 'auto',
 				'exclude'   => array(),
 				'icons_only' => false,
+				'format'    => 'auto',
 			)
 		);
-		$align = in_array( $args['align'], array( 'left', 'center', 'right' ), true ) ? $args['align'] : 'center';
-		$size  = in_array( $args['size'], array( 'thumbnail', 'medium', 'large', 'full' ), true ) ? $args['size'] : 'large';
+		$align      = in_array( $args['align'], array( 'left', 'center', 'right' ), true ) ? $args['align'] : 'center';
+		$size       = in_array( $args['size'], array( 'thumbnail', 'medium', 'large', 'full' ), true ) ? $args['size'] : 'large';
+		$use_blocks = $this->use_blocks_for( $args['format'], $post );
 
 		$current = (int) $this->images->count_for_post( $post );
 
@@ -526,7 +529,7 @@ class SPR_Image_Filler {
 		$used   = array();
 		foreach ( $ids as $id ) {
 			$alt   = $use_ai ? $this->ai_alt( $post, $id ) : $this->auto_alt( $post, $id );
-			$block = $this->build_image_block( $id, $align, $size, $alt );
+			$block = $this->build_image_block( $id, $align, $size, $alt, '', $use_blocks );
 			if ( '' !== $block ) {
 				$blocks[] = $block;
 				$used[]   = (int) $id;
@@ -668,14 +671,14 @@ class SPR_Image_Filler {
 		}
 		$args  = wp_parse_args(
 			$args,
-			array( 'align' => 'center', 'size' => 'large', 'alt' => '', 'caption' => '', 'title' => '', 'description' => '', 'every' => 2 )
+			array( 'align' => 'center', 'size' => 'large', 'alt' => '', 'caption' => '', 'title' => '', 'description' => '', 'every' => 2, 'format' => 'auto' )
 		);
 		$align = in_array( $args['align'], array( 'left', 'center', 'right' ), true ) ? $args['align'] : 'center';
 		$size  = in_array( $args['size'], array( 'thumbnail', 'medium', 'large', 'full' ), true ) ? $args['size'] : 'large';
 
 		$this->update_attachment_fields( $attachment_id, $args['title'], $args['description'], $args['alt'] );
 
-		$block = $this->build_image_block( $attachment_id, $align, $size, $args['alt'], $args['caption'] );
+		$block = $this->build_image_block( $attachment_id, $align, $size, $args['alt'], $args['caption'], $this->use_blocks_for( $args['format'], $post ) );
 		if ( '' === $block ) {
 			return array( 'inserted' => 0, 'count' => (int) $this->images->count_for_post( $post ) );
 		}
@@ -898,6 +901,38 @@ class SPR_Image_Filler {
 	}
 
 	/**
+	 * Should a post get Gutenberg block markup? True when the block editor is
+	 * used for it; false for the classic editor (where a block comment would be
+	 * rewritten on save and lose its alignment).
+	 *
+	 * @param int|WP_Post $post Post.
+	 * @return bool
+	 */
+	public function wants_blocks( $post ) {
+		if ( function_exists( 'use_block_editor_for_post' ) ) {
+			return (bool) use_block_editor_for_post( $post );
+		}
+		return true;
+	}
+
+	/**
+	 * Resolve the requested output format to a "use blocks?" boolean.
+	 *
+	 * @param string      $format auto|classic|block.
+	 * @param int|WP_Post $post   Post (for auto-detection).
+	 * @return bool
+	 */
+	protected function use_blocks_for( $format, $post ) {
+		if ( 'classic' === $format ) {
+			return false;
+		}
+		if ( 'block' === $format ) {
+			return true;
+		}
+		return $this->wants_blocks( $post );
+	}
+
+	/**
 	 * Build a Gutenberg image block (renders in classic editor too).
 	 *
 	 * @param int    $id    Attachment ID.
@@ -906,7 +941,7 @@ class SPR_Image_Filler {
 	 * @param string $alt   Optional alt text to set on the <img> (overrides the stored alt).
 	 * @return string
 	 */
-	public function build_image_block( $id, $align, $size, $alt = '', $caption = '' ) {
+	public function build_image_block( $id, $align, $size, $alt = '', $caption = '', $blocks = true ) {
 		$icon = $this->is_icon( $id );
 		if ( $icon ) {
 			// Small images behave like icons: lead a paragraph, float left, no caption,
@@ -916,12 +951,27 @@ class SPR_Image_Filler {
 			$size    = 'full';
 		}
 
-		// Build a LEAN <img> (no baked-in srcset/sizes): WordPress re-adds the
-		// responsive srcset at render time from the wp-image-{id} class, so the
-		// stored content stays clean. The alignment class lives on the <img> itself
-		// (classic WP markup: "aligncenter size-large wp-image-123"), which every
-		// theme styles — so it centres even without the block-editor CSS.
-		$img = $this->image_tag( $id, $size, 'align' . $align . ' size-' . $size . ' wp-image-' . (int) $id, $alt );
+		$img_class = 'align' . $align . ' size-' . $size . ' wp-image-' . (int) $id . ' ' . self::CSS_CLASS . ( $icon ? ' spr-auto-icon' : '' );
+
+		// Classic editor: store a plain aligned <img> (and, with a caption, a figure
+		// that carries the alignment class). The classic editor (TinyMCE) keeps the
+		// alignment on the <img> when saving — a Gutenberg block comment would be
+		// rewritten on save and lose its "center" alignment.
+		if ( ! $blocks ) {
+			$img = $this->image_tag( $id, $size, $img_class, $alt );
+			if ( '' === $img ) {
+				return '';
+			}
+			if ( '' !== trim( (string) $caption ) ) {
+				return '<figure class="align' . $align . ' size-' . $size . ' ' . self::CSS_CLASS . '">' . $img . '<figcaption class="wp-element-caption">' . esc_html( $caption ) . '</figcaption></figure>';
+			}
+			return $img;
+		}
+
+		// Block editor: a lean wp:image block. The <img> still carries the alignment
+		// class (classic markup themes style) and the wp-image-{id} class WordPress
+		// uses to add responsive srcset at render — so the stored content stays lean.
+		$img = $this->image_tag( $id, $size, $img_class, $alt );
 		if ( '' === $img ) {
 			return '';
 		}
@@ -1106,9 +1156,10 @@ class SPR_Image_Filler {
 			'',
 			$content
 		);
-		// Inline sprinkled icons (an <img> placed inside a heading/paragraph).
+		// Bare/classic inserted images and inline sprinkled icons (an <img> carrying
+		// our class, not wrapped in a figure).
 		$content = preg_replace(
-			'#<img[^>]*\bspr-auto-icon\b[^>]*>\s*#i',
+			'#<img[^>]*\bspr-auto-image\b[^>]*>\s*#i',
 			'',
 			$content
 		);

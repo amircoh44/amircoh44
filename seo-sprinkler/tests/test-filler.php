@@ -80,6 +80,21 @@ check( 'img keeps the wp-image id for responsive render', false !== strpos( $blo
 $left_block = $filler->build_image_block( $plumb, 'left', 'large' );
 check( 'left img carries alignleft', (bool) preg_match( '/<img[^>]*\bclass="[^"]*\balignleft\b/', $left_block ) );
 
+// Classic-editor markup (blocks=false): a plain aligned <img>, no block comment.
+$classic = $filler->build_image_block( $plumb, 'center', 'large', '', '', false );
+check( 'classic markup has no wp:image block', false === strpos( $classic, '<!-- wp:image' ) );
+check( 'classic markup has no figure (no caption)', false === strpos( $classic, '<figure' ) );
+check( 'classic img is aligncenter', (bool) preg_match( '/<img[^>]*\bclass="[^"]*\baligncenter\b/', $classic ) );
+check( 'classic img carries our class', false !== strpos( $classic, 'spr-auto-image' ) );
+// With a caption, classic wraps in a figure that carries the alignment class.
+$classic_cap = $filler->build_image_block( $plumb, 'center', 'large', '', 'A caption', false );
+check( 'classic caption uses an aligncenter figure', false !== strpos( $classic_cap, '<figure class="aligncenter' ) && false !== strpos( $classic_cap, 'A caption' ) );
+
+// remove_inserted strips classic inline images too.
+$cp = wp_insert_post( array( 'post_title' => 'Classic fill', 'post_content' => '<p>a</p>' . $classic . '<p>b</p>', 'post_status' => 'publish' ) );
+$filler->remove_inserted( $cp );
+check( 'remove strips classic inserted images', false === strpos( get_post( $cp )->post_content, 'spr-auto-image' ) );
+
 // Distribution: after every 2nd paragraph.
 $out = $filler->insert_blocks( '<p>a</p><p>b</p><p>c</p><p>d</p>', array( '[IMG1]', '[IMG2]' ), 2 );
 check( 'each image inserted once', 1 === substr_count( $out, '[IMG1]' ) && 1 === substr_count( $out, '[IMG2]' ) );

@@ -65,6 +65,17 @@ $has_saved  = ! empty( $saved_rows );
 				</td>
 			</tr>
 			<tr>
+				<th scope="row"><?php esc_html_e( 'Image format', 'seo-sprinkler' ); ?></th>
+				<td>
+					<select id="spr-format">
+						<option value="auto"><?php esc_html_e( 'Auto (match the editor)', 'seo-sprinkler' ); ?></option>
+						<option value="block"><?php esc_html_e( 'Gutenberg block image', 'seo-sprinkler' ); ?></option>
+						<option value="classic"><?php esc_html_e( 'Classic image', 'seo-sprinkler' ); ?></option>
+					</select>
+					<p class="description"><?php esc_html_e( 'Auto inserts a block image on block-editor posts and a classic image on Classic-editor posts (so alignment sticks on save). Force one if you prefer.', 'seo-sprinkler' ); ?></p>
+				</td>
+			</tr>
+			<tr>
 				<th scope="row"><?php esc_html_e( 'Alt text', 'seo-sprinkler' ); ?></th>
 				<td>
 					<?php if ( $ai_ready ) : ?>

@@ -25,6 +25,7 @@
 			per_words: $( '#spr-per-words' ).val(),
 			align: $( '#spr-align' ).val(),
 			size: $( '#spr-size' ).val(),
+			format: $( '#spr-format' ).val() || 'auto',
 			alt_mode: altMode
 		};
 	}
@@ -342,6 +343,13 @@
 		$( '<input type="checkbox" class="spr-ra-skipcb"/>' ).appendTo( $skip );
 		$skip.append( document.createTextNode( ' ' + ( i18n.skip || 'Skip' ) ) );
 		$( '<div/>' ).append( $skip ).appendTo( $thumb );
+		// Per-image alignment (defaults to the global choice above).
+		var globalAlign = $( '#spr-align' ).val() || 'center';
+		var $align = $( '<select class="spr-ra-align"/>' );
+		$.each( [ [ 'center', i18n.alignCenter || 'Middle' ], [ 'left', i18n.alignLeft || 'Left' ], [ 'right', i18n.alignRight || 'Right' ] ], function ( _, o ) {
+			$( '<option/>' ).val( o[0] ).text( o[1] ).prop( 'selected', o[0] === globalAlign ).appendTo( $align );
+		} );
+		$( '<div class="spr-ra-alignwrap"/>' ).append( $align ).appendTo( $thumb );
 		$card.append( $thumb );
 
 		var $f = $( '<div class="spr-ra-card__fields"/>' );
@@ -469,15 +477,16 @@
 				pid   = $card.data( 'post' ),
 				att   = $card.data( 'att' );
 
-			post( $.extend( {
+			post( $.extend( {}, opts, {
 				action: 'spr_imgdist_apply',
 				post_id: pid,
 				attachment_id: att,
+				align: $card.find( '.spr-ra-align' ).val() || opts.align,
 				alt: $card.find( '.spr-ra-alt' ).val(),
 				caption: $card.find( '.spr-ra-cap' ).val(),
 				title: $card.find( '.spr-ra-ttl' ).val(),
 				description: $card.find( '.spr-ra-desc' ).val()
-			}, opts ) )
+			} ) )
 				.done( function ( res ) {
 					if ( res && res.success ) {
 						var d = res.data || {};
