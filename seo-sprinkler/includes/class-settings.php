@@ -70,6 +70,7 @@ class SPR_Settings {
 			'clean_empty_tags'       => 1,      // Remove empty inline tags.
 			'clean_html_comments'    => 0,      // Remove HTML comments (keep wp: blocks).
 			'clean_inline_styles'    => 1,      // Strip inline style="" (no CSS).
+			'clean_img_srcset'       => 0,      // Strip bloated img srcset/sizes (re-added on render).
 			'clean_classes'          => 0,      // Strip class="" (aggressive; off by default).
 			'clean_custom'           => 0,      // Apply the user's own custom removal rules.
 			'cleaner_autosave'       => 0,      // Auto-clean content on save.
@@ -124,6 +125,7 @@ class SPR_Settings {
 		'clean_empty_tags',
 		'clean_html_comments',
 		'clean_inline_styles',
+		'clean_img_srcset',
 		'clean_classes',
 		'clean_custom',
 		'cleaner_autosave',

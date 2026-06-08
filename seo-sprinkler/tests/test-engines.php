@@ -98,6 +98,15 @@ check( 'custom regex rule removed', false === strpos( $ccclean, '[junk' ) );
 check( 'custom rules keep other text', false !== strpos( $ccclean, 'keep' ) && false !== strpos( $ccclean, 'end' ) );
 check( 'custom rules counted', isset( $ccstats['clean_custom'] ) && $ccstats['clean_custom'] >= 2 );
 
+// Strip bloated img srcset/sizes but keep src/alt/dimensions.
+$bloat = '<figure><img src="https://x/a-1024x576.jpg" sizes="(max-width: 800px) 100vw, 800px" srcset="https://x/a-1024x576.jpg 1024w, https://x/a-600x338.jpg 600w" alt="chimney" width="800" height="450" /></figure>';
+list( $sc, , $scstats ) = $cleaner->clean( $bloat, array( 'clean_img_srcset' => 1 ) );
+check( 'srcset removed', false === stripos( $sc, 'srcset' ) );
+check( 'sizes removed', false === stripos( $sc, 'sizes=' ) );
+check( 'src kept', false !== strpos( $sc, 'src="https://x/a-1024x576.jpg"' ) );
+check( 'alt + dimensions kept', false !== strpos( $sc, 'alt="chimney"' ) && false !== strpos( $sc, 'width="800"' ) );
+check( 'srcset cleanup counted', isset( $scstats['clean_img_srcset'] ) && $scstats['clean_img_srcset'] >= 2 );
+
 // Stripping classes keeps functional image classes (alignment, wp-image-N,
 // size-*, plugin markers) so cleaning never un-centres or orphans our images.
 list( $kc ) = $cleaner->clean( '<figure class="wp-block-image aligncenter junk spr-auto-image"><img class="aligncenter size-large wp-image-9 elementor-x" src="a.jpg" /></figure>', array( 'clean_classes' => 1 ) );

@@ -49,6 +49,7 @@ class SPR_Content_Cleaner {
 			'clean_empty_tags'      => __( 'Empty inline tags (<span></span>, …)', 'seo-sprinkler' ),
 			'clean_html_comments'   => __( 'HTML comments (Gutenberg blocks preserved)', 'seo-sprinkler' ),
 			'clean_inline_styles'   => __( 'Inline style="…" attributes (CSS) — keeps table layout styles', 'seo-sprinkler' ),
+			'clean_img_srcset'      => __( 'Bloated image srcset/sizes attributes (WordPress re-adds them on render)', 'seo-sprinkler' ),
 			'clean_classes'         => __( 'class="…" attributes (CSS hooks — may affect layout/blocks)', 'seo-sprinkler' ),
 			'clean_custom'          => __( 'Custom rules (define your own in Settings)', 'seo-sprinkler' ),
 		);
@@ -95,6 +96,9 @@ class SPR_Content_Cleaner {
 		}
 		if ( $this->on( 'clean_inline_styles', $force ) ) {
 			$html = $this->strip_inline_styles( $html, $stats );
+		}
+		if ( $this->on( 'clean_img_srcset', $force ) ) {
+			$html = $this->strip_img_srcset( $html, $stats );
 		}
 		if ( $this->on( 'clean_classes', $force ) ) {
 			$html = $this->strip_classes( $html, $stats );
@@ -262,6 +266,21 @@ class SPR_Content_Cleaner {
 		);
 
 		$stats['clean_inline_styles'] = $count;
+		return $html;
+	}
+
+	/**
+	 * Strip the responsive-image bloat (srcset + sizes) baked into content. These
+	 * attributes are large and WordPress regenerates them at render time from the
+	 * wp-image-{id} class, so removing them from stored content is safe.
+	 *
+	 * @param string $html  HTML.
+	 * @param array  $stats Stats.
+	 * @return string
+	 */
+	protected function strip_img_srcset( $html, &$stats ) {
+		$html = preg_replace( '/\s+(?:srcset|sizes)\s*=\s*("[^"]*"|\'[^\']*\')/i', '', $html, -1, $c );
+		$stats['clean_img_srcset'] = (int) $c;
 		return $html;
 	}
 
