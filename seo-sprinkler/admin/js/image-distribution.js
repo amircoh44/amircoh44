@@ -170,16 +170,17 @@
 						if ( d.inserted > 0 ) {
 							$res.html( '<span class="spr-badge spr-badge--ok">+' + d.inserted + '</span>' );
 							$tr.find( '.spr-badge--warn' ).removeClass( 'spr-badge--warn' ).addClass( 'spr-badge--ok' );
+							updateRowCount( id, d.count ); // Reflect the new image count.
 						} else if ( 'no_images' === d.skipped ) {
 							$res.text( iconsMode ? ( i18n.noIcons || 'no icons' ) : ( i18n.skipNone || 'no images' ) );
 						} else if ( 'enough' === d.skipped ) {
-							$res.text( i18n.skipEnough || 'enough' );
+							$res.text( ( i18n.skipEnough || 'already has' ) + ' ' + ( d.count || '' ) + ( d.target ? ' / ' + d.target : '' ) );
 						} else {
 							$res.text( '—' );
 						}
 						used = used.concat( d.used || [] );
 					} else {
-						$res.text( i18n.error || 'error' );
+						$res.text( ( res && res.data && res.data.message ) ? res.data.message : ( i18n.error || 'error' ) );
 					}
 				} )
 				.fail( function () { $res.text( i18n.error || 'error' ); } )

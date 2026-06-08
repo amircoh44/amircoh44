@@ -145,6 +145,7 @@ $bp  = wp_insert_post( array( 'post_title' => 'Needs images', 'post_content' => 
 $res = $filler->bulk_fill( $bp, array( 'mode' => 'per_article', 'target' => 2, 'every' => 2, 'alt_mode' => 'auto' ) );
 check( 'bulk_fill inserts up to the target', isset( $res['inserted'] ) && 2 === $res['inserted'] );
 check( 'bulk_fill returns the used image ids', ! empty( $res['used'] ) );
+check( 'bulk_fill reports the new count', isset( $res['count'] ) && $res['count'] >= 2 );
 check( 'bulk_fill wrote image blocks', false !== strpos( get_post( $bp )->post_content, 'spr-auto-image' ) );
 
 // And skips a post that already meets the target.

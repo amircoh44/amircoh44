@@ -515,12 +515,12 @@ class SPR_Image_Filler {
 
 		$need = min( 30, max( 0, $target - $current ) );
 		if ( $need <= 0 ) {
-			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'enough' );
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'enough', 'count' => $current, 'target' => $target );
 		}
 
 		$ids = $this->related_image_ids( $post_id, $need, (array) $args['exclude'], ! empty( $args['icons_only'] ) );
 		if ( empty( $ids ) ) {
-			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'no_images' );
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'no_images', 'count' => $current );
 		}
 
 		$use_ai = ( 'ai' === $args['alt_mode'] ) && SPR_Edition::can( 'ai' ) && SPR_AI::is_configured();
@@ -543,9 +543,10 @@ class SPR_Image_Filler {
 		// Scatter the images evenly across the article rather than clumping them.
 		$new = $this->distribute_evenly( $post->post_content, $blocks );
 		wp_update_post( array( 'ID' => $post_id, 'post_content' => $new ) );
-		update_post_meta( $post_id, SPR_META_IMAGE_COUNT, $this->images->count_for_post( get_post( $post_id ) ) );
+		$count = (int) $this->images->count_for_post( get_post( $post_id ) );
+		update_post_meta( $post_id, SPR_META_IMAGE_COUNT, $count );
 
-		return array( 'inserted' => count( $blocks ), 'used' => $used );
+		return array( 'inserted' => count( $blocks ), 'used' => $used, 'count' => $count );
 	}
 
 	/**
