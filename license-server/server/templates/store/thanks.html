@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Payment received · {{ BRAND }}{% endblock %}
+{% block content %}
+<section class="hero" style="padding:48px 0 18px">
+  <span class="tag">✓ Payment received</span>
+  <h1 style="font-size:34px">Thank you! 🎉</h1>
+  <p class="lead">Your payment went through. We're issuing your licence now — it'll appear in your account within a few seconds, and we've emailed it to you.</p>
+  <p>
+    <a class="btn" href="{{ url_for('store.account') }}">Find my licence key</a>
+    <a class="btn btn--ghost" href="{{ url_for('store.download') }}">Download the plugin</a>
+  </p>
+</section>
+{% endblock %}

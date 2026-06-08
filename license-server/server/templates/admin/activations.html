@@ -1,0 +1,20 @@
+{% extends "admin/_base.html" %}
+{% block title %}Activations · Admin{% endblock %}
+{% block content %}
+<h2>Recent activations</h2>
+<p class="section-sub">The 100 most recently seen site activations.</p>
+<table>
+  <tr><th>Site</th><th>Name</th><th>License</th><th>Customer</th><th>Last seen</th></tr>
+  {% for a in rows %}
+  <tr>
+    <td>{{ a.site_url }}</td>
+    <td>{{ a.site_name or '—' }}</td>
+    <td><a href="{{ url_for('admin.license_detail', lid=a.license.id) }}"><code>{{ a.license.key }}</code></a></td>
+    <td>{{ a.license.customer.email }}</td>
+    <td class="muted">{{ a.last_seen_at.strftime('%d %b %Y %H:%M') }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5" class="muted">No activations recorded yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

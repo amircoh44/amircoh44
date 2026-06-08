@@ -1,0 +1,35 @@
+{% extends "admin/_base.html" %}
+{% block title %}Dashboard · Admin{% endblock %}
+{% block content %}
+<h2>Dashboard</h2>
+<div class="kpis">
+  <div class="kpi"><div class="n">{{ stats.customers }}</div><div class="l">Customers</div></div>
+  <div class="kpi"><div class="n">{{ stats.licenses }}</div><div class="l">Licenses</div></div>
+  <div class="kpi"><div class="n">{{ stats.active }}</div><div class="l">Active</div></div>
+  <div class="kpi"><div class="n">{{ stats.activations }}</div><div class="l">Activations</div></div>
+  <div class="kpi"><div class="n">${{ stats.mrr }}</div><div class="l">Est. MRR</div></div>
+  <div class="kpi"><div class="n">{{ stats.coupons }}</div><div class="l">Coupons</div></div>
+  <a class="kpi" href="{{ url_for('admin.tickets', status='open') }}" style="text-decoration:none;color:inherit"><div class="n">{{ stats.open_tickets }}</div><div class="l">Open tickets</div></a>
+  <a class="kpi" href="{{ url_for('admin.tickets') }}" style="text-decoration:none;color:inherit"><div class="n" style="{{ 'color:var(--warn)' if stats.overdue }}">{{ stats.overdue }}</div><div class="l">Overdue SLA</div></a>
+  <a class="kpi" href="{{ url_for('admin.tickets', status='flagged') }}" style="text-decoration:none;color:inherit"><div class="n" style="{{ 'color:var(--warn)' if stats.flagged }}">{{ stats.flagged }}</div><div class="l">Flagged</div></a>
+</div>
+
+<div class="toolbar">
+  <h3 style="margin:0;flex:1">Recent licenses</h3>
+  <a class="btn btn--sm" href="{{ url_for('admin.license_new') }}">+ Issue license</a>
+</div>
+<table>
+  <tr><th>Key</th><th>Customer</th><th>Plan</th><th>Status</th><th>Created</th></tr>
+  {% for lic in recent %}
+  <tr>
+    <td><a href="{{ url_for('admin.license_detail', lid=lic.id) }}"><code>{{ lic.key }}</code></a></td>
+    <td>{{ lic.customer.email }}</td>
+    <td><span class="badge badge--{{ lic.edition }}">{{ lic.edition|capitalize }}</span> · {{ lic.term }}</td>
+    <td>{% if active_fn(lic) %}<span class="badge badge--ok">active</span>{% else %}<span class="badge badge--warn">{{ lic.status if lic.status!='active' else 'expired' }}</span>{% endif %}</td>
+    <td class="muted">{{ lic.created_at.strftime('%d %b %Y') }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5" class="muted">No licenses yet — issue one or take a sandbox order from the storefront.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

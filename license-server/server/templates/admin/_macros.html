@@ -1,0 +1,11 @@
+{% macro catbadge(c) -%}
+{% if c=='abuse' %}<span class="badge badge--warn">abuse / piracy</span>
+{%- elif c=='spam' %}<span class="badge badge--warn">spam</span>
+{%- elif c=='security_report' %}<span class="badge badge--expert">security report</span>
+{%- elif c=='low_quality' %}<span class="badge badge--off">low-quality</span>
+{%- else %}<span class="badge badge--ok">legit</span>{% endif %}
+{%- endmacro %}
+
+{% macro statusbadge(s) -%}
+<span class="badge badge--{{ 'warn' if s=='flagged' else ('ok' if s in ['queued','open'] else 'off') }}">{{ s }}</span>
+{%- endmacro %}

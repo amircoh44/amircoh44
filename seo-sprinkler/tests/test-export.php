@@ -1,0 +1,147 @@
+<?php
+/**
+ * Exporter + SEO-detector tests, incl. PII gating. Exits non-zero on failure.
+ *
+ * @package SeoSprinkler\Tests
+ */
+
+// Simulate Yoast being active so the SEO detector has something to find.
+define( 'WPSEO_VERSION', '99.9' );
+
+$core = getenv( 'WP_CORE' );
+if ( ! $core ) { fwrite( STDERR, "WP_CORE not set\n" ); exit( 1 ); }
+$_SERVER['HTTP_HOST'] = 'localhost:8088';
+$_SERVER['REQUEST_URI'] = '/';
+require $core . '/wp-load.php';
+
+$pass = 0; $fail = 0;
+function check( $name, $cond ) {
+	global $pass, $fail;
+	if ( $cond ) { $pass++; echo "PASS  $name\n"; }
+	else { $fail++; echo "FAIL  $name\n"; }
+}
+function find_by_id( $list, $id ) {
+	foreach ( (array) $list as $row ) { if ( isset( $row['id'] ) && $row['id'] == $id ) { return $row; } }
+	return null;
+}
+
+// SEO detector.
+check( 'detector finds Yoast', isset( SPR_SEO_Detector::active()['yoast'] ) );
+check( 'meta keys include focus keyword', in_array( '_yoast_wpseo_focuskw', SPR_SEO_Detector::all_meta_keys(), true ) );
+
+// Content fixtures.
+$term   = wp_insert_term( 'Plumbing', 'category' );
+$cat_id = is_wp_error( $term ) ? (int) $term->error_data['term_exists'] : (int) $term['term_id'];
+$post   = wp_insert_post(
+	array(
+		'post_title'    => 'Leaky Faucet',
+		'post_content'  => '<p>Fix it.</p>',
+		'post_status'   => 'publish',
+		'post_category' => array( $cat_id ),
+	)
+);
+update_post_meta( $post, 'custom_field', 'hello' );
+update_post_meta( $post, '_yoast_wpseo_focuskw', 'leaky faucet' );
+update_post_meta( $post, '_yoast_wpseo_metadesc', 'How to fix a leaky faucet' );
+
+$att = wp_insert_attachment(
+	array(
+		'post_mime_type' => 'image/png',
+		'post_title'     => 'Faucet photo',
+		'post_status'    => 'inherit',
+		'post_excerpt'   => 'A caption',
+		'post_content'   => 'A description',
+	),
+	false,
+	0
+);
+update_post_meta( $att, '_wp_attached_file', 'faucet.png' );
+wp_update_attachment_metadata( $att, array( 'width' => 800, 'height' => 600, 'sizes' => array() ) );
+update_post_meta( $att, '_wp_attachment_image_alt', 'faucet alt' );
+
+$exporter = new SPR_Exporter();
+
+// Default manifest (no PII).
+$m = $exporter->build_manifest();
+check( 'manifest has site name', isset( $m['site']['name'] ) );
+check( 'manifest lists post types', ! empty( $m['post_types'] ) );
+check( 'manifest has posts', ! empty( $m['posts'] ) );
+check( 'no users section by default', ! isset( $m['users'] ) );
+check( 'no attachments among posts', empty( array_filter( $m['posts'], function ( $p ) { return 'attachment' === $p['type']; } ) ) );
+
+$rec = find_by_id( $m['posts'], $post );
+check( 'post exported', null !== $rec );
+check( 'post meta exported', $rec && isset( $rec['meta']['custom_field'] ) && 'hello' === $rec['meta']['custom_field'] );
+check( 'post terms exported', $rec && isset( $rec['terms']['category'] ) && in_array( 'plumbing', $rec['terms']['category'], true ) );
+check( 'post SEO normalised', $rec && isset( $rec['seo']['focus_keyword'] ) && 'leaky faucet' === $rec['seo']['focus_keyword'] );
+
+$mrec = find_by_id( $m['media'], $att );
+check( 'media exported', null !== $mrec );
+check( 'media has alt/caption/description', $mrec && 'faucet alt' === $mrec['alt'] && 'A caption' === $mrec['caption'] && 'A description' === $mrec['description'] );
+check( 'seo section lists active plugin', isset( $m['seo'] ) && ! empty( $m['seo']['active_plugins'] ) );
+check( 'taxonomies section present', isset( $m['taxonomies']['category'] ) );
+
+// Content mirror: rendered content, clean HTML, images, links, menus.
+$post2 = wp_insert_post(
+	array(
+		'post_title'   => 'Mirror Test',
+		'post_content' => '<p>See <a href="' . home_url( '/leaky-faucet/' ) . '">faucet</a> and <a href="https://example.com">ext</a>.</p><img src="' . wp_get_attachment_url( $att ) . '" alt="faucet alt" />',
+		'post_status'  => 'publish',
+	)
+);
+$m4 = $exporter->build_manifest();
+$r2 = find_by_id( $m4['posts'], $post2 );
+check( 'content_rendered present', $r2 && isset( $r2['content_rendered'] ) && '' !== $r2['content_rendered'] );
+check( 'content_clean present', $r2 && isset( $r2['content_clean'] ) );
+check( 'builder detected (classic)', $r2 && 'classic' === $r2['builder'] );
+check( 'content images extracted', $r2 && ! empty( $r2['content_images'] ) );
+check( 'content links extracted', $r2 && isset( $r2['links']['external'] ) && ! empty( $r2['links']['external'] ) );
+check( 'menus section present', isset( $m4['menus'] ) && is_array( $m4['menus'] ) );
+
+// clean_export_html removes scripts, classes, styles and data-attributes but keeps content.
+$dirty = '<div class="elementor x" style="color:red" data-id="9"><h2 class="t">Hi</h2><script>bad()</script><p>Keep <a href="/x" class="lnk">me</a></p></div>';
+$clean = $exporter->clean_export_html( $dirty );
+check( 'clean drops scripts', false === stripos( $clean, '<script' ) && false === strpos( $clean, 'bad()' ) );
+check( 'clean drops class/style/data', false === stripos( $clean, 'class=' ) && false === stripos( $clean, 'style=' ) && false === stripos( $clean, 'data-id' ) );
+check( 'clean keeps heading + text', false !== stripos( $clean, '<h2' ) && false !== strpos( $clean, 'Hi' ) );
+check( 'clean keeps link href', false !== strpos( $clean, 'href="/x"' ) );
+
+// PII gating.
+$m2 = $exporter->build_manifest( array( 'include_users' => true ) );
+check( 'users included when opted in', isset( $m2['users'] ) && ! empty( $m2['users'] ) );
+check( 'no email without include_emails', ! isset( $m2['users'][0]['email'] ) );
+check( 'no admin_email without include_emails', ! isset( $m2['site']['admin_email'] ) );
+
+$m3 = $exporter->build_manifest( array( 'include_users' => true, 'include_emails' => true ) );
+check( 'email included with include_emails', isset( $m3['users'][0]['email'] ) );
+check( 'admin_email included with include_emails', isset( $m3['site']['admin_email'] ) );
+
+// Split-file export: a tree of small files instead of one giant manifest.json.
+if ( class_exists( 'ZipArchive' ) ) {
+	$zpath = tempnam( sys_get_temp_dir(), 'sprzip' ) . '.zip';
+	$z     = new ZipArchive();
+	$z->open( $zpath, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+	$exporter->write_zip_tree( $z, array() );
+	$z->close();
+
+	$z2    = new ZipArchive();
+	$z2->open( $zpath );
+	$names = array();
+	for ( $k = 0; $k < $z2->numFiles; $k++ ) {
+		$names[] = $z2->statIndex( $k )['name'];
+	}
+	check( 'zip tree has manifest.json', in_array( 'manifest.json', $names, true ) );
+	check( 'zip tree has site.json', in_array( 'site.json', $names, true ) );
+	check( 'zip tree has posts index', in_array( 'posts/_index.json', $names, true ) );
+	check( 'zip tree has a per-post file', ! empty( preg_grep( '#^posts/\d+-.+\.json$#', $names ) ) );
+	$manifest = $z2->getFromName( 'manifest.json' );
+	check( 'split manifest stays small', strlen( $manifest ) < 4000 );
+	check( 'split manifest declares layout + counts', false !== strpos( $manifest, '"layout": "split"' ) && false !== strpos( $manifest, '"posts"' ) );
+	$z2->close();
+	@unlink( $zpath ); // phpcs:ignore
+} else {
+	check( 'ZipArchive unavailable — split-zip test skipped', true );
+}
+
+echo "\n===== $pass passed, $fail failed =====\n";
+exit( $fail > 0 ? 1 : 0 );

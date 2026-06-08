@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ BRAND }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% block header %}
+  <div class="promo">🚀 Launch offer — <strong>40% off</strong> your first year with code <code>LAUNCH40</code></div>
+  <header class="nav">
+    <div class="container nav__row">
+      <a class="brand" href="{{ url_for('store.index') }}">💧 {{ BRAND }}</a>
+      <nav class="nav__links">
+        <a href="{{ url_for('store.features') }}">Features</a>
+        <a href="{{ url_for('store.pricing') }}">Pricing</a>
+        <a href="{{ url_for('store.faq') }}">FAQ</a>
+        <a href="{{ url_for('store.support') }}">Support</a>
+        <a href="{{ url_for('store.account') }}">My account</a>
+        <a class="btn btn--sm" href="{{ url_for('store.pricing') }}">Get it</a>
+      </nav>
+    </div>
+  </header>
+{% endblock %}
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash flash--{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+{% block footer %}
+  <footer class="footer">
+    <div class="container">
+      <p>© {{ now.year }} {{ BRAND }} · Built from 30 years of SEO by Amir Khan ·
+        <a href="{{ url_for('store.features') }}">Features</a> ·
+        <a href="{{ url_for('store.pricing') }}">Pricing</a> ·
+        <a href="{{ url_for('store.support') }}">Support</a> ·
+        <a href="{{ url_for('store.contact') }}">Contact</a> ·
+        <a href="{{ url_for('admin.login') }}">Admin</a></p>
+    </div>
+  </footer>
+{% endblock %}
+</body>
+</html>

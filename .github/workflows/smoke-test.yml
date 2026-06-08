@@ -1,0 +1,76 @@
+name: SEO Sprinkler — smoke test
+
+on:
+  push:
+    paths:
+      - 'seo-sprinkler/**'
+      - '.github/workflows/smoke-test.yml'
+  pull_request:
+    paths:
+      - 'seo-sprinkler/**'
+      - '.github/workflows/smoke-test.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.2', '8.3']
+
+    env:
+      WP_CORE: ${{ github.workspace }}/wp
+      WP_REF: '6.7'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: sqlite3, pdo_sqlite, dom, mbstring, libxml, json, zip
+          coverage: none
+
+      - name: Lint all PHP files
+        run: |
+          find seo-sprinkler -name '*.php' -print0 \
+            | xargs -0 -n1 -P4 php -l
+
+      - name: Bootstrap WordPress (SQLite)
+        run: bash seo-sprinkler/tests/bootstrap-wp.sh
+
+      - name: Engine tests
+        run: php seo-sprinkler/tests/test-engines.php
+
+      - name: Edition / licensing tests
+        run: php seo-sprinkler/tests/test-edition.php
+
+      - name: License client tests
+        run: php seo-sprinkler/tests/test-license.php
+
+      - name: Front-end filter tests
+        run: php seo-sprinkler/tests/test-frontend.php
+
+      - name: Schema generator tests
+        run: php seo-sprinkler/tests/test-schema.php
+
+      - name: Image filler tests
+        run: php seo-sprinkler/tests/test-filler.php
+
+      - name: Syndication tests
+        run: php seo-sprinkler/tests/test-syndication.php
+
+      - name: Export / migration tests
+        run: php seo-sprinkler/tests/test-export.php
+
+      - name: Admin render tests
+        run: php seo-sprinkler/tests/test-admin.php
+
+      - name: Show debug.log on failure
+        if: failure()
+        run: cat "${WP_CORE}/wp-content/debug.log" 2>/dev/null || echo "no debug.log"

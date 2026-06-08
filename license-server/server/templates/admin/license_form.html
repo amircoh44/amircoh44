@@ -1,0 +1,29 @@
+{% extends "admin/_base.html" %}
+{% block title %}Issue license · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.licenses') }}">← Licenses</a></p>
+<h2>Issue a license</h2>
+<div class="card" style="max-width:520px">
+  <form method="post" action="{{ url_for('admin.license_new') }}">
+    <label>Customer email *</label>
+    <input type="email" name="email" required placeholder="customer@example.com">
+    <label>Customer name</label>
+    <input type="text" name="name" placeholder="Optional (used if new customer)">
+    <div class="row">
+      <div>
+        <label>Edition</label>
+        <select name="edition"><option value="pro">Pro</option><option value="expert">Expert</option></select>
+      </div>
+      <div>
+        <label>Term</label>
+        <select name="term"><option value="annual">Annual</option><option value="lifetime">Lifetime</option></select>
+      </div>
+      <div>
+        <label>Sites</label>
+        <select name="tier">{% for k,label,_lim in tiers %}<option value="{{ k }}">{{ label }}</option>{% endfor %}</select>
+      </div>
+    </div>
+    <button class="btn btn--block" type="submit" style="margin-top:18px">Generate key &amp; issue</button>
+  </form>
+</div>
+{% endblock %}

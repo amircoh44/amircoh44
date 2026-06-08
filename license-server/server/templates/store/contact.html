@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Contact · {{ BRAND }}{% endblock %}
+{% block content %}
+<h2>Contact &amp; support</h2>
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <h3>Support</h3>
+    <p><strong>Pro</strong> includes email support; <strong>Expert</strong> gets <strong>priority email support with a 24-hour response</strong> (business days). Free users have the community forum &amp; docs. Include your licence key so we can find your account fast.</p>
+    <p style="margin-top:10px"><a class="btn" href="{{ url_for('store.support') }}">Submit a request</a> <a class="btn btn--ghost" href="mailto:support@seosprinkler.com">Email us</a></p>
+  </div>
+  <div class="card">
+    <h3>Pre-sales &amp; agencies</h3>
+    <p>Questions about plans, volume licensing (50+ sites) or white-label? We're happy to help you pick.</p>
+    <p style="margin-top:10px"><a class="btn btn--ghost" href="{{ url_for('store.pricing') }}">See pricing</a></p>
+  </div>
+</div>
+<p class="muted" style="margin-top:18px">SEO Sprinkler is built and supported by Amir Khan — 30 years of hands-on SEO and website building.</p>
+{% endblock %}

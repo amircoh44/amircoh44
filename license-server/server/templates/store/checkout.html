@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Checkout · {{ BRAND }}{% endblock %}
+{% block content %}
+<h2>Checkout</h2>
+<div class="note">🧪 <strong>Sandbox checkout.</strong> This demo issues a real, working licence key immediately (no payment taken). In production this page hands off to Stripe / Lemon Squeezy / Freemius, which then calls back to create the licence.</div>
+
+<div class="grid grid-2" style="margin-top:18px;align-items:start">
+  <div class="card">
+    <h3>Your order</h3>
+    <table style="border:0">
+      <tr><td>Plan</td><td style="text-align:right"><span class="badge badge--{{ edition }}">{{ edition|capitalize }}</span></td></tr>
+      <tr><td>Billing</td><td style="text-align:right">{{ term|capitalize }}</td></tr>
+      <tr><td>Sites</td><td style="text-align:right">{{ tier_label }}</td></tr>
+      <tr><td>List price</td><td style="text-align:right">${{ base }}{% if term=='annual' %}/yr{% endif %}</td></tr>
+      {% if coupon %}<tr><td>Coupon <code>{{ coupon.code }}</code> (−{{ coupon.percent_off }}%)</td><td style="text-align:right">−${{ base - final }}</td></tr>{% endif %}
+      <tr><td><strong>Total today</strong></td><td style="text-align:right"><strong>${{ final }}{% if term=='annual' %}/yr{% endif %}</strong></td></tr>
+    </table>
+
+    <form method="get" action="{{ url_for('store.checkout') }}" style="margin-top:12px">
+      <input type="hidden" name="edition" value="{{ edition }}">
+      <input type="hidden" name="term" value="{{ term }}">
+      <input type="hidden" name="tier" value="{{ tier }}">
+      <label>Discount code</label>
+      <div class="row">
+        <div><input type="text" name="coupon" value="{{ code }}" placeholder="e.g. LAUNCH40"></div>
+        <div style="flex:0"><button class="btn btn--ghost" type="submit">Apply</button></div>
+      </div>
+      {% if invalid_coupon %}<p class="muted" style="color:var(--warn)">That code isn't valid.</p>{% endif %}
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Your details</h3>
+    <form method="post" action="{{ url_for('store.checkout') }}">
+      <input type="hidden" name="edition" value="{{ edition }}">
+      <input type="hidden" name="term" value="{{ term }}">
+      <input type="hidden" name="tier" value="{{ tier }}">
+      <input type="hidden" name="coupon" value="{{ code }}">
+      <input type="hidden" name="place_order" value="1">
+      <label>Email *</label>
+      <input type="email" name="email" required placeholder="you@example.com">
+      <label>Name</label>
+      <input type="text" name="name" placeholder="Optional">
+      <button class="btn btn--block" type="submit" style="margin-top:18px">Complete order — ${{ final }}</button>
+      <p class="muted" style="font-size:13px;margin-top:10px;text-align:center">14-day money-back guarantee · cancel anytime</p>
+    </form>
+  </div>
+</div>
+
+<p style="margin-top:18px"><a href="{{ url_for('store.pricing') }}">← Change plan</a></p>
+{% endblock %}

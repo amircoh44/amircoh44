@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}My account · {{ BRAND }}{% endblock %}
+{% block content %}
+<h2>My account</h2>
+<p class="section-sub">Look up your licences by email address or licence key.</p>
+
+<div class="card" style="max-width:520px">
+  <form method="post" action="{{ url_for('store.account') }}">
+    <label>Email or licence key</label>
+    <div class="row">
+      <div><input type="text" name="q" value="{{ query }}" placeholder="you@example.com or SPR-XXXX-…" required></div>
+      <div style="flex:0"><button class="btn" type="submit">Look up</button></div>
+    </div>
+  </form>
+  <p class="muted" style="font-size:13px;margin-top:10px">Try the demo: <code>demo@example.com</code></p>
+</div>
+
+{% if result is not none %}
+  {% if result.licenses %}
+  <h3>Licences for {{ result.customer.email }}</h3>
+  <table>
+    <tr><th>Key</th><th>Plan</th><th>Status</th><th>Sites</th><th>Support</th><th>Renews</th></tr>
+    {% for lic in result.licenses %}
+    <tr>
+      <td><code>{{ lic.key }}</code></td>
+      <td><span class="badge badge--{{ lic.edition }}">{{ lic.edition|capitalize }}</span> · {{ lic.term }}</td>
+      <td>{% if active_fn(lic) %}<span class="badge badge--ok">active</span>{% else %}<span class="badge badge--warn">{{ lic.status if lic.status!='active' else 'expired' }}</span>{% endif %}</td>
+      <td>{{ seats(lic) }} / {{ 'unlimited' if lic.site_limit==0 else lic.site_limit }}</td>
+      <td>{{ SUPPORT[lic.edition if active_fn(lic) else 'free'] }}</td>
+      <td>{{ lic.expires_at.strftime('%d %b %Y') if lic.expires_at else 'lifetime' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p style="margin-top:14px"><a class="btn btn--ghost" href="{{ url_for('store.download') }}">Download plugin</a></p>
+  {% else %}
+  <div class="flash flash--error">No licences found for “{{ query }}”. Check the spelling, or <a href="{{ url_for('store.pricing') }}">get a plan</a>.</div>
+  {% endif %}
+{% endif %}
+{% endblock %}

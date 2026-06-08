@@ -1,0 +1,1011 @@
+/**
+ * Admin styles for SEO Sprinkler.
+ */
+
+/* ---------------------------------------------------------------------------
+ * 2026 design system — shared tokens applied on every SEO Sprinkler screen.
+ * ------------------------------------------------------------------------- */
+.spr-wrap {
+	--spr-grad: linear-gradient( 135deg, #7c3aed 0%, #2563eb 52%, #06b6d4 100% );
+	--spr-ink: #1d2327;
+	--spr-muted: #646970;
+	--spr-line: #e6e8ec;
+	--spr-radius: 14px;
+}
+
+.spr-wrap .spr-intro {
+	max-width: 760px;
+	font-size: 14px;
+	color: var(--spr-muted);
+}
+
+/* Plain page titles (screens without the hero) get a brand accent bar so the
+ * design line is consistent from screen to screen. */
+.spr-wrap > h1 {
+	position: relative;
+	margin-top: 6px;
+	padding-left: 16px;
+}
+
+.spr-wrap > h1::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY( -50% );
+	width: 5px;
+	height: 1.05em;
+	border-radius: 999px;
+	background: var(--spr-grad);
+}
+
+/* Branded hero header (Dashboard, and reusable on any screen). */
+.spr-hero {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	margin: 14px 0 22px;
+	padding: 24px 28px;
+	border-radius: 18px;
+	background: var(--spr-grad);
+	color: #fff;
+	overflow: hidden;
+	box-shadow: 0 14px 34px rgba( 37, 99, 235, 0.22 );
+}
+
+.spr-hero::after {
+	content: "";
+	position: absolute;
+	right: -60px;
+	top: -60px;
+	width: 220px;
+	height: 220px;
+	background: radial-gradient( circle at center, rgba( 255, 255, 255, 0.22 ), transparent 70% );
+	pointer-events: none;
+}
+
+.spr-hero__icon {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 60px;
+	height: 60px;
+	border-radius: 16px;
+	background: rgba( 255, 255, 255, 0.18 );
+	box-shadow: inset 0 0 0 1px rgba( 255, 255, 255, 0.25 );
+}
+
+.spr-hero__icon .dashicons {
+	font-size: 32px;
+	width: 32px;
+	height: 32px;
+	color: #fff;
+}
+
+.spr-hero__body {
+	position: relative;
+	z-index: 1;
+	min-width: 0;
+}
+
+.spr-hero__title {
+	margin: 0;
+	padding: 0;
+	font-size: 23px;
+	font-weight: 700;
+	color: #fff;
+}
+
+.spr-hero__sub {
+	margin: 6px 0 0;
+	max-width: 720px;
+	color: rgba( 255, 255, 255, 0.92 );
+	font-size: 13.5px;
+	line-height: 1.5;
+}
+
+.spr-hero__edition {
+	position: relative;
+	z-index: 1;
+	margin-left: auto;
+	align-self: flex-start;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 14px;
+	border-radius: 999px;
+	background: rgba( 255, 255, 255, 0.16 );
+	color: #fff;
+	font-weight: 600;
+	font-size: 12px;
+	white-space: nowrap;
+	box-shadow: inset 0 0 0 1px rgba( 255, 255, 255, 0.3 );
+}
+
+.spr-hero__edition .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+/* Coloured icon chips, shared by cards and tiles. */
+.spr-chip {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	border-radius: 12px;
+	color: #fff;
+}
+
+.spr-chip .dashicons {
+	color: #fff;
+}
+
+.spr-chip--teal   { background: linear-gradient( 135deg, #06b6d4, #0891b2 ); }
+.spr-chip--blue   { background: linear-gradient( 135deg, #3b82f6, #2563eb ); }
+.spr-chip--amber  { background: linear-gradient( 135deg, #f59e0b, #d97706 ); }
+.spr-chip--violet { background: linear-gradient( 135deg, #8b5cf6, #6d28d9 ); }
+.spr-chip--green  { background: linear-gradient( 135deg, #10b981, #059669 ); }
+.spr-chip--pink   { background: linear-gradient( 135deg, #ec4899, #db2777 ); }
+.spr-chip--indigo { background: linear-gradient( 135deg, #6366f1, #4f46e5 ); }
+.spr-chip--orange { background: linear-gradient( 135deg, #f97316, #ea580c ); }
+.spr-chip--slate  { background: linear-gradient( 135deg, #64748b, #475569 ); }
+
+/* Dashboard stat cards. */
+.spr-cards {
+	display: grid;
+	grid-template-columns: repeat( auto-fit, minmax( 210px, 1fr ) );
+	gap: 16px;
+	margin: 0 0 22px;
+}
+
+.spr-card {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	background: #fff;
+	border: 1px solid var(--spr-line);
+	border-radius: var(--spr-radius);
+	padding: 16px 18px;
+	text-align: left;
+	box-shadow: 0 1px 2px rgba( 0, 0, 0, 0.04 );
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.spr-card:hover {
+	transform: translateY( -2px );
+	box-shadow: 0 10px 24px rgba( 0, 0, 0, 0.08 );
+}
+
+.spr-card .spr-chip {
+	width: 50px;
+	height: 50px;
+}
+
+.spr-card .spr-chip .dashicons {
+	font-size: 26px;
+	width: 26px;
+	height: 26px;
+}
+
+.spr-card__num {
+	font-size: 26px;
+	font-weight: 700;
+	line-height: 1.05;
+	color: var(--spr-ink);
+}
+
+.spr-card__lbl {
+	margin-top: 2px;
+	color: var(--spr-muted);
+	font-size: 12.5px;
+}
+
+/* Panels — soft cards used on every screen. */
+.spr-panel {
+	position: relative;
+	background: #fff;
+	border: 1px solid var(--spr-line);
+	border-radius: var(--spr-radius);
+	padding: 18px 22px;
+	margin: 18px 0;
+	max-width: 900px;
+	box-shadow: 0 1px 2px rgba( 0, 0, 0, 0.04 );
+}
+
+.spr-panel h2 {
+	margin-top: 0;
+}
+
+.spr-panel__h {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 0 0 4px;
+}
+
+.spr-panel__h .dashicons {
+	color: #6d28d9;
+}
+
+/* Quick-action tiles. */
+.spr-tiles {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 200px, 1fr ) );
+	gap: 12px;
+	margin: 6px 0 0;
+}
+
+.spr-tile {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 14px;
+	border: 1px solid var(--spr-line);
+	border-radius: 12px;
+	background: #fff;
+	color: var(--spr-ink);
+	text-decoration: none;
+	font-weight: 600;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.spr-tile:hover,
+.spr-tile:focus {
+	transform: translateY( -1px );
+	border-color: transparent;
+	box-shadow: 0 8px 20px rgba( 0, 0, 0, 0.1 );
+	color: var(--spr-ink);
+}
+
+.spr-tile .spr-chip {
+	width: 38px;
+	height: 38px;
+}
+
+.spr-tile .spr-chip .dashicons {
+	font-size: 20px;
+	width: 20px;
+	height: 20px;
+}
+
+.spr-tile--primary {
+	box-shadow: inset 0 0 0 1.5px #c7b6f5;
+}
+
+/* Status list. */
+.spr-statuslist {
+	margin: 6px 0 0;
+}
+
+.spr-statusrow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	padding: 12px 2px;
+	border-bottom: 1px solid var(--spr-line);
+}
+
+.spr-statusrow:last-child {
+	border-bottom: 0;
+}
+
+.spr-statusrow__k {
+	color: var(--spr-ink);
+	font-weight: 500;
+}
+
+.spr-statusrow__v {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-align: right;
+	overflow-wrap: anywhere;
+}
+
+/* Activity timeline. */
+.spr-timeline {
+	list-style: none;
+	margin: 6px 0 0;
+	padding: 0;
+}
+
+.spr-timeline li {
+	position: relative;
+	display: flex;
+	gap: 12px;
+	align-items: baseline;
+	margin-left: 6px;
+	padding: 10px 0 10px 18px;
+	border-left: 2px solid var(--spr-line);
+}
+
+.spr-timeline li:last-child {
+	padding-bottom: 0;
+}
+
+.spr-timeline li::before {
+	content: "";
+	position: absolute;
+	left: -6px;
+	top: 15px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--spr-grad);
+	box-shadow: 0 0 0 3px #fff;
+}
+
+.spr-timeline time {
+	flex: 0 0 120px;
+	color: var(--spr-muted);
+	font-size: 12px;
+}
+
+.spr-timeline .spr-tl-msg {
+	color: var(--spr-ink);
+}
+
+.spr-actions .button {
+	margin-right: 6px;
+}
+
+/* Inline "edit minimum images" affordance on the dashboard card. */
+.spr-mini-edit {
+	font-size: 11px;
+	font-weight: 500;
+	text-decoration: none;
+	margin-left: 4px;
+}
+
+.spr-mini-status {
+	font-size: 11px;
+	margin-left: 6px;
+}
+
+#spr-min-input {
+	width: 64px;
+	font-size: 15px;
+}
+
+/* "Run all scans" results summary. */
+.spr-scan-results {
+	margin-top: 14px;
+}
+
+.spr-scan-result {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--spr-line);
+}
+
+.spr-scan-result:last-child {
+	border-bottom: 0;
+}
+
+.spr-scan-result .dashicons {
+	color: #6d28d9;
+}
+
+.spr-scan-result__t {
+	flex: 1 1 auto;
+	color: var(--spr-ink);
+}
+
+/* Sortable table headers (Link Audit). */
+th.spr-sort {
+	cursor: pointer;
+	user-select: none;
+	white-space: nowrap;
+}
+
+th.spr-sort:hover {
+	color: #2271b1;
+}
+
+.spr-sort__caret::after {
+	content: "↕";
+	opacity: 0.35;
+	font-size: 11px;
+	margin-left: 2px;
+}
+
+th.spr-sort--active .spr-sort__caret::after {
+	opacity: 1;
+	color: #2271b1;
+}
+
+th.spr-sort--active.spr-sort--asc .spr-sort__caret::after {
+	content: "▲";
+}
+
+th.spr-sort--active.spr-sort--desc .spr-sort__caret::after {
+	content: "▼";
+}
+
+/* Guided "Connect" steps (Search Console). */
+.spr-steps {
+	margin: 6px 0 16px 18px;
+}
+
+.spr-steps > li {
+	margin: 0 0 16px;
+	padding-left: 4px;
+}
+
+.spr-steps .button {
+	margin: 4px 6px 0 0;
+}
+
+.spr-substeps {
+	margin: 4px 0 6px 18px;
+	list-style: disc;
+}
+
+.spr-substeps li {
+	margin: 2px 0;
+}
+
+.spr-help {
+	max-width: 760px;
+	margin: 8px 0 4px;
+	padding: 8px 12px;
+	background: #f6f7f7;
+	border: 1px solid var(--spr-line);
+	border-radius: 8px;
+}
+
+.spr-help > summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.spr-help .spr-substeps {
+	margin-top: 8px;
+}
+
+.spr-copy-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.spr-copy-uri {
+	display: inline-block;
+	padding: 6px 10px;
+	background: #f6f7f7;
+	border: 1px solid var(--spr-line);
+	border-radius: 6px;
+	overflow-wrap: anywhere;
+}
+
+.spr-copied {
+	color: #0a7c3f;
+	font-weight: 600;
+}
+
+/* Icon-sprinkle button + placement selector. */
+.spr-icon-sprinkle {
+	display: inline-flex;
+	align-items: stretch;
+	gap: 0;
+}
+
+.spr-icon-sprinkle #spr-icon-placement {
+	margin-left: 4px;
+	vertical-align: middle;
+}
+
+/* Status badges (also used in post list columns) */
+.spr-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.spr-badge .dashicons {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+}
+
+.spr-badge--ok {
+	background: #edfaef;
+	color: #007017;
+}
+
+.spr-badge--warn {
+	background: #fcf0f1;
+	color: #b32d2e;
+}
+
+.spr-badge--neutral {
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+/* Progress bar */
+.spr-progress {
+	max-width: 640px;
+	margin: 18px 0;
+}
+
+.spr-progress__bar {
+	position: relative;
+	background: #eceff3;
+	border-radius: 999px;
+	height: 10px;
+	overflow: hidden;
+	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
+}
+
+.spr-progress__bar > span {
+	display: block;
+	height: 100%;
+	width: 0;
+	border-radius: 999px;
+	background: linear-gradient( 90deg, #2271b1, #46a6e0 );
+	background-size: 200% 100%;
+	transition: width 0.35s cubic-bezier( 0.4, 0, 0.2, 1 );
+	animation: spr-progress-sheen 2.4s linear infinite;
+}
+
+@keyframes spr-progress-sheen {
+	0%   { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
+}
+
+.spr-progress__label {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	margin: 9px 0 0;
+	color: #50575e;
+	font-size: 13px;
+	font-weight: 500;
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+	.spr-progress__bar > span { animation: none; }
+}
+
+/* Edition pills (Pro / Expert) shown next to gated options. */
+.spr-pill {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.7;
+	vertical-align: middle;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+.spr-pill--pro { background: #e6f4f5; color: #0a5a61; }
+.spr-pill--expert { background: #efe7fb; color: #5b2da8; }
+
+.spr-inline-status {
+	margin-left: 8px;
+	color: #50575e;
+	font-style: italic;
+}
+
+.spr-empty {
+	padding: 12px 16px;
+	background: #f6f7f7;
+	border-left: 4px solid #72aee6;
+	color: #50575e;
+}
+
+.spr-muted {
+	color: #787c82;
+	font-size: 12px;
+}
+
+.spr-rule-form .form-table th {
+	width: 220px;
+}
+
+/* Publish meta box lines */
+.spr-pub-images .dashicons,
+.spr-pub-schema .dashicons,
+.spr-pub-h1 .dashicons {
+	color: #2271b1;
+	vertical-align: text-bottom;
+}
+
+.spr-checklist {
+	margin: 0;
+}
+
+.spr-checklist li {
+	margin: 2px 0;
+}
+
+.spr-checklist .dashicons {
+	color: #007017;
+	vertical-align: text-bottom;
+}
+
+/* Per-post SEO score header */
+.spr-score {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	margin: 0 0 10px;
+	font-weight: 600;
+}
+
+.spr-score__num {
+	font-size: 28px;
+	line-height: 1;
+}
+
+.spr-score__max {
+	color: #646970;
+}
+
+.spr-score__label {
+	margin-left: auto;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #50575e;
+}
+
+.spr-score--ok {
+	background: #edfaef;
+}
+
+.spr-score--neutral {
+	background: #fcf9e8;
+}
+
+.spr-score--warn {
+	background: #fcf0f1;
+}
+
+/* ---------------------------------------------------------------------------
+ * Link Audit: edit modal + mini WYSIWYG
+ * ------------------------------------------------------------------------- */
+.spr-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.spr-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba( 0, 0, 0, 0.5 );
+}
+
+.spr-modal__box {
+	position: relative;
+	z-index: 1;
+	background: #fff;
+	border-radius: 6px;
+	padding: 20px 24px;
+	width: 520px;
+	max-width: calc( 100% - 40px );
+	box-shadow: 0 8px 30px rgba( 0, 0, 0, 0.25 );
+}
+
+.spr-modal__box h2 {
+	margin-top: 0;
+}
+
+.spr-modal__label {
+	display: block;
+	font-weight: 600;
+	margin: 12px 0 4px;
+}
+
+.spr-wysiwyg-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	border: 1px solid #c3c4c7;
+	border-bottom: 0;
+	padding: 4px 6px;
+	background: #f6f7f7;
+	border-radius: 4px 4px 0 0;
+}
+
+.spr-wysiwyg-toolbar button {
+	min-width: 28px;
+	height: 26px;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+	border-radius: 3px;
+	cursor: pointer;
+	line-height: 1;
+}
+
+.spr-charcount {
+	margin-left: auto;
+	font-size: 12px;
+	color: #646970;
+}
+
+.spr-charcount.spr-over {
+	color: #b32d2e;
+	font-weight: 700;
+}
+
+.spr-wysiwyg {
+	min-height: 64px;
+	border: 1px solid #c3c4c7;
+	border-radius: 0 0 4px 4px;
+	padding: 8px 10px;
+	background: #fff;
+	font-size: 14px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+
+.spr-wysiwyg:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: -1px;
+}
+
+.spr-modal__error {
+	color: #b32d2e;
+	background: #fcf0f1;
+	padding: 8px 10px;
+	border-radius: 4px;
+}
+
+.spr-modal__actions {
+	margin: 16px 0 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Image Distribution: per-image reviewer modal + saved-scan note
+ * ------------------------------------------------------------------------- */
+body.spr-modal-open {
+	overflow: hidden;
+}
+
+.spr-modal__dialog {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	background: #fff;
+	border-radius: 8px;
+	padding: 18px 22px 16px;
+	width: 680px;
+	max-width: calc( 100% - 40px );
+	max-height: calc( 100vh - 60px );
+	box-shadow: 0 12px 40px rgba( 0, 0, 0, 0.28 );
+}
+
+.spr-modal__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.spr-modal__title {
+	margin: 0;
+	font-size: 18px;
+	line-height: 1.3;
+	overflow-wrap: anywhere;
+}
+
+.spr-modal__close {
+	border: 0;
+	background: transparent;
+	font-size: 26px;
+	line-height: 1;
+	cursor: pointer;
+	color: #646970;
+	padding: 0 4px;
+}
+
+.spr-modal__close:hover {
+	color: #d63638;
+}
+
+.spr-modal__progress {
+	margin: 4px 0 12px;
+	color: #646970;
+	font-size: 13px;
+}
+
+.spr-review__body {
+	display: flex;
+	gap: 18px;
+	overflow-y: auto;
+}
+
+.spr-review__thumb {
+	flex: 0 0 200px;
+}
+
+.spr-review__thumb img {
+	width: 200px;
+	height: 200px;
+	object-fit: cover;
+	border-radius: 6px;
+	background: #f0f0f1;
+	border: 1px solid #dcdcde;
+}
+
+.spr-review__fields {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.spr-review__fields p {
+	margin: 0 0 10px;
+}
+
+.spr-review__fields label strong {
+	display: block;
+	margin-bottom: 3px;
+}
+
+.spr-modal__foot {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+	padding-top: 14px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.spr-review__spin {
+	float: none;
+	margin: 0;
+	visibility: hidden;
+}
+
+.spr-review__spin.is-active {
+	visibility: visible;
+}
+
+@media ( max-width: 600px ) {
+	.spr-review__body {
+		flex-direction: column;
+	}
+	.spr-review__thumb,
+	.spr-review__thumb img {
+		flex-basis: auto;
+		width: 100%;
+		height: auto;
+	}
+}
+
+/* Bulk "preview & edit all" review list. */
+.spr-ra-group {
+	margin: 0 0 18px;
+}
+
+.spr-ra-group__title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 14px 0 8px;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.spr-ra-group__title .dashicons {
+	color: #6d28d9;
+}
+
+.spr-ra-card {
+	display: flex;
+	gap: 14px;
+	padding: 12px;
+	margin: 0 0 10px;
+	border: 1px solid #e6e8ec;
+	border-radius: 12px;
+	background: #fff;
+}
+
+.spr-ra-card.is-skipped {
+	opacity: 0.5;
+}
+
+.spr-ra-card__thumb {
+	flex: 0 0 130px;
+	text-align: center;
+}
+
+.spr-ra-card__thumb img {
+	width: 130px;
+	height: 130px;
+	object-fit: cover;
+	border-radius: 8px;
+	background: #f0f0f1;
+	border: 1px solid #dcdcde;
+}
+
+.spr-ra-skip {
+	display: inline-block;
+	margin-top: 8px;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.spr-ra-alignwrap {
+	margin-top: 6px;
+}
+
+.spr-ra-alignwrap select {
+	width: 100%;
+	max-width: 130px;
+}
+
+.spr-ra-card__fields {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.spr-ra-card__fields p {
+	margin: 0 0 8px;
+}
+
+.spr-ra-card__fields label {
+	display: block;
+	margin-bottom: 2px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.spr-ra-foot {
+	position: sticky;
+	bottom: 0;
+	margin: 12px 0 0;
+	padding-top: 12px;
+	border-top: 1px solid #e6e8ec;
+	background: #fff;
+}
+
+.spr-saved-note {
+	color: #646970;
+	font-style: italic;
+	margin: 0 0 12px;
+}
+
+.spr-saved-note .dashicons {
+	color: #2271b1;
+	vertical-align: text-bottom;
+}
+
+/* Audit → pipeline "next step" call-to-action. */
+.spr-next-step {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin: 14px 0 0;
+	padding: 12px 14px;
+	background: #f0f6fc;
+	border: 1px solid #c5d9ed;
+	border-radius: 6px;
+}
+
+.spr-next-step .dashicons {
+	color: #2271b1;
+}

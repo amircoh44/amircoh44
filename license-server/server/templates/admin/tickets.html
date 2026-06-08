@@ -1,0 +1,49 @@
+{% extends "admin/_base.html" %}
+{% from "admin/_macros.html" import catbadge, statusbadge %}
+{% block title %}Tickets · Admin{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0;flex:1">Support tickets</h2>
+  <a class="btn btn--ghost btn--sm" href="{{ url_for('admin.outbox') }}">Outbox</a>
+  <form method="post" action="{{ url_for('admin.tickets_digest') }}">
+    <button class="btn btn--sm" type="submit">✉ Email me new requests</button>
+  </form>
+</div>
+
+<div class="toolbar">
+  <form method="get" action="{{ url_for('admin.tickets') }}">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search subject or email">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for s in ['queued','open','held','flagged','closed'] %}<option value="{{ s }}" {{ 'selected' if status==s }}>{{ s }}</option>{% endfor %}
+    </select>
+    <select name="tier" onchange="this.form.submit()">
+      <option value="">All tiers</option>
+      {% for tt in ['expert','pro','free'] %}<option value="{{ tt }}" {{ 'selected' if tier==tt }}>{{ tt }}</option>{% endfor %}
+    </select>
+    <button class="btn btn--sm" type="submit">Filter</button>
+  </form>
+</div>
+
+<table>
+  <tr><th>#</th><th>Subject / from</th><th>Tier</th><th>Type</th><th>Triage</th><th>SLA due</th><th>Status</th></tr>
+  {% for t in rows %}
+  {% set overdue = t.sla_due_at and t.sla_due_at < now and t.status != 'closed' %}
+  <tr>
+    <td>{{ t.id }}</td>
+    <td>
+      <a href="{{ url_for('admin.ticket_detail', tid=t.id) }}">{{ t.subject or '(no subject)' }}</a>
+      {% if t.priority %}<span class="badge badge--expert">priority</span>{% endif %}
+      <br><span class="muted" style="font-size:12px">{{ t.email or 'anonymous' }}</span>
+    </td>
+    <td><span class="badge badge--{{ t.tier }}">{{ t.tier }}</span></td>
+    <td>{{ t.type }}</td>
+    <td>{{ catbadge(t.category) }}</td>
+    <td>{% if t.sla_due_at %}{% if overdue %}<span class="badge badge--warn">{{ t.sla_due_at.strftime('%d %b %H:%M') }} · overdue</span>{% else %}{{ t.sla_due_at.strftime('%d %b %H:%M') }}{% endif %}{% else %}<span class="muted">—</span>{% endif %}</td>
+    <td>{{ statusbadge(t.status) }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" class="muted">No tickets match.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "admin/_base.html" %}
+{% from "admin/_macros.html" import catbadge, statusbadge %}
+{% block title %}Ticket #{{ t.id }} · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.tickets') }}">← Tickets</a></p>
+<h2>#{{ t.id }} · {{ t.subject or '(no subject)' }}</h2>
+<p>
+  <span class="badge badge--{{ t.tier }}">{{ t.tier }}</span>
+  {{ statusbadge(t.status) }}
+  {% if t.priority %}<span class="badge badge--expert">priority</span>{% endif %}
+  · {{ t.type }} · {{ t.created_at.strftime('%d %b %Y %H:%M') }} UTC
+</p>
+
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <h3>Message</h3>
+    <p><strong>From:</strong> {{ t.email or 'anonymous' }}{% if t.license_key %} · key <code>{{ t.license_key }}</code>{% endif %}</p>
+    {% if t.url %}<p><strong>Page:</strong> {{ t.url }}</p>{% endif %}
+    <p style="white-space:pre-wrap;background:#fafbfc;border:1px solid var(--line);border-radius:8px;padding:12px">{{ t.message }}</p>
+  </div>
+
+  <div class="card">
+    <h3>Triage analysis</h3>
+    <p>{{ catbadge(t.category) }} · risk <strong>{{ t.risk_score }}/100</strong></p>
+    <p class="muted">{{ t.reasons }}</p>
+    {% if t.category in ['abuse','spam'] %}<p class="note">Auto-quarantined — excluded from the admin email digest until you approve it.</p>{% endif %}
+
+    <h3>SLA</h3>
+    {% set overdue = t.sla_due_at and t.sla_due_at < now and t.status != 'closed' %}
+    <p>{% if t.sla_due_at %}First response due <strong>{{ t.sla_due_at.strftime('%a %d %b %H:%M UTC') }}</strong>{% if overdue %} <span class="badge badge--warn">overdue</span>{% endif %}{% else %}Best-effort (no SLA){% endif %}</p>
+    {% if t.emailed_at %}<p class="muted">In digest since {{ t.emailed_at.strftime('%d %b %H:%M') }}</p>{% endif %}
+    {% if t.license %}<p><a href="{{ url_for('admin.license_detail', lid=t.license.id) }}">View license →</a></p>{% endif %}
+
+    <h3>Actions</h3>
+    <form method="post" action="{{ url_for('admin.ticket_action', tid=t.id) }}">
+      <div class="row" style="gap:8px">
+        {% if t.status != 'closed' %}<button class="btn btn--sm" name="action" value="close">Close</button>
+        {% else %}<button class="btn btn--sm" name="action" value="reopen">Reopen</button>{% endif %}
+        {% if t.status in ['flagged','held'] %}<button class="btn btn--ghost btn--sm" name="action" value="approve">Approve → queue</button>
+        {% else %}<button class="btn btn--ghost btn--sm" name="action" value="flag">Flag</button>{% endif %}
+        <button class="btn btn--ghost btn--sm" name="action" value="delete" onclick="return confirm('Delete this ticket?')">Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

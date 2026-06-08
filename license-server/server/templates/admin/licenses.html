@@ -1,0 +1,32 @@
+{% extends "admin/_base.html" %}
+{% block title %}Licenses · Admin{% endblock %}
+{% block content %}
+<h2>Licenses</h2>
+<div class="toolbar">
+  <form method="get" action="{{ url_for('admin.licenses') }}">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search key or email">
+    <select name="status" onchange="this.form.submit()">
+      <option value="" {{ 'selected' if status=='' }}>All statuses</option>
+      <option value="active" {{ 'selected' if status=='active' }}>Active only</option>
+      <option value="inactive" {{ 'selected' if status=='inactive' }}>Inactive only</option>
+    </select>
+    <button class="btn btn--sm" type="submit">Filter</button>
+  </form>
+  <a class="btn btn--sm" href="{{ url_for('admin.license_new') }}">+ Issue license</a>
+</div>
+<table>
+  <tr><th>Key</th><th>Customer</th><th>Plan</th><th>Status</th><th class="c">Sites</th><th>Renews</th></tr>
+  {% for lic in rows %}
+  <tr>
+    <td><a href="{{ url_for('admin.license_detail', lid=lic.id) }}"><code>{{ lic.key }}</code></a></td>
+    <td>{{ lic.customer.email }}</td>
+    <td><span class="badge badge--{{ lic.edition }}">{{ lic.edition|capitalize }}</span> · {{ lic.term }}</td>
+    <td>{% if active_fn(lic) %}<span class="badge badge--ok">active</span>{% else %}<span class="badge badge--warn">{{ lic.status if lic.status!='active' else 'expired' }}</span>{% endif %}</td>
+    <td class="c">{{ seats(lic) }} / {{ 'unlim.' if lic.site_limit==0 else lic.site_limit }}</td>
+    <td>{{ lic.expires_at.strftime('%d %b %Y') if lic.expires_at else 'lifetime' }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="6" class="muted">No licenses match.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

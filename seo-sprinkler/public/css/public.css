@@ -1,0 +1,147 @@
+/**
+ * Front-end styling for SEO Sprinkler.
+ *
+ * Covers automatically inserted internal links and the Content Distribution
+ * ("Sprinkler") blocks (spacing, alignment and device visibility).
+ */
+
+a.spr-internal-link {
+	/* Inherit the theme's link colour by default. Uncomment to customise: */
+	/* text-decoration: underline; */
+	/* text-decoration-style: dotted; */
+}
+
+/* ---------------------------------------------------------------------------
+ * Distributed ("sprinkled") blocks
+ * ------------------------------------------------------------------------- */
+
+.spr-injection {
+	margin: 1.5em 0;
+	clear: both;
+}
+
+.spr-injection > figure {
+	margin: 0;
+}
+
+.spr-injection figure.alignleft {
+	float: left;
+	margin: 0 1.25em 1em 0;
+	max-width: 50%;
+}
+
+.spr-injection figure.alignright {
+	float: right;
+	margin: 0 0 1em 1.25em;
+	max-width: 50%;
+}
+
+.spr-injection figure.aligncenter {
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.spr-injection figure.alignnone {
+	display: block;
+}
+
+.spr-injection img.spr-injection-img {
+	max-width: 100%;
+	height: auto;
+}
+
+/* ---------------------------------------------------------------------------
+ * Auto-distributed images ("Fill with images" / Image Distribution).
+ *
+ * Every figure we insert carries the .spr-auto-image class. We set alignment on
+ * that class directly so center/left/right work even on themes (or page
+ * builders) that don't load WordPress's block-library stylesheet — without
+ * which a "center" image would otherwise fall to the left. !important is used
+ * deliberately here: it only ever targets our own inserted figures.
+ * ------------------------------------------------------------------------- */
+figure.spr-auto-image {
+	margin: 1.25em 0;
+}
+
+figure.spr-auto-image img {
+	max-width: 100%;
+	height: auto;
+}
+
+figure.spr-auto-image.aligncenter {
+	display: block !important;
+	text-align: center !important;
+	float: none !important;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+figure.spr-auto-image.aligncenter img {
+	display: block !important;
+	float: none !important;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+/* Also honour the classic alignment class when it sits on the <img> itself. */
+.spr-auto-image img.aligncenter {
+	display: block !important;
+	float: none !important;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+.spr-auto-image img.alignleft {
+	float: left !important;
+	margin: 0.25em 1.25em 0.75em 0;
+}
+
+.spr-auto-image img.alignright {
+	float: right !important;
+	margin: 0.25em 0 0.75em 1.25em;
+}
+
+figure.spr-auto-image.alignleft {
+	float: left !important;
+	margin: 0.25em 1.5em 1em 0;
+	max-width: 50%;
+}
+
+figure.spr-auto-image.alignright {
+	float: right !important;
+	margin: 0.25em 0 1em 1.5em;
+	max-width: 50%;
+}
+
+figure.spr-auto-image figcaption {
+	text-align: center;
+	font-size: 0.9em;
+	opacity: 0.85;
+}
+
+/* Icon-sized images (<=150px): a tight, left-floated icon that leads the text. */
+figure.spr-auto-icon {
+	max-width: 150px;
+	margin: 0.2em 1em 0.4em 0 !important;
+}
+
+figure.spr-auto-icon img {
+	width: auto;
+	max-width: 150px;
+	height: auto;
+}
+
+/* Device visibility. The wrapper carries one of these classes when a rule is
+ * limited to desktop or mobile. The 782px breakpoint matches WordPress core. */
+@media ( max-width: 782px ) {
+	.spr-injection--desktop-only {
+		display: none !important;
+	}
+}
+
+@media ( min-width: 783px ) {
+	.spr-injection--mobile-only {
+		display: none !important;
+	}
+}
