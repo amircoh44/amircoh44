@@ -101,6 +101,7 @@ class SPR_Image_Distribution_Admin {
 					'doneOne'   => __( 'added %d image(s)', 'seo-sprinkler' ),
 					'skipNone'  => __( 'no suitable images in the library', 'seo-sprinkler' ),
 					'skipEnough' => __( 'already had enough', 'seo-sprinkler' ),
+					'skipBuilder' => __( 'page builder — skipped', 'seo-sprinkler' ),
 					'error'     => __( 'Something went wrong.', 'seo-sprinkler' ),
 					'pickSome'  => __( 'Select at least one article first.', 'seo-sprinkler' ),
 					'confirm'   => __( 'Insert images into the selected articles? This updates the saved content (each change is backed up and can be reverted from the post editor).', 'seo-sprinkler' ),

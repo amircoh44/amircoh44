@@ -4,7 +4,7 @@ Tags: seo, internal links, images, schema, structured data, yoast
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.21.2
+Stable tag: 1.22.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,9 @@ No. The linker never links inside existing links, code, scripts or (optionally) 
 * **Expert** – everything in Pro plus the Export / Migrate tool (JSON + media ZIP) and multisite/agency use. Support: priority email support with a 24-hour response.
 
 == Changelog ==
+
+= 1.22.0 =
+* New: Image Distribution now excludes page-builder pages (Elementor, Divi, Beaver Builder, WPBakery, Brizy, Oxygen). Those builders keep their content outside post_content, so inserting images there is invisible — they no longer show as "missing" and are skipped ("page builder — skipped") if selected. Override with the spr_is_page_builder filter.
 
 = 1.21.2 =
 * Image Distribution now shows the result of each fill clearly: the "Images now" count updates live as images are added, and a skipped article says why ("already has N / target" or "no images"), so it is obvious whether a fill worked.

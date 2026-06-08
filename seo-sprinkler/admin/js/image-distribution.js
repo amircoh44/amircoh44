@@ -171,6 +171,8 @@
 							$res.html( '<span class="spr-badge spr-badge--ok">+' + d.inserted + '</span>' );
 							$tr.find( '.spr-badge--warn' ).removeClass( 'spr-badge--warn' ).addClass( 'spr-badge--ok' );
 							updateRowCount( id, d.count ); // Reflect the new image count.
+						} else if ( 'builder' === d.skipped ) {
+							$res.text( i18n.skipBuilder || 'page builder — skipped' );
 						} else if ( 'no_images' === d.skipped ) {
 							$res.text( iconsMode ? ( i18n.noIcons || 'no icons' ) : ( i18n.skipNone || 'no images' ) );
 						} else if ( 'enough' === d.skipped ) {
@@ -299,6 +301,8 @@
 						var d = res.data || {};
 						if ( d.inserted > 0 ) {
 							$res.html( '<span class="spr-badge spr-badge--ok">+' + d.inserted + '</span>' );
+						} else if ( 'builder' === d.skipped ) {
+							$res.text( i18n.skipBuilder || 'page builder — skipped' );
 						} else if ( 'no_icons' === d.skipped ) {
 							$res.text( i18n.noIcons || 'no icons' );
 						} else if ( 'no_points' === d.skipped || 'no_match' === d.skipped ) {

@@ -481,6 +481,9 @@ class SPR_Image_Filler {
 		if ( ! $post ) {
 			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'missing' );
 		}
+		if ( $this->images->is_page_builder( $post ) ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'builder' );
+		}
 		$args = wp_parse_args(
 			$args,
 			array(
@@ -669,6 +672,9 @@ class SPR_Image_Filler {
 		$post = get_post( $post_id );
 		if ( ! $post || ! $attachment_id ) {
 			return array( 'inserted' => 0, 'count' => 0 );
+		}
+		if ( $this->images->is_page_builder( $post ) ) {
+			return array( 'inserted' => 0, 'count' => (int) $this->images->count_for_post( $post ), 'skipped' => 'builder' );
 		}
 		$args  = wp_parse_args(
 			$args,
@@ -1186,6 +1192,9 @@ class SPR_Image_Filler {
 		$post = get_post( $post_id );
 		if ( ! $post ) {
 			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'missing' );
+		}
+		if ( $this->images->is_page_builder( $post ) ) {
+			return array( 'inserted' => 0, 'used' => array(), 'skipped' => 'builder' );
 		}
 		$args = wp_parse_args(
 			$args,

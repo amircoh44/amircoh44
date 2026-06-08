@@ -148,6 +148,16 @@ check( 'bulk_fill returns the used image ids', ! empty( $res['used'] ) );
 check( 'bulk_fill reports the new count', isset( $res['count'] ) && $res['count'] >= 2 );
 check( 'bulk_fill wrote image blocks', false !== strpos( get_post( $bp )->post_content, 'spr-auto-image' ) );
 
+// Page-builder pages are detected and skipped (their content lives in the builder).
+$scanner_pb = new SPR_Image_Scanner();
+$elem = wp_insert_post( array( 'post_title' => 'Elementor page', 'post_content' => '', 'post_status' => 'publish' ) );
+update_post_meta( $elem, '_elementor_edit_mode', 'builder' );
+check( 'is_page_builder detects Elementor', true === $scanner_pb->is_page_builder( $elem ) );
+check( 'normal post is not a builder page', false === $scanner_pb->is_page_builder( $bp ) );
+$res_pb = $filler->bulk_fill( $elem, array( 'mode' => 'per_article', 'target' => 5 ) );
+check( 'bulk_fill skips builder pages', 0 === $res_pb['inserted'] && 'builder' === $res_pb['skipped'] );
+check( 'builder page content untouched', '' === get_post( $elem )->post_content );
+
 // And skips a post that already meets the target.
 $res2 = $filler->bulk_fill( $bp, array( 'mode' => 'per_article', 'target' => 2 ) );
 check( 'bulk_fill skips when already enough', 0 === $res2['inserted'] && 'enough' === $res2['skipped'] );

@@ -100,6 +100,53 @@ class SPR_Image_Scanner {
 	}
 
 	/**
+	 * Is the post built with a page builder (Elementor, Divi, Beaver Builder,
+	 * WPBakery, Brizy, Oxygen)? Such pages keep their content/layout in the
+	 * builder's own data, not post_content — so inserting images into
+	 * post_content is invisible. Image Distribution skips them.
+	 *
+	 * @param int|WP_Post $post Post.
+	 * @return bool
+	 */
+	public function is_page_builder( $post ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return false;
+		}
+		$id      = $post->ID;
+		$builder = '';
+
+		if ( 'builder' === get_post_meta( $id, '_elementor_edit_mode', true ) || '' !== (string) get_post_meta( $id, '_elementor_data', true ) ) {
+			$builder = 'elementor';
+		} elseif ( get_post_meta( $id, '_fl_builder_enabled', true ) ) {
+			$builder = 'beaver';
+		} elseif ( 'on' === get_post_meta( $id, '_et_pb_use_builder', true ) ) {
+			$builder = 'divi';
+		} elseif ( 'true' === get_post_meta( $id, '_wpb_vc_js_status', true ) ) {
+			$builder = 'wpbakery';
+		} elseif ( '' !== (string) get_post_meta( $id, 'brizy_post_uid', true ) ) {
+			$builder = 'brizy';
+		} elseif ( '' !== (string) get_post_meta( $id, 'ct_builder_shortcodes', true ) ) {
+			$builder = 'oxygen';
+		} else {
+			$content = (string) $post->post_content;
+			if ( false !== strpos( $content, '[vc_row' ) || false !== strpos( $content, '[et_pb_section' ) || false !== strpos( $content, '[fl_builder' ) ) {
+				$builder = 'shortcode';
+			}
+		}
+
+		/**
+		 * Filter whether a post is treated as a page-builder page (and thus skipped
+		 * by Image Distribution). Return true/false to override detection.
+		 *
+		 * @param bool    $is_builder Detected result.
+		 * @param WP_Post $post       Post.
+		 * @param string  $builder    Detected builder key ('' if none).
+		 */
+		return (bool) apply_filters( 'spr_is_page_builder', '' !== $builder, $post, $builder );
+	}
+
+	/**
 	 * Does this post meet (or exceed) the minimum?
 	 *
 	 * @param int|WP_Post $post Post.
@@ -186,6 +233,11 @@ class SPR_Image_Scanner {
 
 		$deficient = array();
 		foreach ( $query->posts as $post ) {
+			// Skip page-builder pages (Elementor, Divi, …): their content lives in
+			// the builder, not post_content, so filling post_content does nothing.
+			if ( $this->is_page_builder( $post ) ) {
+				continue;
+			}
 			$count = $this->count_for_post( $post );
 			update_post_meta( $post->ID, SPR_META_IMAGE_COUNT, $count );
 
