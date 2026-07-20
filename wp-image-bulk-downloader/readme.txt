@@ -6,7 +6,7 @@ Tags: media, images, export, download, zip, backup
 Requires at least: 5.6
 Tested up to: 6.5
 Requires PHP: 7.2
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,11 @@ No — only attachments with an `image/*` MIME type.
 The export is AJAX-driven and runs only while you are on the page. Default chunk size is 20 images per request.
 
 == Changelog ==
+
+= 1.2.0 =
+* New export mode: Full site export (Astro-ready). Ships every post / page / custom post type as a markdown file with YAML frontmatter (categories, tags, author, featured image, Rank Math / Yoast SEO fields, Elementor flag) under src/content/. Adds src/data/ JSON files for site config, authors, taxonomies, menus, comments, and Rank Math redirects. Images land under public/images/ with the original YYYY/MM structure, and post-body image URLs are rewritten so they line up.
+* Adds a project-handover/ folder with spreadsheets (project overview, content inventory, plugin inventory, integration inventory, menu, taxonomy, redirect, and user inventories), a redacted connections dossier (database, WP constants, SMTP, payment gateways, analytics), and a database inventory (schema, options, table row counts).
+* Includes README.md files inside the ZIP explaining the layout and a suggested Astro content-collection schema.
 
 = 1.1.0 =
 * Adds optional site-info file (on by default) containing verification codes for Google Search Console, Bing, Yandex, Baidu, Pinterest, Facebook, Norton, Ahrefs, Semrush, Alexa; tracking IDs for Google Analytics (UA + GA4), Google Tag Manager, Google Ads, Facebook Pixel, TikTok Pixel, LinkedIn Insight, Pinterest Tag, Hotjar, Microsoft Clarity, Microsoft UET; SEO plugin settings from Yoast, Rank Math, All in One SEO, SEOPress; active theme; and active plugins list. Delivered as site-info.json + site-info.txt inside the ZIP.

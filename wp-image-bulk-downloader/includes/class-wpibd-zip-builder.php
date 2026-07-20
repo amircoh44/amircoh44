@@ -89,7 +89,7 @@ class WPIBD_Zip_Builder {
 				continue;
 			}
 
-			if ( 'with_metadata' === $job['mode'] ) {
+			if ( 'with_metadata' === $job['mode'] || 'astro_export' === $job['mode'] ) {
 				$job['metadata_rows'][] = array(
 					'id'          => $data['id'],
 					'file'        => $entry_path,
@@ -111,12 +111,16 @@ class WPIBD_Zip_Builder {
 		$next_offset = $offset + count( $ids );
 		$done        = $next_offset >= $job['total'];
 
-		if ( $done && 'with_metadata' === $job['mode'] && ! empty( $job['metadata_rows'] ) ) {
+		if ( $done && ( 'with_metadata' === $job['mode'] || 'astro_export' === $job['mode'] ) && ! empty( $job['metadata_rows'] ) ) {
 			$this->append_metadata_files( $job );
 		}
 
 		if ( $done && ! empty( $job['include_site_info'] ) ) {
 			$this->append_site_info_files( $job );
+		}
+
+		if ( $done && 'astro_export' === $job['mode'] ) {
+			$this->append_astro_export( $job );
 		}
 
 		$this->save_job( $job );
@@ -179,6 +183,9 @@ class WPIBD_Zip_Builder {
 
 	private function resolve_entry_path( array $data, array &$job ) {
 		switch ( $job['mode'] ) {
+			case 'astro_export':
+				$entry = 'public/images/' . $data['relative_path'];
+				break;
 			case 'with_paths':
 			case 'with_metadata':
 				$entry = $data['relative_path'];
@@ -247,6 +254,25 @@ class WPIBD_Zip_Builder {
 		$json = wp_json_encode( $job['metadata_rows'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 		if ( false !== $json ) {
 			$zip->addFromString( 'image-metadata.json', $json );
+		}
+
+		$zip->close();
+	}
+
+	private function append_astro_export( array $job ) {
+		$zip = new ZipArchive();
+		if ( true !== $zip->open( $job['zip_path'] ) ) {
+			return;
+		}
+
+		if ( class_exists( 'WPIBD_Astro_Exporter' ) ) {
+			$astro = new WPIBD_Astro_Exporter();
+			$astro->write_all( $zip );
+		}
+
+		if ( class_exists( 'WPIBD_Project_Handover' ) ) {
+			$handover = new WPIBD_Project_Handover( true );
+			$handover->write_all( $zip );
 		}
 
 		$zip->close();

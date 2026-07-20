@@ -104,6 +104,12 @@ class WPIBD_Admin {
 						<span class="wpibd-mode-title"><?php esc_html_e( 'Images + folder paths + metadata', 'wp-image-bulk-downloader' ); ?></span>
 						<span class="wpibd-mode-desc"><?php esc_html_e( 'Everything above plus image-metadata.csv and image-metadata.json with title, alt text, caption, and description for every image.', 'wp-image-bulk-downloader' ); ?></span>
 					</label>
+
+					<label class="wpibd-mode wpibd-mode-astro">
+						<input type="radio" name="wpibd_mode" value="astro_export">
+						<span class="wpibd-mode-title"><?php esc_html_e( 'Full site export (Astro-ready)', 'wp-image-bulk-downloader' ); ?></span>
+						<span class="wpibd-mode-desc"><?php esc_html_e( 'Everything above plus every post / page / custom post type as a markdown file with YAML frontmatter under src/content/, taxonomies + menus + authors + comments + Rank Math redirects under src/data/, images under public/images/, and a project-handover/ folder with spreadsheets (content, plugins, integrations, users, redirects), a redacted connections dossier (database, SMTP, payments, analytics), and a database inventory (schema + options).', 'wp-image-bulk-downloader' ); ?></span>
+					</label>
 				</fieldset>
 
 				<div class="wpibd-extras">

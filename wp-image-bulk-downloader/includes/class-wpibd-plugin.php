@@ -48,7 +48,7 @@ class WPIBD_Plugin {
 		$this->verify_request();
 
 		$mode = isset( $_POST['mode'] ) ? sanitize_key( wp_unslash( $_POST['mode'] ) ) : 'images_only';
-		if ( ! in_array( $mode, array( 'images_only', 'with_paths', 'with_metadata' ), true ) ) {
+		if ( ! in_array( $mode, array( 'images_only', 'with_paths', 'with_metadata', 'astro_export' ), true ) ) {
 			$mode = 'images_only';
 		}
 
