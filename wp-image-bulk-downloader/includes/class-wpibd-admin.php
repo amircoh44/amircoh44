@@ -120,6 +120,14 @@ class WPIBD_Admin {
 							<?php esc_html_e( 'Adds site-info.json and site-info.txt to the ZIP with Google Search Console / Bing / Yandex / Pinterest / Facebook verification codes, Google Analytics (UA + GA4), GTM, Google Ads, Facebook Pixel, TikTok, LinkedIn, Hotjar, Microsoft Clarity IDs, SEO plugin settings (Yoast / Rank Math / AIOSEO / SEOPress), active theme, and the list of active plugins with versions.', 'wp-image-bulk-downloader' ); ?>
 						</span>
 					</label>
+
+					<label class="wpibd-extra" style="margin-top: 10px;">
+						<input type="checkbox" id="wpibd-download-as-gz" name="wpibd_download_as_gz" value="1">
+						<span class="wpibd-extra-title"><?php esc_html_e( 'Deliver download as .zip.gz', 'wp-image-bulk-downloader' ); ?></span>
+						<span class="wpibd-extra-desc">
+							<?php esc_html_e( 'Wraps the ZIP in gzip before sending it to your browser. Use this if your browser, antivirus, corporate firewall, or download manager blocks .zip files. To open it you will need to extract the .gz once (any tool — 7-Zip, Total Commander, Windows built-in, WinRAR) and you will get the normal .zip back.', 'wp-image-bulk-downloader' ); ?>
+						</span>
+					</label>
 				</div>
 
 				<div class="wpibd-actions">

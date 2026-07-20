@@ -53,6 +53,7 @@ class WPIBD_Plugin {
 		}
 
 		$include_site_info = isset( $_POST['include_site_info'] ) && '1' === (string) $_POST['include_site_info'];
+		$download_as_gz    = isset( $_POST['download_as_gz'] ) && '1' === (string) $_POST['download_as_gz'];
 
 		$collector      = new WPIBD_Image_Collector();
 		$attachment_ids = $collector->get_all_image_ids();
@@ -64,7 +65,7 @@ class WPIBD_Plugin {
 		}
 
 		$zip_builder = new WPIBD_Zip_Builder();
-		$job         = $zip_builder->create_job( $attachment_ids, $mode, $include_site_info );
+		$job         = $zip_builder->create_job( $attachment_ids, $mode, $include_site_info, $download_as_gz );
 
 		if ( is_wp_error( $job ) ) {
 			wp_send_json_error( array( 'message' => $job->get_error_message() ) );
@@ -115,8 +116,13 @@ class WPIBD_Plugin {
 			wp_die( esc_html__( 'Missing export job.', 'wp-image-bulk-downloader' ), '', array( 'response' => 400 ) );
 		}
 
+		$format = isset( $_GET['format'] ) ? sanitize_key( wp_unslash( $_GET['format'] ) ) : 'zip';
+		if ( ! in_array( $format, array( 'zip', 'gz' ), true ) ) {
+			$format = 'zip';
+		}
+
 		$zip_builder = new WPIBD_Zip_Builder();
-		$zip_builder->stream_zip( $job_id );
+		$zip_builder->stream_zip( $job_id, $format );
 	}
 
 	public function ajax_cancel_export() {

@@ -56,6 +56,7 @@
 	function startExport() {
 		var mode = $('input[name="wpibd_mode"]:checked').val() || 'images_only';
 		var includeSiteInfo = $('#wpibd-include-site-info').is(':checked') ? '1' : '0';
+		var downloadAsGz = $('#wpibd-download-as-gz').is(':checked') ? '1' : '0';
 
 		enterRunningState();
 		setStatus(wpibdConfig.i18n.preparing);
@@ -65,7 +66,8 @@
 			action: 'wpibd_start_export',
 			nonce: wpibdConfig.nonce,
 			mode: mode,
-			include_site_info: includeSiteInfo
+			include_site_info: includeSiteInfo,
+			download_as_gz: downloadAsGz
 		}).done(function (response) {
 			if (!response || !response.success) {
 				handleError(response && response.data ? response.data.message : null);

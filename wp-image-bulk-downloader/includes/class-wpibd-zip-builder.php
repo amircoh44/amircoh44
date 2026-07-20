@@ -15,7 +15,7 @@ class WPIBD_Zip_Builder {
 	const JOB_TRANSIENT_TTL  = HOUR_IN_SECONDS;
 	const JOB_DIR_NAME       = 'wpibd-exports';
 
-	public function create_job( array $attachment_ids, $mode, $include_site_info = false ) {
+	public function create_job( array $attachment_ids, $mode, $include_site_info = false, $download_as_gz = false ) {
 		$dir = $this->get_export_dir();
 		if ( is_wp_error( $dir ) ) {
 			return $dir;
@@ -36,6 +36,7 @@ class WPIBD_Zip_Builder {
 			'job_id'            => $job_id,
 			'mode'              => $mode,
 			'include_site_info' => (bool) $include_site_info,
+			'download_as_gz'    => (bool) $download_as_gz,
 			'zip_path'          => $zip_path,
 			'attachment_ids'    => array_values( array_map( 'absint', $attachment_ids ) ),
 			'total'             => count( $attachment_ids ),
@@ -135,42 +136,87 @@ class WPIBD_Zip_Builder {
 		);
 
 		if ( $done ) {
-			$response['download_url'] = add_query_arg(
-				array(
-					'action' => 'wpibd_download_zip',
-					'job_id' => $job['job_id'],
-					'nonce'  => wp_create_nonce( 'wpibd_download_nonce' ),
-				),
-				admin_url( 'admin-ajax.php' )
+			$download_args = array(
+				'action' => 'wpibd_download_zip',
+				'job_id' => $job['job_id'],
+				'nonce'  => wp_create_nonce( 'wpibd_download_nonce' ),
 			);
-			$response['filename'] = 'wp-images-' . gmdate( 'Y-m-d-His' ) . '.zip';
+			if ( ! empty( $job['download_as_gz'] ) ) {
+				$download_args['format'] = 'gz';
+			}
+			$response['download_url'] = add_query_arg( $download_args, admin_url( 'admin-ajax.php' ) );
+			$response['filename']     = 'wp-images-' . gmdate( 'Y-m-d-His' ) . '.zip' . ( ! empty( $job['download_as_gz'] ) ? '.gz' : '' );
 		}
 
 		return $response;
 	}
 
-	public function stream_zip( $job_id ) {
+	public function stream_zip( $job_id, $format = 'zip' ) {
 		$job = $this->get_job( $job_id );
 		if ( ! $job || ! file_exists( $job['zip_path'] ) ) {
 			wp_die( esc_html__( 'Export archive is missing or expired.', 'wp-image-bulk-downloader' ), '', array( 'response' => 404 ) );
 		}
 
-		$filename = 'wp-images-' . gmdate( 'Y-m-d-His' ) . '.zip';
+		$as_gz = ( 'gz' === $format ) || ! empty( $job['download_as_gz'] );
 
 		while ( ob_get_level() > 0 ) {
 			ob_end_clean();
 		}
 
 		nocache_headers();
-		header( 'Content-Type: application/zip' );
-		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
-		header( 'Content-Length: ' . filesize( $job['zip_path'] ) );
 		header( 'X-Content-Type-Options: nosniff' );
 
-		readfile( $job['zip_path'] );
+		if ( $as_gz ) {
+			$gz_path = $this->build_gz_copy( $job['zip_path'] );
+			if ( ! $gz_path || ! file_exists( $gz_path ) ) {
+				wp_die( esc_html__( 'Could not build gzip download.', 'wp-image-bulk-downloader' ), '', array( 'response' => 500 ) );
+			}
+			$filename = 'wp-images-' . gmdate( 'Y-m-d-His' ) . '.zip.gz';
+			header( 'Content-Type: application/gzip' );
+			header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+			header( 'Content-Length: ' . filesize( $gz_path ) );
+			readfile( $gz_path );
+			@unlink( $gz_path );
+		} else {
+			$filename = 'wp-images-' . gmdate( 'Y-m-d-His' ) . '.zip';
+			header( 'Content-Type: application/zip' );
+			header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+			header( 'Content-Length: ' . filesize( $job['zip_path'] ) );
+			readfile( $job['zip_path'] );
+		}
 
 		$this->cleanup_job( $job_id );
 		exit;
+	}
+
+	private function build_gz_copy( $zip_path ) {
+		if ( ! function_exists( 'gzopen' ) ) {
+			return null;
+		}
+
+		$gz_path = $zip_path . '.gz';
+		$in      = @fopen( $zip_path, 'rb' );
+		if ( ! $in ) {
+			return null;
+		}
+		$out = @gzopen( $gz_path, 'wb1' );
+		if ( ! $out ) {
+			fclose( $in );
+			return null;
+		}
+
+		while ( ! feof( $in ) ) {
+			$buf = fread( $in, 65536 );
+			if ( false === $buf || '' === $buf ) {
+				break;
+			}
+			gzwrite( $out, $buf );
+		}
+
+		fclose( $in );
+		gzclose( $out );
+
+		return $gz_path;
 	}
 
 	public function cleanup_job( $job_id ) {

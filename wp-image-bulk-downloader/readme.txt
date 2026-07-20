@@ -6,7 +6,7 @@ Tags: media, images, export, download, zip, backup
 Requires at least: 5.6
 Tested up to: 6.5
 Requires PHP: 7.2
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,9 @@ No — only attachments with an `image/*` MIME type.
 The export is AJAX-driven and runs only while you are on the page. Default chunk size is 20 images per request.
 
 == Changelog ==
+
+= 1.2.1 =
+* New checkbox: "Deliver download as .zip.gz". Wraps the export in gzip before streaming it, so networks / antivirus / download managers that block .zip files let it through. Extract the .gz once with any tool and you get the normal .zip back.
 
 = 1.2.0 =
 * New export mode: Full site export (Astro-ready). Ships every post / page / custom post type as a markdown file with YAML frontmatter (categories, tags, author, featured image, Rank Math / Yoast SEO fields, Elementor flag) under src/content/. Adds src/data/ JSON files for site config, authors, taxonomies, menus, comments, and Rank Math redirects. Images land under public/images/ with the original YYYY/MM structure, and post-body image URLs are rewritten so they line up.
