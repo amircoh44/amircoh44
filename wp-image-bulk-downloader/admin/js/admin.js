@@ -115,23 +115,44 @@
 		});
 	}
 
+	function triggerDownload(url) {
+		try {
+			var a = document.createElement('a');
+			a.href = url;
+			a.rel = 'noopener';
+			a.style.display = 'none';
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		} catch (e) {
+			window.location.href = url;
+		}
+	}
+
 	function finishExport(data) {
 		setProgress(data.total, data.total);
+
+		// Drop the "leave the page?" guard before kicking off the download.
+		currentJobId = null;
+		exitRunningState();
 
 		var message = wpibdConfig.i18n.complete;
 		if (data.failed && data.failed > 0) {
 			message += ' ' + wpibdConfig.i18n.failed.replace('%s', data.failed.toLocaleString());
 		}
 
+		if (data.download_url) {
+			var safeUrl = String(data.download_url).replace(/"/g, '&quot;');
+			message += ' <a href="' + safeUrl + '" class="wpibd-download-link" download>'
+				+ wpibdConfig.i18n.downloadNow + '</a>';
+		}
+
 		setNotice(message, 'success');
 		setStatus('');
 
 		if (data.download_url) {
-			window.location.href = data.download_url;
+			triggerDownload(data.download_url);
 		}
-
-		currentJobId = null;
-		exitRunningState();
 	}
 
 	function handleError(message) {

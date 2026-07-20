@@ -21,6 +21,8 @@ class WPIBD_Zip_Builder {
 			return $dir;
 		}
 
+		$this->cleanup_stale_exports( $dir );
+
 		try {
 			$job_id = bin2hex( random_bytes( 8 ) );
 		} catch ( Exception $e ) {
@@ -153,40 +155,86 @@ class WPIBD_Zip_Builder {
 
 	public function stream_zip( $job_id, $format = 'zip' ) {
 		$job = $this->get_job( $job_id );
-		if ( ! $job || ! file_exists( $job['zip_path'] ) ) {
-			wp_die( esc_html__( 'Export archive is missing or expired.', 'wp-image-bulk-downloader' ), '', array( 'response' => 404 ) );
+		if ( ! $job || empty( $job['zip_path'] ) || ! file_exists( $job['zip_path'] ) ) {
+			wp_die( esc_html__( 'Export archive is missing or expired. Please run the export again.', 'wp-image-bulk-downloader' ), '', array( 'response' => 404 ) );
 		}
 
 		$as_gz = ( 'gz' === $format ) || ! empty( $job['download_as_gz'] );
 
+		$deliver_path = $job['zip_path'];
+		$filename     = 'wp-images-' . gmdate( 'Y-m-d-His' ) . '.zip';
+		$content_type = 'application/zip';
+		$temp_gz      = null;
+
+		if ( $as_gz ) {
+			$temp_gz = $this->build_gz_copy( $job['zip_path'] );
+			if ( ! $temp_gz || ! file_exists( $temp_gz ) ) {
+				wp_die( esc_html__( 'Could not build the gzip download. Try again without the .zip.gz option.', 'wp-image-bulk-downloader' ), '', array( 'response' => 500 ) );
+			}
+			$deliver_path = $temp_gz;
+			$filename    .= '.gz';
+			$content_type = 'application/gzip';
+		}
+
+		$this->send_file( $deliver_path, $filename, $content_type );
+
+		if ( $temp_gz ) {
+			@unlink( $temp_gz );
+		}
+		$this->cleanup_job( $job_id );
+		exit;
+	}
+
+	/**
+	 * Streams a file to the browser as a download, defensively disabling any
+	 * server-side compression/buffering that would otherwise corrupt a binary
+	 * stream or make the advertised Content-Length disagree with the bytes on
+	 * the wire — the usual reason a download "never starts" on managed hosts.
+	 */
+	private function send_file( $path, $filename, $content_type ) {
+		@ini_set( 'zlib.output_compression', 'Off' );
+		@ini_set( 'implicit_flush', '1' );
+		if ( function_exists( 'apache_setenv' ) ) {
+			@apache_setenv( 'no-gzip', '1' );
+		}
+		if ( function_exists( 'set_time_limit' ) ) {
+			@set_time_limit( 0 );
+		}
 		while ( ob_get_level() > 0 ) {
 			ob_end_clean();
 		}
 
 		nocache_headers();
+		header( 'Content-Description: File Transfer' );
+		header( 'Content-Type: ' . $content_type );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+		header( 'Content-Transfer-Encoding: binary' );
 		header( 'X-Content-Type-Options: nosniff' );
+		header( 'Accept-Ranges: none' );
 
-		if ( $as_gz ) {
-			$gz_path = $this->build_gz_copy( $job['zip_path'] );
-			if ( ! $gz_path || ! file_exists( $gz_path ) ) {
-				wp_die( esc_html__( 'Could not build gzip download.', 'wp-image-bulk-downloader' ), '', array( 'response' => 500 ) );
+		// Only advertise a length when nothing downstream will re-encode the body.
+		$zlib = (string) ini_get( 'zlib.output_compression' );
+		if ( '' === $zlib || '0' === $zlib || 0 === strcasecmp( $zlib, 'off' ) ) {
+			$size = @filesize( $path );
+			if ( false !== $size ) {
+				header( 'Content-Length: ' . $size );
 			}
-			$filename = 'wp-images-' . gmdate( 'Y-m-d-His' ) . '.zip.gz';
-			header( 'Content-Type: application/gzip' );
-			header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
-			header( 'Content-Length: ' . filesize( $gz_path ) );
-			readfile( $gz_path );
-			@unlink( $gz_path );
-		} else {
-			$filename = 'wp-images-' . gmdate( 'Y-m-d-His' ) . '.zip';
-			header( 'Content-Type: application/zip' );
-			header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
-			header( 'Content-Length: ' . filesize( $job['zip_path'] ) );
-			readfile( $job['zip_path'] );
 		}
 
-		$this->cleanup_job( $job_id );
-		exit;
+		$handle = @fopen( $path, 'rb' );
+		if ( false === $handle ) {
+			readfile( $path );
+			return;
+		}
+		while ( ! feof( $handle ) ) {
+			$buffer = fread( $handle, 1048576 ); // 1 MB
+			if ( false === $buffer ) {
+				break;
+			}
+			echo $buffer; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- binary file stream.
+			flush();
+		}
+		fclose( $handle );
 	}
 
 	private function build_gz_copy( $zip_path ) {
@@ -223,8 +271,33 @@ class WPIBD_Zip_Builder {
 		$job = $this->get_job( $job_id );
 		if ( $job && ! empty( $job['zip_path'] ) && file_exists( $job['zip_path'] ) ) {
 			@unlink( $job['zip_path'] );
+			if ( file_exists( $job['zip_path'] . '.gz' ) ) {
+				@unlink( $job['zip_path'] . '.gz' );
+			}
 		}
 		delete_transient( $this->job_key( $job_id ) );
+	}
+
+	/**
+	 * Removes export archives left behind by abandoned jobs (tab closed before
+	 * download, blocked auto-download, etc.) once they are older than the job
+	 * transient's lifetime, so the uploads folder does not accumulate files.
+	 */
+	private function cleanup_stale_exports( $dir ) {
+		$files = array_merge(
+			(array) glob( trailingslashit( $dir ) . 'images-*.zip' ),
+			(array) glob( trailingslashit( $dir ) . 'images-*.zip.gz' )
+		);
+		$now = time();
+		foreach ( $files as $file ) {
+			if ( ! is_string( $file ) ) {
+				continue;
+			}
+			$mtime = @filemtime( $file );
+			if ( false !== $mtime && ( $now - $mtime ) > self::JOB_TRANSIENT_TTL ) {
+				@unlink( $file );
+			}
+		}
 	}
 
 	private function resolve_entry_path( array $data, array &$job ) {

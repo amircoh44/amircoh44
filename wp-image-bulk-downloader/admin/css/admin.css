@@ -149,3 +149,9 @@
 	border-left-color: #00a32a;
 	background: #f0f7ed;
 }
+
+.wpibd-download-link {
+	display: inline-block;
+	margin-left: 4px;
+	font-weight: 600;
+}

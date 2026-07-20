@@ -52,7 +52,8 @@ class WPIBD_Admin {
 				'i18n'    => array(
 					'preparing'   => __( 'Preparing export…', 'wp-image-bulk-downloader' ),
 					'processing'  => __( 'Processed %1$s of %2$s images', 'wp-image-bulk-downloader' ),
-					'complete'    => __( 'Export complete. Your download should start automatically.', 'wp-image-bulk-downloader' ),
+					'complete'    => __( 'Export complete. Your download should start automatically — if it does not, use the link below.', 'wp-image-bulk-downloader' ),
+					'downloadNow' => __( 'Download the ZIP', 'wp-image-bulk-downloader' ),
 					'failed'      => __( '%s image(s) could not be added.', 'wp-image-bulk-downloader' ),
 					'error'       => __( 'Something went wrong:', 'wp-image-bulk-downloader' ),
 					'cancelled'   => __( 'Export cancelled.', 'wp-image-bulk-downloader' ),

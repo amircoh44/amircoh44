@@ -6,7 +6,7 @@ Tags: media, images, export, download, zip, backup
 Requires at least: 5.6
 Tested up to: 6.5
 Requires PHP: 7.2
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,12 @@ No — only attachments with an `image/*` MIME type.
 The export is AJAX-driven and runs only while you are on the page. Default chunk size is 20 images per request.
 
 == Changelog ==
+
+= 1.2.2 =
+* Fixed: download never started on some managed hosts (e.g. WP Engine). The stream now disables server-side output compression and only sends Content-Length when the byte count is guaranteed to match, preventing the browser from stalling on a length mismatch.
+* Download is now streamed in 1 MB chunks with set_time_limit(0) so large full-site exports do not exhaust memory or time out mid-transfer.
+* Added a visible "Download the ZIP" link in the success message as a fallback when the automatic download is blocked by the browser.
+* Abandoned export archives (tab closed before download, blocked auto-download) are now swept from the uploads folder on the next export instead of lingering.
 
 = 1.2.1 =
 * New checkbox: "Deliver download as .zip.gz". Wraps the export in gzip before streaming it, so networks / antivirus / download managers that block .zip files let it through. Extract the .gz once with any tool and you get the normal .zip back.
