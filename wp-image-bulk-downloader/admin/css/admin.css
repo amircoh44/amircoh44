@@ -68,6 +68,40 @@
 	grid-column: 2;
 }
 
+.wpibd-extras {
+	margin: 0 0 24px;
+	padding: 14px 16px;
+	background: #f6f7f7;
+	border-left: 4px solid #72aee6;
+	border-radius: 4px;
+}
+
+.wpibd-extra {
+	display: grid;
+	grid-template-columns: 24px 1fr;
+	grid-template-rows: auto auto;
+	gap: 4px 12px;
+	align-items: start;
+	cursor: pointer;
+}
+
+.wpibd-extra input[type="checkbox"] {
+	grid-row: 1 / span 2;
+	margin-top: 4px;
+}
+
+.wpibd-extra-title {
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.wpibd-extra-desc {
+	color: #50575e;
+	font-size: 12px;
+	line-height: 1.5;
+	grid-column: 2;
+}
+
 .wpibd-actions {
 	display: flex;
 	gap: 8px;

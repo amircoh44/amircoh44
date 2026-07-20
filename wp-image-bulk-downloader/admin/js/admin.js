@@ -55,6 +55,7 @@
 
 	function startExport() {
 		var mode = $('input[name="wpibd_mode"]:checked').val() || 'images_only';
+		var includeSiteInfo = $('#wpibd-include-site-info').is(':checked') ? '1' : '0';
 
 		enterRunningState();
 		setStatus(wpibdConfig.i18n.preparing);
@@ -63,7 +64,8 @@
 		$.post(wpibdConfig.ajaxUrl, {
 			action: 'wpibd_start_export',
 			nonce: wpibdConfig.nonce,
-			mode: mode
+			mode: mode,
+			include_site_info: includeSiteInfo
 		}).done(function (response) {
 			if (!response || !response.success) {
 				handleError(response && response.data ? response.data.message : null);

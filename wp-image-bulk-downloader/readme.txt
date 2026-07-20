@@ -6,7 +6,7 @@ Tags: media, images, export, download, zip, backup
 Requires at least: 5.6
 Tested up to: 6.5
 Requires PHP: 7.2
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,11 @@ No — only attachments with an `image/*` MIME type.
 The export is AJAX-driven and runs only while you are on the page. Default chunk size is 20 images per request.
 
 == Changelog ==
+
+= 1.1.0 =
+* Adds optional site-info file (on by default) containing verification codes for Google Search Console, Bing, Yandex, Baidu, Pinterest, Facebook, Norton, Ahrefs, Semrush, Alexa; tracking IDs for Google Analytics (UA + GA4), Google Tag Manager, Google Ads, Facebook Pixel, TikTok Pixel, LinkedIn Insight, Pinterest Tag, Hotjar, Microsoft Clarity, Microsoft UET; SEO plugin settings from Yoast, Rank Math, All in One SEO, SEOPress; active theme; and active plugins list. Delivered as site-info.json + site-info.txt inside the ZIP.
+* Fixed: "Export job not found or expired" caused by mixed-case job IDs.
+* Fixed: "Export archive is missing" on hosts that do not flush empty ZipArchives.
 
 = 1.0.0 =
 * Initial release.

@@ -15,7 +15,7 @@ class WPIBD_Zip_Builder {
 	const JOB_TRANSIENT_TTL  = HOUR_IN_SECONDS;
 	const JOB_DIR_NAME       = 'wpibd-exports';
 
-	public function create_job( array $attachment_ids, $mode ) {
+	public function create_job( array $attachment_ids, $mode, $include_site_info = false ) {
 		$dir = $this->get_export_dir();
 		if ( is_wp_error( $dir ) ) {
 			return $dir;
@@ -33,17 +33,18 @@ class WPIBD_Zip_Builder {
 		}
 
 		$job = array(
-			'job_id'         => $job_id,
-			'mode'           => $mode,
-			'zip_path'       => $zip_path,
-			'attachment_ids' => array_values( array_map( 'absint', $attachment_ids ) ),
-			'total'          => count( $attachment_ids ),
-			'processed'      => 0,
-			'failed'         => array(),
-			'metadata_rows'  => array(),
-			'used_paths'     => array(),
-			'created_at'     => time(),
-			'chunk_size'     => self::CHUNK_SIZE,
+			'job_id'            => $job_id,
+			'mode'              => $mode,
+			'include_site_info' => (bool) $include_site_info,
+			'zip_path'          => $zip_path,
+			'attachment_ids'    => array_values( array_map( 'absint', $attachment_ids ) ),
+			'total'             => count( $attachment_ids ),
+			'processed'         => 0,
+			'failed'            => array(),
+			'metadata_rows'     => array(),
+			'used_paths'        => array(),
+			'created_at'        => time(),
+			'chunk_size'        => self::CHUNK_SIZE,
 		);
 
 		$this->save_job( $job );
@@ -112,6 +113,10 @@ class WPIBD_Zip_Builder {
 
 		if ( $done && 'with_metadata' === $job['mode'] && ! empty( $job['metadata_rows'] ) ) {
 			$this->append_metadata_files( $job );
+		}
+
+		if ( $done && ! empty( $job['include_site_info'] ) ) {
+			$this->append_site_info_files( $job );
 		}
 
 		$this->save_job( $job );
@@ -243,6 +248,29 @@ class WPIBD_Zip_Builder {
 		if ( false !== $json ) {
 			$zip->addFromString( 'image-metadata.json', $json );
 		}
+
+		$zip->close();
+	}
+
+	private function append_site_info_files( array $job ) {
+		if ( ! class_exists( 'WPIBD_Site_Info_Collector' ) ) {
+			return;
+		}
+
+		$zip = new ZipArchive();
+		if ( true !== $zip->open( $job['zip_path'] ) ) {
+			return;
+		}
+
+		$collector = new WPIBD_Site_Info_Collector();
+		$info      = $collector->collect();
+
+		$json = wp_json_encode( $info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+		if ( false !== $json ) {
+			$zip->addFromString( 'site-info.json', $json );
+		}
+
+		$zip->addFromString( 'site-info.txt', $collector->format_as_text( $info ) );
 
 		$zip->close();
 	}

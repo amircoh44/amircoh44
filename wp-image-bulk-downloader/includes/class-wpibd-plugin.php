@@ -52,7 +52,9 @@ class WPIBD_Plugin {
 			$mode = 'images_only';
 		}
 
-		$collector  = new WPIBD_Image_Collector();
+		$include_site_info = isset( $_POST['include_site_info'] ) && '1' === (string) $_POST['include_site_info'];
+
+		$collector      = new WPIBD_Image_Collector();
 		$attachment_ids = $collector->get_all_image_ids();
 
 		if ( empty( $attachment_ids ) ) {
@@ -62,7 +64,7 @@ class WPIBD_Plugin {
 		}
 
 		$zip_builder = new WPIBD_Zip_Builder();
-		$job         = $zip_builder->create_job( $attachment_ids, $mode );
+		$job         = $zip_builder->create_job( $attachment_ids, $mode, $include_site_info );
 
 		if ( is_wp_error( $job ) ) {
 			wp_send_json_error( array( 'message' => $job->get_error_message() ) );
@@ -70,10 +72,10 @@ class WPIBD_Plugin {
 
 		wp_send_json_success(
 			array(
-				'job_id'      => $job['job_id'],
-				'total'       => $job['total'],
-				'chunk_size'  => $job['chunk_size'],
-				'mode'        => $mode,
+				'job_id'     => $job['job_id'],
+				'total'      => $job['total'],
+				'chunk_size' => $job['chunk_size'],
+				'mode'       => $mode,
 			)
 		);
 	}

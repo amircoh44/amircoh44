@@ -106,6 +106,16 @@ class WPIBD_Admin {
 					</label>
 				</fieldset>
 
+				<div class="wpibd-extras">
+					<label class="wpibd-extra">
+						<input type="checkbox" id="wpibd-include-site-info" name="wpibd_include_site_info" value="1" checked>
+						<span class="wpibd-extra-title"><?php esc_html_e( 'Also include site info file', 'wp-image-bulk-downloader' ); ?></span>
+						<span class="wpibd-extra-desc">
+							<?php esc_html_e( 'Adds site-info.json and site-info.txt to the ZIP with Google Search Console / Bing / Yandex / Pinterest / Facebook verification codes, Google Analytics (UA + GA4), GTM, Google Ads, Facebook Pixel, TikTok, LinkedIn, Hotjar, Microsoft Clarity IDs, SEO plugin settings (Yoast / Rank Math / AIOSEO / SEOPress), active theme, and the list of active plugins with versions.', 'wp-image-bulk-downloader' ); ?>
+						</span>
+					</label>
+				</div>
+
 				<div class="wpibd-actions">
 					<button type="button" class="button button-primary button-hero" id="wpibd-start" <?php disabled( 0 === $image_count ); ?>>
 						<?php esc_html_e( 'Download all images', 'wp-image-bulk-downloader' ); ?>
