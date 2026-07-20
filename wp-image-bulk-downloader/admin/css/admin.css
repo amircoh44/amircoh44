@@ -1,0 +1,157 @@
+.wpibd-wrap {
+	max-width: 820px;
+}
+
+.wpibd-intro {
+	font-size: 14px;
+	margin-bottom: 20px;
+}
+
+.wpibd-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 24px;
+	margin-top: 16px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.wpibd-card h2 {
+	margin-top: 0;
+	margin-bottom: 16px;
+}
+
+.wpibd-modes {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	border: 0;
+	padding: 0;
+	margin: 0 0 24px;
+}
+
+.wpibd-mode {
+	display: grid;
+	grid-template-columns: 24px 1fr;
+	grid-template-rows: auto auto;
+	gap: 4px 12px;
+	align-items: start;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 14px 16px;
+	cursor: pointer;
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.wpibd-mode:hover {
+	border-color: #2271b1;
+	background: #f6fbfd;
+}
+
+.wpibd-mode input[type="radio"] {
+	grid-row: 1 / span 2;
+	margin-top: 4px;
+}
+
+.wpibd-mode input[type="radio"]:checked ~ .wpibd-mode-title {
+	color: #2271b1;
+}
+
+.wpibd-mode-title {
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.wpibd-mode-desc {
+	color: #50575e;
+	font-size: 13px;
+	grid-column: 2;
+}
+
+.wpibd-extras {
+	margin: 0 0 24px;
+	padding: 14px 16px;
+	background: #f6f7f7;
+	border-left: 4px solid #72aee6;
+	border-radius: 4px;
+}
+
+.wpibd-extra {
+	display: grid;
+	grid-template-columns: 24px 1fr;
+	grid-template-rows: auto auto;
+	gap: 4px 12px;
+	align-items: start;
+	cursor: pointer;
+}
+
+.wpibd-extra input[type="checkbox"] {
+	grid-row: 1 / span 2;
+	margin-top: 4px;
+}
+
+.wpibd-extra-title {
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.wpibd-extra-desc {
+	color: #50575e;
+	font-size: 12px;
+	line-height: 1.5;
+	grid-column: 2;
+}
+
+.wpibd-actions {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.wpibd-progress {
+	margin-top: 8px;
+}
+
+.wpibd-progress-bar {
+	background: #f0f0f1;
+	border-radius: 999px;
+	height: 12px;
+	overflow: hidden;
+}
+
+.wpibd-progress-fill {
+	background: linear-gradient(90deg, #2271b1, #72aee6);
+	height: 100%;
+	width: 0;
+	transition: width 0.25s ease;
+}
+
+.wpibd-progress-status {
+	font-size: 13px;
+	color: #50575e;
+	margin: 8px 0 0;
+}
+
+.wpibd-notice {
+	margin-top: 16px;
+	padding: 12px 14px;
+	border-left: 4px solid #2271b1;
+	background: #f6fbfd;
+	font-size: 13px;
+}
+
+.wpibd-notice.is-error {
+	border-left-color: #d63638;
+	background: #fcf0f1;
+}
+
+.wpibd-notice.is-success {
+	border-left-color: #00a32a;
+	background: #f0f7ed;
+}
+
+.wpibd-download-link {
+	display: inline-block;
+	margin-left: 4px;
+	font-weight: 600;
+}

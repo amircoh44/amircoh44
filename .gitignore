@@ -1,0 +1,6 @@
+wp-image-bulk-downloader.zip
+*.zip
+*.gz
+*.tar.gz
+.DS_Store
+Thumbs.db
